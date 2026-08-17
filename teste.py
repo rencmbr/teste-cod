@@ -2,25 +2,30 @@ import os
 import numpy as np
 
 from carregar_malha import carregar_malha
+from plotar_malha import plotar_malha
 from construir_arvore_busca import construir_arvore_busca
 from selecionar_nos_vnmm_2d import selecionar_nos_vnmm_2d
 
 
 def main():
-    nome_arquivo = os.path.join("malhas", "malha.csv")
+    nome_arquivo = os.path.join("malhas", "malha_densa.csv")
+    arquivo_imagem = os.path.splitext(nome_arquivo)[0] + ".png"
     
     # 1. Leitura dos dados a partir do arquivo em disco
     coords, vectors = carregar_malha(nome_arquivo)
     
-    # 2. Construção prévia da árvore de busca espacial (fora do loop de avaliação)
+    # 2. Geração e exibição da imagem dos nós e direções vetoriais
+    plotar_malha(coords, vectors, caminho_saida=arquivo_imagem, exibir=True)
+    
+    # 3. Construção prévia da árvore de busca espacial (fora do loop de avaliação)
     arvore = construir_arvore_busca(coords)
     
-    # 3. Definição do ponto de avaliação P
-    ponto_avaliacao = [0.3, 0.3]
+    # 4. Definição do ponto de avaliação P
+    ponto_avaliacao = [0.0, 0.0]
     tolerancia = 1e-3
     tamanho_vizinhanca = 5
     
-    # 4. Execução do algoritmo passando a árvore pré-construída
+    # 5. Execução do algoritmo passando a árvore pré-construída
     nos_selecionados, determinante, matriz_a = selecionar_nos_vnmm_2d(
         P=ponto_avaliacao, 
         nodes_coords=coords, 
@@ -30,7 +35,7 @@ def main():
         Tol_det=tolerancia
     )
     
-    # 5. Resultados
+    # 6. Resultados
     print(f"Ponto de Avaliação: {ponto_avaliacao}")
     if nos_selecionados:
         print(f"Nós de suporte selecionados (Índices Globais): {nos_selecionados}")
