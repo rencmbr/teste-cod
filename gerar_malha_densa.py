@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import os
+from scipy.spatial import KDTree
+
 
 def gerar_malha_densa(
     nome_arquivo="malhas/malha_densa.csv",
@@ -8,11 +10,17 @@ def gerar_malha_densa(
     num_nos_interior=120,
     limite=10.0,
     dist_min_fronteira=1.0,
-    seed=42
+    dist_min_nos=0.9,
+    seed=42,
+    max_tentativas=100000
 ):
     """
     Gera uma malha no domínio [-limite, limite] x [-limite, limite] com nós na fronteira
-    e nós distribuídos aleatoriamente no interior respeitando a distância mínima da fronteira.
+    e nós distribuídos aleatoriamente no interior.
+    
+    Utiliza uma estrutura de busca espacial (KD-Tree) para garantir de forma eficiente:
+    1. Distância mínima de cada nó interior em relação aos nós da fronteira (dist_min_fronteira).
+    2. Distância euclidiana mínima entre quaisquer nós da malha (dist_min_nos).
     """
     np.random.seed(seed)
     
@@ -21,8 +29,7 @@ def gerar_malha_densa(
     coords = []
     vectors = []
     
-    # 1. Nós da Fronteira (40 nós igualmente espaçados no perímetro 4 * 2 * limite = 80)
-    # Perímetro total = 80 -> espaçamento = 80 / 40 = 2.0 (10 nós por borda)
+    # 1. Nós da Fronteira
     nos_por_borda = num_nos_fronteira // 4
     passo = (2 * limite) / nos_por_borda
     
@@ -55,24 +62,46 @@ def gerar_malha_densa(
         vectors.append([0.0, -1.0])
         
     coords_fronteira = np.array(coords)
+    arvore_fronteira = KDTree(coords_fronteira)
     
-    # 2. Nós Interiores: coordenadas aleatórias com distância >= dist_min_fronteira dos nós da fronteira
+    # Inicializa a KD-Tree global contendo todos os nós já aprovados
+    arvore_total = KDTree(np.array(coords))
+    
+    # 2. Nós Interiores com busca espacial eficiente
     lim_int = limite - dist_min_fronteira
     nos_gerados = 0
-    while nos_gerados < num_nos_interior:
+    tentativas = 0
+    
+    while nos_gerados < num_nos_interior and tentativas < max_tentativas:
+        tentativas += 1
+        
         # Gera ponto candidato no interior
         pt = np.random.uniform(-lim_int, lim_int, size=2)
         
-        # Verifica a distância euclidiana mínima aos nós da fronteira
-        dists = np.linalg.norm(coords_fronteira - pt, axis=1)
-        if np.all(dists >= dist_min_fronteira):
-            coords.append(pt.tolist())
+        # 2.1 Verifica distância mínima aos nós da fronteira via KD-Tree
+        dist_fronteira, _ = arvore_fronteira.query(pt, k=1)
+        if dist_fronteira < dist_min_fronteira:
+            continue
             
-            # Direção vetorial unitária aleatória
-            theta = np.random.uniform(0, 2 * np.pi)
-            vectors.append([np.cos(theta), np.sin(theta)])
-            nos_gerados += 1
+        # 2.2 Verifica distância mínima aos nós existentes (fronteira e interiores já aceitos)
+        dist_vizinho_mais_proximo, _ = arvore_total.query(pt, k=1)
+        if dist_vizinho_mais_proximo < dist_min_nos:
+            continue
             
+        # Ponto aceito
+        coords.append(pt.tolist())
+        
+        # Direção vetorial unitária aleatória
+        theta = np.random.uniform(0, 2 * np.pi)
+        vectors.append([np.cos(theta), np.sin(theta)])
+        nos_gerados += 1
+        
+        # Atualiza a KD-Tree com o novo conjunto de nós aceitos
+        arvore_total = KDTree(np.array(coords))
+        
+    if nos_gerados < num_nos_interior:
+        print(f"Aviso: Atingido o limite de tentativas. {nos_gerados}/{num_nos_interior} nós interiores foram gerados.")
+        
     # 3. Criação do DataFrame e exportação CSV
     coords = np.array(coords)
     vectors = np.array(vectors)
@@ -86,7 +115,8 @@ def gerar_malha_densa(
     })
     
     df.to_csv(nome_arquivo, index=False)
-    print(f"Malha gerada com sucesso com {len(df)} nós ({num_nos_fronteira} fronteira + {num_nos_interior} interior).")
+    print(f"Malha gerada com sucesso com {len(df)} nós ({num_nos_fronteira} fronteira + {nos_gerados} interior).")
+    print(f"Distância mínima entre nós respeitada: >= {dist_min_nos}")
     print(f"Salvo em: {nome_arquivo}")
     return nome_arquivo
 
