@@ -1,4 +1,4 @@
-import io
+import os
 import numpy as np
 
 from carregar_malha import carregar_malha
@@ -7,20 +7,10 @@ from selecionar_nos_vnmm_2d import selecionar_nos_vnmm_2d
 
 
 def main():
-    # Simulando a leitura de um arquivo CSV (dados fictícios)
-    csv_simulado = """id,x,y,tx,ty
-0,0.1,0.2,1.0,0.0
-1,0.5,0.1,0.707,-0.707
-2,0.2,0.6,0.0,1.0
-3,0.8,0.8,-0.707,0.707
-4,0.0,0.0,-1.0,0.0
-5,1.2,0.5,0.0,-1.0
-6,-0.5,0.4,0.866,0.5"""
-
-    arquivo_memoria = io.StringIO(csv_simulado)
+    nome_arquivo = os.path.join("malhas", "malha.csv")
     
-    # 1. Leitura dos dados
-    coords, vectors = carregar_malha(arquivo_memoria)
+    # 1. Leitura dos dados a partir do arquivo em disco
+    coords, vectors = carregar_malha(nome_arquivo)
     
     # 2. Construção prévia da árvore de busca espacial (fora do loop de avaliação)
     arvore = construir_arvore_busca(coords)
