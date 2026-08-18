@@ -7,7 +7,7 @@ from scipy.spatial import KDTree
 def gerar_malha_densa(
     nome_arquivo="malhas/malha_densa.csv",
     num_nos_fronteira=40,
-    num_nos_interior=120,
+    num_nos_interior=150,
     limite=10.0,
     dist_min_fronteira=1.0,
     dist_min_nos=0.9,
@@ -23,9 +23,9 @@ def gerar_malha_densa(
     2. Distância euclidiana mínima entre quaisquer nós da malha (dist_min_nos).
     """
     np.random.seed(seed)
-    
+     
     os.makedirs(os.path.dirname(nome_arquivo), exist_ok=True)
-    
+     
     coords = []
     vectors = []
     
