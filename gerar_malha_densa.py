@@ -7,7 +7,7 @@ from scipy.spatial import KDTree
 def gerar_malha_densa(
     nome_arquivo="malhas/malha_densa.csv",
     num_nos_fronteira=40,
-    num_nos_interior=120,
+    num_nos_interior=150,
     limite=10.0,
     dist_min_fronteira=1.0,
     dist_min_nos=0.9,
@@ -23,41 +23,41 @@ def gerar_malha_densa(
     2. Distância euclidiana mínima entre quaisquer nós da malha (dist_min_nos).
     """
     np.random.seed(seed)
-    
+     
     os.makedirs(os.path.dirname(nome_arquivo), exist_ok=True)
-    
+     
     coords = []
     vectors = []
     
-    # 1. Nós da Fronteira
+    # 1. Nós da Fronteira (distribuídos uniformemente sem tocar nos 4 cantos/vértices)
     nos_por_borda = num_nos_fronteira // 4
     passo = (2 * limite) / nos_por_borda
     
-    # Borda Inferior: y = -limite, x varia de -limite a limite (tangente: +x)
+    # Borda Inferior: y = -limite, x varia no interior do intervalo (tangente: +x)
     for i in range(nos_por_borda):
-        x = -limite + i * passo
+        x = -limite + (i + 0.5) * passo
         y = -limite
         coords.append([x, y])
         vectors.append([1.0, 0.0])
         
-    # Borda Direita: x = +limite, y varia de -limite a limite (tangente: +y)
+    # Borda Direita: x = +limite, y varia no interior do intervalo (tangente: +y)
     for i in range(nos_por_borda):
         x = limite
-        y = -limite + i * passo
+        y = -limite + (i + 0.5) * passo
         coords.append([x, y])
         vectors.append([0.0, 1.0])
         
-    # Borda Superior: y = +limite, x varia de +limite a -limite (tangente: -x)
+    # Borda Superior: y = +limite, x varia no interior do intervalo (tangente: -x)
     for i in range(nos_por_borda):
-        x = limite - i * passo
+        x = limite - (i + 0.5) * passo
         y = limite
         coords.append([x, y])
         vectors.append([-1.0, 0.0])
         
-    # Borda Esquerda: x = -limite, y varia de +limite a -limite (tangente: -y)
+    # Borda Esquerda: x = -limite, y varia no interior do intervalo (tangente: -y)
     for i in range(nos_por_borda):
         x = -limite
-        y = limite - i * passo
+        y = limite - (i + 0.5) * passo
         coords.append([x, y])
         vectors.append([0.0, -1.0])
         
