@@ -1,11 +1,12 @@
 # Relatório da Análise Paramétrica: Método Sem Malha Nodal Vetorial (VNMM 2D)
 
-Este relatório apresenta os resultados da análise paramétrica de interpolação do campo vetorial $\vec{E}$ e de seu rotacional $\nabla \times \vec{E}$ para o modo $\text{TE}_{11}$ em cavidade PEC.\n
+Este relatório apresenta os resultados da análise paramétrica de interpolação do campo vetorial $\vec{E}$ e de seu rotacional $\nabla \times \vec{E}$ para o modo $\text{TE}_{11}$ em cavidade PEC.
+
 ## 1. Estudo Paramétrico: Variação da Tolerância do Determinante ($Tol_{det}$)
 
 A tabela abaixo apresenta os erros para diferentes valores mínimos de $|\det(A)|$ com busca adaptativa de vizinhança $K$:
 
-| $Tol_{det}$ | $|\det(A)|_{méd}$ | Erro Médio $\vec{E}$ | Erro RMS $\vec{E}$ | Erro Máx $\vec{E}$ | Erro Médio $\nabla\times\vec{E}$ | Erro RMS $\nabla\times\vec{E}$ | Erro Máx $\nabla\times\vec{E}$ |
+| $Tol_{det}$ | $\vert\det(A)\vert_{méd}$ | Erro Médio $\vec{E}$ | Erro RMS $\vec{E}$ | Erro Máx $\vec{E}$ | Erro Médio $\nabla\times\vec{E}$ | Erro RMS $\nabla\times\vec{E}$ | Erro Máx $\nabla\times\vec{E}$ |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 0.001 | 1.0428 | 1.8858e-01 | 3.5696e-01 | 1.8785e+00 | 2.1481e-01 | 4.0135e-01 | 2.2700e+00 |
 | 0.010 | 1.0428 | 1.8858e-01 | 3.5696e-01 | 1.8785e+00 | 2.1481e-01 | 4.0135e-01 | 2.2700e+00 |
