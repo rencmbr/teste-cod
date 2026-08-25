@@ -24,6 +24,8 @@ def imprimir_detalhes_ponto(r, titulo, coords=None, vectors=None):
         for idx_no in r['nos']:
             print(f"  Nó {idx_no:>3d}: Coords={coords[idx_no]}, Vector={vectors[idx_no]}")
     print(f"Determinante |det(A)|        : {r['det_A']:.6f}")
+    if r.get('k_efetivo') is not None:
+        print(f"K vizinhos efetivos usados   : {r['k_efetivo']}")
     if r.get('e_s') is not None:
         print(f"Projeções nodais e_s         : {np.round(r['e_s'], 4)}")
     if r.get('Phi') is not None:
