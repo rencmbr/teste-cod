@@ -267,17 +267,18 @@ def gerar_relatorio_markdown(
 ):
     """
     Gera um relatório técnico em formato Markdown contendo tabelas e análises dos dados.
+    Utiliza sintaxe compatível com o parser de Markdown e LaTeX do GitHub.
     """
     os.makedirs(os.path.dirname(caminho_relatorio), exist_ok=True)
     
     conteudo = []
     conteudo.append("# Relatório da Análise Paramétrica: Método Sem Malha Nodal Vetorial (VNMM 2D)\n")
     conteudo.append("Este relatório apresenta os resultados da análise paramétrica de interpolação do campo vetorial "
-                    r"$\vec{E}$ e de seu rotacional $\nabla \times \vec{E}$ para o modo $\text{TE}_{11}$ em cavidade PEC.\n")
+                    r"$\vec{E}$ e de seu rotacional $\nabla \times \vec{E}$ para o modo $\text{TE}_{11}$ em cavidade PEC." + "\n")
     
     conteudo.append(r"## 1. Estudo Paramétrico: Variação da Tolerância do Determinante ($Tol_{det}$)" + "\n")
     conteudo.append(r"A tabela abaixo apresenta os erros para diferentes valores mínimos de $|\det(A)|$ com busca adaptativa de vizinhança $K$:" + "\n")
-    conteudo.append(r"| $Tol_{det}$ | $|\det(A)|_{méd}$ | Erro Médio $\vec{E}$ | Erro RMS $\vec{E}$ | Erro Máx $\vec{E}$ | Erro Médio $\nabla\times\vec{E}$ | Erro RMS $\nabla\times\vec{E}$ | Erro Máx $\nabla\times\vec{E}$ |")
+    conteudo.append(r"| $Tol_{det}$ | $\vert\det(A)\vert_{méd}$ | Erro Médio $\vec{E}$ | Erro RMS $\vec{E}$ | Erro Máx $\vec{E}$ | Erro Médio $\nabla\times\vec{E}$ | Erro RMS $\nabla\times\vec{E}$ | Erro Máx $\nabla\times\vec{E}$ |")
     conteudo.append("|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|")
     for r in res_tolerancia:
         conteudo.append(f"| {r['tolerancia']:.3f} | {r['det_medio']:.4f} | {r['erro_vet_medio']:.4e} | {r['erro_vet_rms']:.4e} | {r['erro_vet_max']:.4e} | {r['erro_rot_medio']:.4e} | {r['erro_rot_rms']:.4e} | {r['erro_rot_max']:.4e} |")
