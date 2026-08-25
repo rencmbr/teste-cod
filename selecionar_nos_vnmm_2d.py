@@ -40,6 +40,7 @@ def selecionar_nos_vnmm_2d(
     melhor_trio = None
     melhor_det = 0.0
     melhor_A = None
+    melhor_k_efetivo = 0
     
     while True:
         # Fase 1: Recuperação de vizinhos mais próximos utilizando a árvore pré-construída
@@ -58,6 +59,7 @@ def selecionar_nos_vnmm_2d(
             for comb in itertools.combinations(indices_restantes, 2):
                 idx2_global = indices_vizinhos[comb[0]]
                 idx3_global = indices_vizinhos[comb[1]]
+                k_efetivo_candidato = comb[1] + 1
                 
                 trio_candidato = [ancora_global, idx2_global, idx3_global]
                 
@@ -82,10 +84,11 @@ def selecionar_nos_vnmm_2d(
                     melhor_det = det_A
                     melhor_trio = trio_candidato
                     melhor_A = A
+                    melhor_k_efetivo = k_efetivo_candidato
                 
                 # Critério de Parada Antecipada
                 if det_A >= Tol_det:
-                    return trio_candidato, det_A, A
+                    return trio_candidato, det_A, A, k_efetivo_candidato
                     
         # Se não for adaptativo ou já atingiu o limite de vizinhos
         if not adaptativo or K_atual >= limite_K:
@@ -96,9 +99,9 @@ def selecionar_nos_vnmm_2d(
         
     # Caso nenhuma combinação atinja Tol_det, retorna a melhor encontrada se houver, ou None
     if melhor_trio is not None and melhor_det >= Tol_det:
-        return melhor_trio, melhor_det, melhor_A
+        return melhor_trio, melhor_det, melhor_A, melhor_k_efetivo
     elif melhor_trio is not None and adaptativo:
         # Retorna o melhor trio disponível quando adaptativo está ativo
-        return melhor_trio, melhor_det, melhor_A
+        return melhor_trio, melhor_det, melhor_A, melhor_k_efetivo
     else:
-        return None, 0.0, None
+        return None, 0.0, None, 0

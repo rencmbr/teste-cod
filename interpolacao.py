@@ -70,10 +70,12 @@ def main():
     print(f"Falhas                    : {res['falhas']}")
     
     if res['sucessos'] > 0:
-        print(f"\n--- Estatísticas do Determinante |det(A)| ---")
+        print(f"\n--- Estatísticas do Determinante |det(A)| e Vizinhança K ---")
         print(f"|det(A)| Mínimo : {res['det_min']:.6f}")
         print(f"|det(A)| Máximo : {res['det_max']:.6f}")
         print(f"|det(A)| Médio  : {res['det_medio']:.6f}")
+        print(f"K vizinhos Médio: {res['k_medio']:.2f}")
+        print(f"K vizinhos Máx  : {res['k_max']}")
         
         print(f"\n--- Estatísticas do Erro de Interpolação ||E^h - E_exato|| ---")
         print(f"Erro Mínimo : {res['erro_vet_min']:.6e}")

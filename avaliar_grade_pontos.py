@@ -42,10 +42,11 @@ def avaliar_grade_pontos(
     dets = []
     erros_vet = []
     erros_rot = []
+    ks_efetivos = []
     resultados = []
     
     for idx_ponto, P in enumerate(pontos_avaliacao):
-        nos_selecionados, determinante, matriz_a = selecionar_nos_vnmm_2d(
+        nos_selecionados, determinante, matriz_a, k_efetivo = selecionar_nos_vnmm_2d(
             P=P,
             nodes_coords=coords,
             nodes_vectors=vectors,
@@ -77,12 +78,14 @@ def avaliar_grade_pontos(
             dets.append(determinante)
             erros_vet.append(erro_vetorial)
             erros_rot.append(erro_rotacional)
+            ks_efetivos.append(k_efetivo)
             
             resultados.append({
                 'id': idx_ponto,
                 'P': P,
                 'nos': nos_selecionados,
                 'det_A': determinante,
+                'k_efetivo': k_efetivo,
                 'e_s': e_s,
                 'E_interpolado': E_interpolado,
                 'rot_E_interpolado': rot_E_interpolado,
@@ -101,6 +104,7 @@ def avaliar_grade_pontos(
                 'P': P,
                 'nos': None,
                 'det_A': 0.0,
+                'k_efetivo': 0,
                 'e_s': None,
                 'E_interpolado': None,
                 'rot_E_interpolado': None,
@@ -116,6 +120,7 @@ def avaliar_grade_pontos(
     erros_vet_arr = np.array(erros_vet) if erros_vet else np.array([0.0])
     erros_rot_arr = np.array(erros_rot) if erros_rot else np.array([0.0])
     dets_arr = np.array(dets) if dets else np.array([0.0])
+    ks_arr = np.array(ks_efetivos) if ks_efetivos else np.array([0])
     
     return {
         'total_pontos': total_pontos,
@@ -125,6 +130,8 @@ def avaliar_grade_pontos(
         'det_min': float(np.min(dets_arr)),
         'det_max': float(np.max(dets_arr)),
         'det_medio': float(np.mean(dets_arr)),
+        'k_medio': float(np.mean(ks_arr)),
+        'k_max': int(np.max(ks_arr)),
         'erro_vet_min': float(np.min(erros_vet_arr)),
         'erro_vet_max': float(np.max(erros_vet_arr)),
         'erro_vet_medio': float(np.mean(erros_vet_arr)),
