@@ -19,16 +19,16 @@ def plotar_malha(nodes_coords, nodes_vectors, caminho_saida=None, exibir=True):
     ty = nodes_vectors[:, 1]
     
     # Plot dos nós
-    ax.scatter(x, y, color="blue", s=60, zorder=3, label="Nós")
+    ax.scatter(x, y, color="blue", s=30, zorder=3, label="Nós")
     
     # Anotação com o índice de cada nó
     for idx, (xi, yi) in enumerate(zip(x, y)):
         ax.annotate(
-            f"Nó {idx}", 
+            f"{idx}", 
             (xi, yi), 
             textcoords="offset points", 
-            xytext=(7, 7), 
-            fontsize=9, 
+            xytext=(2, 2), 
+            fontsize=6, 
             fontweight="bold",
             color="black"
         )
