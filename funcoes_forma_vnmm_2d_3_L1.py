@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def calcular_funcoes_forma_vnmm_2d(P, nodes_coords, nodes_vectors, nos_selecionados, matriz_a=None):
+def funcoes_forma_vnmm_2d_3_L1(P, nodes_coords, nodes_vectors, nos_selecionados, matriz_a=None):
     """
     Calcula as funções de forma vetoriais N_i e o seu rotacional (curl N_i) 
     no ponto de avaliação P para a formulação VNMM 2D com 3 nós de suporte.
