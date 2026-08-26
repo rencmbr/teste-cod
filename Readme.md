@@ -1,94 +1,70 @@
-# Método sem malha nodal vetorial em 2 dimensões e 3 nós de suporte
+# Método Sem Malha Nodal Vetorial em 2 Dimensões e 3 Nós de Suporte
 
-# Premissas:
+## Premissas
 
-O Método Sem Malha Nodal Vetorial, Vector Nodal Meshless Method, VNMM,  é baseado na ideia do Método Sem Malha de Aresta , EMM, com o comprimento das arestas tendendo para zero. A ideia é espalhar um conjunto de nós no domı́nio, sendo que para cada nó é associado um vetor unitário com direção arbitrária. Nós também são espalhados nas fronteiras do domínio e na interface entre diferentes materiais. Para estes nós, a direção vetorial do vetor unitário não é mais arbitrária, mas tangente às fronteiras e interfaces, conforme mostrado na figura 1\. 
+O Método Sem Malha Nodal Vetorial (*Vector Nodal Meshless Method* - VNMM) é baseado na ideia do Método Sem Malha de Aresta (EMM) com o comprimento das arestas tendendo a zero. A ideia consiste em distribuir um conjunto de nós no domínio, associando a cada nó um vetor unitário com direção arbitrária. Nós também são posicionados nas fronteiras do domínio e nas interfaces entre diferentes materiais; para estes nós de contorno, a direção do vetor unitário não é arbitrária, mas tangente às fronteiras e interfaces, conforme ilustrado na Figura 1.
 
 <img width="1079" height="537" alt="image" src="https://github.com/user-attachments/assets/aa0919de-1202-46be-aeeb-563215222cad" />
 
+**Figura 1:** Distribuição de nós e direções vetoriais para o VNMM.
 
-Figura 1: Distribuição de nós e direções vetoriais para o VNMM
+Sejam $(x_i, y_i)$ as coordenadas do $i$-ésimo nó e $(t_{xi}, t_{yi})$ as componentes do vetor unitário associado a este mesmo nó.
 
-Sejam $(x\_i, y\_i)$  as coordenadas do $i\_{\\acute{e}simo}$ nó e $$(t\_{xi}, t\_{yi})$$ as componentes do vetor unitário associado a este mesmo nó.
+A formulação matemática para a construção das funções de forma vetoriais utilizando três nós de suporte no VNMM bidimensional considera um polinômio de ordem igual a 1:
 
-A formulação matemática para a construção das funções de forma vetoriais utilizando três nós de suporte no Método Sem Malha Nodal Vetorial (VNMM) bidimensional considera um polinômio de ordem igual a 1:
+$$\mathcal{L}^1 = \left\langle \begin{bmatrix} 1 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 1 \end{bmatrix}, \begin{bmatrix} y \\ -x \end{bmatrix} \right\rangle$$
 
-$$\\mathcal{L}^{1} \= \\left\\langle \\begin{bmatrix} 1 \\  
-0 \\end{bmatrix}, \\begin{bmatrix} 0 \\ 
-1 \\end{bmatrix}, \\begin{bmatrix} y \\ 
-\-x \\end{bmatrix} \\right\\rangle$$
+A partir desta base vetorial, a função de forma $\vec{N}_i$ associada ao $i$-ésimo nó é expressa como uma combinação linear de seus termos componentes:
 
-A partir desta base vetorial, a função de forma $\\vec{N}\_{i}$  associada ao $i\_{\\acute{e}simo}$ nó é expressa como uma combinação linear de seus termos componentes:
+$$\vec{N}_i = \beta_{1i} \begin{bmatrix} 1 \\ 0 \end{bmatrix} + \beta_{2i} \begin{bmatrix} 0 \\ 1 \end{bmatrix} + \beta_{3i} \begin{bmatrix} y \\ -x \end{bmatrix}$$
 
-$$\\vec{N}\_{i} \= \\beta\_{1i}\\begin{bmatrix} 1\\\\
-0 \\end{bmatrix} \+ \\beta\_{2i}\\begin{bmatrix} 0 \\\\  
-1 \\end{bmatrix} \+ \\beta\_{3i}\\begin{bmatrix} y \\\\  
-\-x \\end{bmatrix}$$
+Nesta expressão, $\beta_{1i}$, $\beta_{2i}$ e $\beta_{3i}$ representam os coeficientes incógnitos da interpolação a serem determinados. Como há três coeficientes, utilizam-se três nós de suporte no domínio local.
 
-Nesta expressão, $$\\beta\_{1i}$$, $$\\beta\_{2i}$$ e $$\\beta\_{3i}$$ representam os coeficientes incógnitos da interpolação que necessitam ser determinados. Tendo em vista que há exatamente três coeficientes a serem encontrados, utilizam-se três nós de suporte no domínio local.
+Para garantir a coerência física e matemática da aproximação em $H(\text{curl})$, impõe-se que a função de forma $\vec{N}_i$ possua projeção não nula exclusivamente na direção do vetor associado ao seu respectivo nó. Consequentemente, impõe-se a condição de projeção em que a $k$-ésima função de forma tenha projeção igual a 1 na direção do vetor unitário de seu próprio nó e 0 nas direções dos vetores associados aos demais nós de suporte. Esta restrição, que traduz a propriedade do delta de Kronecker à formulação vetorial, é definida por:
 
-Para garantir a coerência física e matemática da aproximação em $$H(curl)$$, é imperativo que a função de forma $$\\vec{N}\_{i}$$ *possua componente tangencial exclusivamente na direção do vetor associado ao seu respectivo nó. Consequentemente, impõe-se uma condição de projeção determinando que a késima função de forma tenha projeção igual a 1 na direção do vetor unitário de seu próprio nó e igual a 0 nas direções dos vetores associados aos demais nós de suporte. Esta restrição, que traduz a propriedade de delta de Kronecker à formulação vetorial, é definida algebricamente pelo produto escalar:
+$$\vec{N}_i \cdot \vec{t}_k = \delta_{ik}$$
 
-$$\\vec{N}\_{i} \\cdot \\vec{t}\_{k} \= \\delta\_{ik} $$
+onde $\vec{t}_k$ é o vetor unitário associado ao nó $n_k$ e $\delta_{ik}$ assume o valor 1 se $k=i$ e 0 se $k \neq i$. A aplicação dessa condição resulta nos sistemas lineares:
 
-onde $$\\vec{t}\_{k}$$ *é o vetor unitário associado ao nó $$n\_k$$ e $$\\delta\_{ik}$$ assume o valor 1 se $k=i$ e 0 se $k \\neq i$. A aplicação dessa condição resulta nos sistemas de equações lineares definidos por:
+$$A \beta_i = L_i, \quad \text{para } i = 1, 2, 3$$
 
-$$A\\beta\_{i} \= L\_{i}, \\quad para \\quad i=1, 2, 3 $$
+A matriz de interpolação $A$, os vetores de coeficientes locais $\beta_i$ e os vetores canônicos $L_i$ tomam a seguinte forma matricial:
 
-A matriz de interpolação $$A$$, os vetores de coeficientes locais $$\\beta\_{i}$$ e os vetores canônicos $$L\_{i}$$ tomam a seguinte forma matricial:
+$$A = \begin{bmatrix}
+t_{1x} & t_{1y} & y_1 t_{1x} - x_1 t_{1y} \\
+t_{2x} & t_{2y} & y_2 t_{2x} - x_2 t_{2y} \\
+t_{3x} & t_{3y} & y_3 t_{3x} - x_3 t_{3y}
+\end{bmatrix}$$
 
-$$ A \= \\begin{bmatrix} t\_{1x} & t\_{1y} & y\_{1}t\_{1x} \- x\_{1}t\_{1y} \\\\  
-			 t\_{2x} & t\_{2y} & y\_{2}t\_{2x} \- x\_{2}t\_{2y} \\\\  
-			 t\_{3x} & t\_{3y} & y\_{3}t\_{3x} \- x\_{3}t\_{3y} \\end{bmatrix} $$
+$$\beta_i = \begin{bmatrix} \beta_{1i} \\ \beta_{2i} \\ \beta_{3i} \end{bmatrix}$$
 
-$$ \\beta\_{i} \= \\begin{bmatrix} \\beta\_{1i} \\\\  
-				 \\beta\_{2i} \\\\  
-				 \\beta\_{3i} \\end{bmatrix} $$
+$$L_1 = \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix}, \quad L_2 = \begin{bmatrix} 0 \\ 1 \\ 0 \end{bmatrix}, \quad L_3 = \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix}$$
 
-$$ L\_{1} \= \\begin{bmatrix} 1 \\  
-0 \\  
-0 \\end{bmatrix}, \\quad L\_{2} \= \\begin{bmatrix} 0 \\  
-1 \\  
-0 \\end{bmatrix}, \\quad L\_{3} \= \\begin{bmatrix} 0 \\  
-0 \\ 
-1 \\end{bmatrix} $$
+Nestes sistemas, $t_{kx}$ e $t_{ky}$ correspondem às componentes cartesianas do vetor unitário de direção atrelado ao $k$-ésimo nó de suporte.
 
-Nestes sistemas, $$t\_{kx}$$ e $$t\_{ky}$$ correspondem às componentes cartesianas do vetor unitário de direção atrelado ao $$k$$-ésimo nó de suporte. 
+Uma vez determinados os coeficientes $\beta_i$ ($i=1,2,3$), as funções de forma $\vec{N}_i$ estarão determinadas para o domínio de suporte e a aproximação de uma função vetorial $\vec{E}$ no domínio de suporte é dada por:
 
-Uma vez determinados os coeficientes $$\\beta\_{i} , i=1,2,3$$, as funções de forma $$\\vec{N}\_{i}$$ estarão determinadas para o domínio de suporte e a aproximação de uma função vetorial $$\\vec{E}$$ no domínio de suporte é dada por:
+$$\vec{E}^h = \sum_{i=1}^3 \vec{N}_i e_i = \Phi(x,y) e_s$$
 
-$$\\vec{E}^h=\\sum\_{i=1}^{3} \\vec{N}\_{i}e\_{i} \= \\Phi(x,y)e\_{s} $$
+onde $e_s$ é o vetor com as projeções de $\vec{E}$ na direção de cada vetor unitário $\vec{t}_i$ e $\Phi(x,y)$ é a matriz de funções de forma:
 
-onde $$e\_s$$ é um vetor com as projeções de $$\\vec{E}$$ na direção de cada vetor unitário $$\\vec{t}\_i$$ e $$\\Phi(x,y)$$ é a matriz de funções de forma:
+$$\Phi(x,y) = \begin{bmatrix} \vec{N}_1 & \vec{N}_2 & \vec{N}_3 \end{bmatrix} \quad \text{e} \quad e_s = \begin{bmatrix} e_1 \\ e_2 \\ e_3 \end{bmatrix}$$
 
-$$ \\Phi(x,y) \= \\begin{bmatrix} \\vec{N}\_{1} & \\vec{N}\_{2} & \\vec{N}\_{3} \\end{bmatrix} \\text{ e } e\_{s} \= \\begin{bmatrix} e\_{1} \\\\  
-e\_{2} \\\\  
-e\_{3} \\end{bmatrix} $$
+O rotacional da aproximação, $\nabla \times \vec{E}^h$, é dado por:
 
-O rotacional da aproximação, $$\\nabla \\times \\vec{E}^h$$ é dado por
+$$\nabla \times \vec{E}^h = \begin{bmatrix} \nabla \times \vec{N}_1 & \nabla \times \vec{N}_2 & \nabla \times \vec{N}_3 \end{bmatrix} \begin{bmatrix} e_1 \\ e_2 \\ e_3 \end{bmatrix}$$
 
-$$\\nabla \\times \\vec{E}^h= \\begin{bmatrix} \\nabla \\times \\vec{N}\_{1} & \\nabla \\times \\vec{N}\_{2} & \\nabla \\times \\vec{N}\_{3} \\end{bmatrix} \\begin{bmatrix} e\_{1} \\\\  
-e\_{2} \\\\  
-e\_{3} \\end{bmatrix}  $$
+com:
 
-com
+$$\nabla \times \vec{N}_i = \beta_{1i} \nabla \times \begin{bmatrix} 1 \\ 0 \end{bmatrix} + \beta_{2i} \nabla \times \begin{bmatrix} 0 \\ 1 \end{bmatrix} + \beta_{3i} \nabla \times \begin{bmatrix} y \\ -x \end{bmatrix}$$
 
-$$\\nabla \\times \\vec{N}\_i \= \\beta\_{1i} \\nabla \\times \\begin{bmatrix} 1 \\\\  
-0 \\end{bmatrix} \+ \\beta\_{2i} \\nabla \\times \\begin{bmatrix} 0 \\\\  
-1 \\end{bmatrix} \+ \\beta\_{3i}\\nabla \\times \\begin{bmatrix} y \\\\  
-\-x \\end{bmatrix} $$
+Como o rotacional aplicado a vetores constantes é nulo, ele é não nulo apenas para o último termo da base:
 
-Nota-se que o rotacional aplicado a vetores constantes é nulo e, portanto, ele é diferente de zero apenas para o último termo da equação, resultando em:
+$$\nabla \times \vec{N}_i = \begin{bmatrix} 0 \\ 0 \\ -2\beta_{3i} \end{bmatrix}$$
 
-$$\\nabla \\times \\vec{N}\_i \= \\begin{bmatrix} 0 \\\\  
-0  \\\\  
-\-2\\beta\_{3i} \\end{bmatrix} $$
+Logo, o rotacional da aproximação se reduz a:
 
-Logo, o rotacional da aproximação se reduz a: 
-
-$$\nabla \times \vec{E}^h = \begin{bmatrix} 0 \\  
-0  \\  
--2 \sum_{i=1}^{3} \beta_{3i}e_{i}  \end{bmatrix}$$
+$$\nabla \times \vec{E}^h = \begin{bmatrix} 0 \\ 0 \\ -2 \sum_{i=1}^3 \beta_{3i} e_i \end{bmatrix}$$
 
 É fundamental garantir que as aproximações $\vec{E}^h$ e $\nabla \times \vec{E}^h$ sejam as melhores possíveis.
 
@@ -99,7 +75,7 @@ $$\nabla \times \vec{E}^h = \begin{bmatrix} 0 \\
 Realizou-se uma análise paramétrica sistemática avaliando a interpolação do campo vetorial $\vec{E}$ e de seu rotacional $\nabla \times \vec{E}$ para o modo $\text{TE}_{11}$ em cavidade ressonante bidimensional com condutor elétrico perfeito (PEC), considerando:
 
 1. **Tolerância do Determinante ($Tol_{det}$):** Adoção de um algoritmo adaptativo de vizinhança $K$ que expande a busca local caso nenhum trio de nós satisfaça $|\det(A)| \ge Tol_{det}$, assegurando 100% de sucesso na seleção de nós e eliminando configurações quase-singulares.
-2. **Densidade de Nós ($N_{total}$) e Escala Proporcional $Tol_{det}(h) \propto h$:** Como a terceira coluna da matriz $A$ possui dimensão de comprimento ($(y_i - y_P)t_{xi} - (x_i - x_P)t_{yi} \sim O(h)$), $\det(A)$ escala linearmente com $O(h)$. Ao fixar $Tol_{det}(h) = Tol_{ref} \cdot (h / h_{ref})$, a qualidade geométrica adimensional $|\det(A)|/h$ mantém-se constante, fazendo com que o número de vizinhos efetivos permaneça estritamente confinado em $K_{méd} \approx 4 - 5$ e $K_{máx} \le 9$ ao longo de toda a variação de densidade (de 84 a 8408 nós, fator de $100\times$).
+2. **Densidade de Nós ($N_{total}$) e Escala Proporcional $Tol_{det}(h) \propto h$:** Como a terceira coluna da matriz $A$ possui dimensão de comprimento, dada por $(y_i - y_P)t_{xi} - (x_i - x_P)t_{yi} \sim O(h)$, o determinante $\det(A)$ escala linearmente com $O(h)$. Ao fixar $Tol_{det}(h) = Tol_{ref} \cdot (h / h_{ref})$, a qualidade geométrica adimensional $|\det(A)|/h$ mantém-se constante, fazendo com que o número de vizinhos efetivos permaneça estritamente confinado em $K_{méd} \approx 4 - 5$ e $K_{máx} \le 9$ ao longo de toda a variação de densidade (de 84 a 8408 nós, fator de $100\times$).
 
 ### Resultados de Convergência Obtidos:
 
