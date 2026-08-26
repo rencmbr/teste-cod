@@ -1,7 +1,7 @@
 import numpy as np
 
-from selecionar_nos_vnmm_2d import selecionar_nos_vnmm_2d
-from calcular_funcoes_forma_vnmm_2d import calcular_funcoes_forma_vnmm_2d
+from nos_suporte_vnmm_2d_3_L1 import nos_suporte_vnmm_2d_3_L1
+from funcoes_forma_vnmm_2d_3_L1 import funcoes_forma_vnmm_2d_3_L1
 from func_vet import func_vet
 
 
@@ -46,7 +46,7 @@ def avaliar_grade_pontos(
     resultados = []
     
     for idx_ponto, P in enumerate(pontos_avaliacao):
-        nos_selecionados, determinante, matriz_a, k_efetivo = selecionar_nos_vnmm_2d(
+        nos_selecionados, determinante, matriz_a, k_efetivo = nos_suporte_vnmm_2d_3_L1(
             P=P,
             nodes_coords=coords,
             nodes_vectors=vectors,
@@ -59,7 +59,7 @@ def avaliar_grade_pontos(
         E_exato, rot_E_exato = func_vet(P)
         
         if nos_selecionados is not None:
-            Phi, rot_Phi, beta = calcular_funcoes_forma_vnmm_2d(
+            Phi, rot_Phi, beta = funcoes_forma_vnmm_2d_3_L1(
                 P=P,
                 nodes_coords=coords,
                 nodes_vectors=vectors,

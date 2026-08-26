@@ -1,7 +1,7 @@
 import itertools
 import numpy as np
 
-def selecionar_nos_vnmm_2d(
+def nos_suporte_vnmm_2d_3_L1(
     P, 
     nodes_coords, 
     nodes_vectors, 
