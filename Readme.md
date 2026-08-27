@@ -13,13 +13,13 @@ Sejam $(x_i, y_i)$ as coordenadas do $i$-ésimo nó e $(t_{xi}, t_{yi})$ as comp
 A formulação matemática para a construção das funções de forma vetoriais utilizando três nós de suporte no VNMM bidimensional considera um polinômio de ordem igual a 1:
 
 $$
-\mathcal{L}^1 = \left\langle \begin{bmatrix} 1 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 1 \end{bmatrix}, \begin{bmatrix} y \\ -x \end{bmatrix} \right\rangle \qquad (1)
+\mathcal{L}^1 = \left\langle \begin{bmatrix} 1 \\\\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\\\ 1 \end{bmatrix}, \begin{bmatrix} y \\\\ -x \end{bmatrix} \right\rangle \qquad (1)
 $$
 
 A partir desta base vetorial, a função de forma $\vec{N}_i$ associada ao $i$-ésimo nó é expressa como uma combinação linear de seus termos componentes:
 
 $$
-\vec{N}_i = \beta_{1i} \begin{bmatrix} 1 \\ 0 \end{bmatrix} + \beta_{2i} \begin{bmatrix} 0 \\ 1 \end{bmatrix} + \beta_{3i} \begin{bmatrix} y \\ -x \end{bmatrix} \qquad (2)
+\vec{N}_i = \beta_{1i} \begin{bmatrix} 1 \\\\ 0 \end{bmatrix} + \beta_{2i} \begin{bmatrix} 0 \\\\ 1 \end{bmatrix} + \beta_{3i} \begin{bmatrix} y \\\\ -x \end{bmatrix} \qquad (2)
 $$
 
 Nesta expressão, $\beta_{1i}$, $\beta_{2i}$ e $\beta_{3i}$ representam os coeficientes incógnitos da interpolação a serem determinados. Como há três coeficientes, utilizam-se três nós de suporte no domínio local.
@@ -40,20 +40,20 @@ A matriz de interpolação $A$, os vetores de coeficientes locais $\beta_i$ e os
 
 $$
 A = \begin{bmatrix}
-t_{1x} & t_{1y} & y_1 t_{1x} - x_1 t_{1y} \\
-t_{2x} & t_{2y} & y_2 t_{2x} - x_2 t_{2y} \\
+t_{1x} & t_{1y} & y_1 t_{1x} - x_1 t_{1y} \\\\
+t_{2x} & t_{2y} & y_2 t_{2x} - x_2 t_{2y} \\\\
 t_{3x} & t_{3y} & y_3 t_{3x} - x_3 t_{3y}
 \end{bmatrix} \qquad (5)
 $$
 
 $$
-\beta_i = \begin{bmatrix} \beta_{1i} \\ \beta_{2i} \\ \beta_{3i} \end{bmatrix} \qquad (6)
+\beta_i = \begin{bmatrix} \beta_{1i} \\\\ \beta_{2i} \\\\ \beta_{3i} \end{bmatrix} \qquad (6)
 $$
 
 $$
-L_1 = \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix}, \quad
-L_2 = \begin{bmatrix} 0 \\ 1 \\ 0 \end{bmatrix}, \quad
-L_3 = \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix} \qquad (7)
+L_1 = \begin{bmatrix} 1 \\\\ 0 \\\\ 0 \end{bmatrix}, \quad
+L_2 = \begin{bmatrix} 0 \\\\ 1 \\\\ 0 \end{bmatrix}, \quad
+L_3 = \begin{bmatrix} 0 \\\\ 0 \\\\ 1 \end{bmatrix} \qquad (7)
 $$
 
 Nestes sistemas, $t_{kx}$ e $t_{ky}$ correspondem às componentes cartesianas do vetor unitário de direção atrelado ao $k$-ésimo nó de suporte.
@@ -67,31 +67,31 @@ $$
 onde $e_s$ é o vetor com as projeções de $\vec{E}$ na direção de cada vetor unitário $\vec{t}_i$ e $\Phi(x,y)$ é a matriz de funções de forma:
 
 $$
-\Phi(x,y) = \begin{bmatrix} \vec{N}_1 & \vec{N}_2 & \vec{N}_3 \end{bmatrix}, \quad e_s = \begin{bmatrix} e_1 \\ e_2 \\ e_3 \end{bmatrix} \qquad (9)
+\Phi(x,y) = \begin{bmatrix} \vec{N}_1 & \vec{N}_2 & \vec{N}_3 \end{bmatrix}, \quad e_s = \begin{bmatrix} e_1 \\\\ e_2 \\\\ e_3 \end{bmatrix} \qquad (9)
 $$
 
 O rotacional da aproximação, $\nabla \times \vec{E}^h$, é dado por:
 
 $$
-\nabla \times \vec{E}^h = \begin{bmatrix} \nabla \times \vec{N}_1 & \nabla \times \vec{N}_2 & \nabla \times \vec{N}_3 \end{bmatrix} \begin{bmatrix} e_1 \\ e_2 \\ e_3 \end{bmatrix} \qquad (10)
+\nabla \times \vec{E}^h = \begin{bmatrix} \nabla \times \vec{N}_1 & \nabla \times \vec{N}_2 & \nabla \times \vec{N}_3 \end{bmatrix} \begin{bmatrix} e_1 \\\\ e_2 \\\\ e_3 \end{bmatrix} \qquad (10)
 $$
 
 com:
 
 $$
-\nabla \times \vec{N}_i = \beta_{1i} \nabla \times \begin{bmatrix} 1 \\ 0 \end{bmatrix} + \beta_{2i} \nabla \times \begin{bmatrix} 0 \\ 1 \end{bmatrix} + \beta_{3i} \nabla \times \begin{bmatrix} y \\ -x \end{bmatrix} \qquad (11)
+\nabla \times \vec{N}_i = \beta_{1i} \nabla \times \begin{bmatrix} 1 \\\\ 0 \end{bmatrix} + \beta_{2i} \nabla \times \begin{bmatrix} 0 \\\\ 1 \end{bmatrix} + \beta_{3i} \nabla \times \begin{bmatrix} y \\\\ -x \end{bmatrix} \qquad (11)
 $$
 
 Como o rotacional aplicado a vetores constantes é nulo, ele é não nulo apenas para o último termo da base:
 
 $$
-\nabla \times \vec{N}_i = \begin{bmatrix} 0 \\ 0 \\ -2\beta_{3i} \end{bmatrix} \qquad (12)
+\nabla \times \vec{N}_i = \begin{bmatrix} 0 \\\\ 0 \\\\ -2\beta_{3i} \end{bmatrix} \qquad (12)
 $$
 
 Logo, o rotacional da aproximação se reduz a:
 
 $$
-\nabla \times \vec{E}^h = \begin{bmatrix} 0 \\ 0 \\ -2 \sum_{i=1}^3 \beta_{3i} e_i \end{bmatrix} \qquad (13)
+\nabla \times \vec{E}^h = \begin{bmatrix} 0 \\\\ 0 \\\\ -2 \sum_{i=1}^3 \beta_{3i} e_i \end{bmatrix} \qquad (13)
 $$
 
 É fundamental garantir que as aproximações $\vec{E}^h$ e $\nabla \times \vec{E}^h$ sejam as melhores possíveis.
@@ -131,7 +131,7 @@ A causa raiz da estagnação do rotacional reside na **incompletude da base poli
 A expansão de Taylor de 1ª ordem do campo real $\vec{E}$ em torno do ponto de avaliação $P=(0,0)$ requer as 4 derivadas espaciais da matriz Jacobiana:
 
 $$
-\mathbf{J} = \begin{bmatrix} \frac{\partial E_x}{\partial x} & \frac{\partial E_x}{\partial y} \\ \frac{\partial E_y}{\partial x} & \frac{\partial E_y}{\partial y} \end{bmatrix} \qquad (14)
+\mathbf{J} = \begin{bmatrix} \frac{\partial E_x}{\partial x} & \frac{\partial E_x}{\partial y} \\\\ \frac{\partial E_y}{\partial x} & \frac{\partial E_y}{\partial y} \end{bmatrix} \qquad (14)
 $$
 
 Contudo, a base $\mathcal{L}^1 = \left\langle [1, 0]^T, [0, 1]^T, [y, -x]^T \right\rangle$ possui apenas 3 graus de liberdade, impondo restrições rígidas:
@@ -178,13 +178,13 @@ No VNMM, por ser um método puramente sem malha (*meshless*) baseado em colocaç
 Para eliminar o vazamento modal e garantir a convergência estrita tanto do campo quanto do rotacional no contexto sem malha nodal, adota-se o **espaço polinomial vetorial linear completo $\mathcal{P}_1 \times \mathcal{P}_1$ (6 termos)** utilizando **6 nós de suporte** no domínio local de colocação:
 
 $$
-\mathcal{P}^1 = \left\langle \begin{bmatrix} 1 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 1 \end{bmatrix}, \begin{bmatrix} x \\ 0 \end{bmatrix}, \begin{bmatrix} y \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ x \end{bmatrix}, \begin{bmatrix} 0 \\ y \end{bmatrix} \right\rangle \qquad (18)
+\mathcal{P}^1 = \left\langle \begin{bmatrix} 1 \\\\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\\\ 1 \end{bmatrix}, \begin{bmatrix} x \\\\ 0 \end{bmatrix}, \begin{bmatrix} y \\\\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\\\ x \end{bmatrix}, \begin{bmatrix} 0 \\\\ y \end{bmatrix} \right\rangle \qquad (18)
 $$
 
 Em coordenadas locais $(\Delta x_k = x_k - x_P, \Delta y_k = y_k - y_P)$ em torno do ponto de avaliação $P$, a função de forma $\vec{N}_i$ associada ao $i$-ésimo nó de suporte é dada pela combinação linear dos 6 termos da base:
 
 $$
-\vec{N}_i(x, y) = \beta_{1i} \begin{bmatrix} 1 \\ 0 \end{bmatrix} + \beta_{2i} \begin{bmatrix} 0 \\ 1 \end{bmatrix} + \beta_{3i} \begin{bmatrix} x \\ 0 \end{bmatrix} + \beta_{4i} \begin{bmatrix} y \\ 0 \end{bmatrix} + \beta_{5i} \begin{bmatrix} 0 \\ x \end{bmatrix} + \beta_{6i} \begin{bmatrix} 0 \\ y \end{bmatrix} \qquad (19)
+\vec{N}_i(x, y) = \beta_{1i} \begin{bmatrix} 1 \\\\ 0 \end{bmatrix} + \beta_{2i} \begin{bmatrix} 0 \\\\ 1 \end{bmatrix} + \beta_{3i} \begin{bmatrix} x \\\\ 0 \end{bmatrix} + \beta_{4i} \begin{bmatrix} y \\\\ 0 \end{bmatrix} + \beta_{5i} \begin{bmatrix} 0 \\\\ x \end{bmatrix} + \beta_{6i} \begin{bmatrix} 0 \\\\ y \end{bmatrix} \qquad (19)
 $$
 
 onde $\beta_i = [\beta_{1i}, \beta_{2i}, \beta_{3i}, \beta_{4i}, \beta_{5i}, \beta_{6i}]^T$ é o vetor de coeficientes locais incógnitos.
@@ -209,11 +209,11 @@ A **matriz de interpolação de momento $A \in \mathbb{R}^{6 \times 6}$** toma a
 
 $$
 A = \begin{bmatrix}
-t_{1x} & t_{1y} & (x_1 - x_P)t_{1x} & (y_1 - y_P)t_{1x} & (x_1 - x_P)t_{1y} & (y_1 - y_P)t_{1y} \\
-t_{2x} & t_{2y} & (x_2 - x_P)t_{2x} & (y_2 - y_P)t_{2x} & (x_2 - x_P)t_{2y} & (y_2 - y_P)t_{2y} \\
-t_{3x} & t_{3y} & (x_3 - x_P)t_{3x} & (y_3 - y_P)t_{3x} & (x_3 - x_P)t_{3y} & (y_3 - y_P)t_{3y} \\
-t_{4x} & t_{4y} & (x_4 - x_P)t_{4x} & (y_4 - y_P)t_{4x} & (x_4 - x_P)t_{4y} & (y_4 - y_P)t_{4y} \\
-t_{5x} & t_{5y} & (x_5 - x_P)t_{5x} & (y_5 - y_P)t_{5x} & (x_5 - x_P)t_{5y} & (y_5 - y_P)t_{5y} \\
+t_{1x} & t_{1y} & (x_1 - x_P)t_{1x} & (y_1 - y_P)t_{1x} & (x_1 - x_P)t_{1y} & (y_1 - y_P)t_{1y} \\\\
+t_{2x} & t_{2y} & (x_2 - x_P)t_{2x} & (y_2 - y_P)t_{2x} & (x_2 - x_P)t_{2y} & (y_2 - y_P)t_{2y} \\\\
+t_{3x} & t_{3y} & (x_3 - x_P)t_{3x} & (y_3 - y_P)t_{3x} & (x_3 - x_P)t_{3y} & (y_3 - y_P)t_{3y} \\\\
+t_{4x} & t_{4y} & (x_4 - x_P)t_{4x} & (y_4 - y_P)t_{4x} & (x_4 - x_P)t_{4y} & (y_4 - y_P)t_{4y} \\\\
+t_{5x} & t_{5y} & (x_5 - x_P)t_{5x} & (y_5 - y_P)t_{5x} & (x_5 - x_P)t_{5y} & (y_5 - y_P)t_{5y} \\\\
 t_{6x} & t_{6y} & (x_6 - x_P)t_{6x} & (y_6 - y_P)t_{6x} & (x_6 - x_P)t_{6y} & (y_6 - y_P)t_{6y}
 \end{bmatrix} \qquad (22)
 $$
@@ -225,11 +225,11 @@ No ponto de avaliação $P$ (origem do sistema local $\Delta x = 0, \Delta y = 0
 #### 1. Funções de forma no ponto $P$:
 
 $$
-\vec{N}_i(P) = \begin{bmatrix} \beta_{1i} \\ \beta_{2i} \end{bmatrix} \qquad (23)
+\vec{N}_i(P) = \begin{bmatrix} \beta_{1i} \\\\ \beta_{2i} \end{bmatrix} \qquad (23)
 $$
 
 $$
-\Phi(P) = \begin{bmatrix} \vec{N}_1(P) & \vec{N}_2(P) & \dots & \vec{N}_6(P) \end{bmatrix} = \begin{bmatrix} \beta_{11} & \beta_{12} & \dots & \beta_{16} \\ \beta_{21} & \beta_{22} & \dots & \beta_{26} \end{bmatrix} \qquad (24)
+\Phi(P) = \begin{bmatrix} \vec{N}_1(P) & \vec{N}_2(P) & \dots & \vec{N}_6(P) \end{bmatrix} = \begin{bmatrix} \beta_{11} & \beta_{12} & \dots & \beta_{16} \\\\ \beta_{21} & \beta_{22} & \dots & \beta_{26} \end{bmatrix} \qquad (24)
 $$
 
 #### 2. Campo vetorial interpolado:
@@ -245,27 +245,27 @@ onde $e_s = [e_1, e_2, \dots, e_6]^T$, com $e_i = \vec{E}(\mathbf{x}_i) \cdot \v
 Calculando o rotacional de cada termo da base polinomial:
 
 $$
-\nabla \times \begin{bmatrix} 1 \\ 0 \end{bmatrix} = \vec{0}, \quad
-\nabla \times \begin{bmatrix} 0 \\ 1 \end{bmatrix} = \vec{0}, \quad
-\nabla \times \begin{bmatrix} x \\ 0 \end{bmatrix} = \vec{0} \qquad (26)
+\nabla \times \begin{bmatrix} 1 \\\\ 0 \end{bmatrix} = \vec{0}, \quad
+\nabla \times \begin{bmatrix} 0 \\\\ 1 \end{bmatrix} = \vec{0}, \quad
+\nabla \times \begin{bmatrix} x \\\\ 0 \end{bmatrix} = \vec{0} \qquad (26)
 $$
 
 $$
-\nabla \times \begin{bmatrix} y \\ 0 \end{bmatrix} = -\hat{z}, \quad
-\nabla \times \begin{bmatrix} 0 \\ x \end{bmatrix} = +\hat{z}, \quad
-\nabla \times \begin{bmatrix} 0 \\ y \end{bmatrix} = \vec{0} \qquad (27)
+\nabla \times \begin{bmatrix} y \\\\ 0 \end{bmatrix} = -\hat{z}, \quad
+\nabla \times \begin{bmatrix} 0 \\\\ x \end{bmatrix} = +\hat{z}, \quad
+\nabla \times \begin{bmatrix} 0 \\\\ y \end{bmatrix} = \vec{0} \qquad (27)
 $$
 
 Logo, o rotacional de cada função de forma $\vec{N}_i$ é dado por:
 
 $$
-\nabla \times \vec{N}_i = \begin{bmatrix} 0 \\ 0 \\ \beta_{5i} - \beta_{4i} \end{bmatrix} \qquad (28)
+\nabla \times \vec{N}_i = \begin{bmatrix} 0 \\\\ 0 \\\\ \beta_{5i} - \beta_{4i} \end{bmatrix} \qquad (28)
 $$
 
 E o rotacional da aproximação no ponto $P$ resulta em:
 
 $$
-\nabla \times \vec{E}^h(P) = \begin{bmatrix} 0 \\ 0 \\ \sum_{i=1}^6 (\beta_{5i} - \beta_{4i}) e_i \end{bmatrix} \qquad (29)
+\nabla \times \vec{E}^h(P) = \begin{bmatrix} 0 \\\\ 0 \\\\ \sum_{i=1}^6 (\beta_{5i} - \beta_{4i}) e_i \end{bmatrix} \qquad (29)
 $$
 
 ### 3.3 Propriedades e Taxas Assintóticas da Colocação com $\mathcal{P}^1$
