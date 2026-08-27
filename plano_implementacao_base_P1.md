@@ -90,24 +90,26 @@ $$
 
 ## 2. Componentes e Arquitetura de Módulos
 
-Seguindo o padrão de nomenclatura estrita do repositório, criaremos os seguintes módulos:
+Seguindo o padrão de nomenclatura estrita do repositório, criaremos os seguintes módulos dentro do diretório `codigo/`:
 
 ```
 teste-cod/
-├── nos_suporte_vnmm_2d_6_P1.py      # Seleção adaptativa de 6 nós de suporte
-├── funcoes_forma_vnmm_2d_6_P1.py    # Cálculo de Phi(P), rot_Phi(P) e beta (6 nós)
-├── avaliar_grade_pontos_6_P1.py     # Avaliador de grade para a formulação 6-P1
-├── interpolacao_6_P1.py             # Script de validação em malha única densa
-├── analise_parametrica_6_P1.py      # Análise paramétrica completa (Tol e Densidade)
-└── relatorios/
-    └── relatorio_analise_parametrica_P1.md  # Relatório técnico consolidado
+├── codigo/
+│   ├── nos_suporte_vnmm_2d_6_P1.py      # Seleção adaptativa de 6 nós de suporte
+│   ├── funcoes_forma_vnmm_2d_6_P1.py    # Cálculo de Phi(P), rot_Phi(P) e beta (6 nós)
+│   ├── avaliar_grade_pontos_6_P1.py     # Avaliador de grade para a formulação 6-P1
+│   ├── interpolacao_6_P1.py             # Script de validação em malha única densa
+│   └── analise_parametrica_6_P1.py      # Análise paramétrica completa (Tol e Densidade)
+├── malhas/                              # Arquivos de dados de malha (.csv) e imagens (.png)
+└── relatorios/                          # Gráficos de convergência e relatórios técnicos (.md)
+    └── relatorio_analise_parametrica_P1.md
 ```
 
 ---
 
 ## 3. Detalhamento das Etapas de Implementação
 
-### Etapa 1: Módulo de Seleção de 6 Nós de Suporte (`nos_suporte_vnmm_2d_6_P1.py`)
+### Etapa 1: Módulo de Seleção de 6 Nós de Suporte (`codigo/nos_suporte_vnmm_2d_6_P1.py`)
 - **Entradas:** Ponto $P$, coordenadas globais dos nós, vetores unitários, árvore KDTree, $K_{ini}=12$, $Tol_{det}$, `adaptativo=True`, `passo_K=4`, `K_max`.
 - **Estratégia de Busca:**
   1. Consulta a KDTree para obter os $K$ nós mais próximos de $P$.
@@ -118,7 +120,7 @@ teste-cod/
   6. Caso contrário, registra o melhor sexteto encontrado e, se `adaptativo=True`, expande a vizinhança $K \gets K + \text{passo}$ (com `passo_K=4`) até encontrar um sexteto válido ou atingir `K_max`.
 - **Retorno:** `(sexteto_indices, det_A, matriz_A, k_efetivo)`.
 
-### Etapa 2: Módulo de Funções de Forma (`funcoes_forma_vnmm_2d_6_P1.py`)
+### Etapa 2: Módulo de Funções de Forma (`codigo/funcoes_forma_vnmm_2d_6_P1.py`)
 - **Entradas:** Ponto $P$, coordenadas, vetores, lista dos 6 nós selecionados, matriz $A$ pré-calculada (opcional).
 - **Cálculo:**
   1. Monta a matriz $A_{6 \times 6}$ em coordenadas locais $\Delta x_k = x_k - x_P, \Delta y_k = y_k - y_P$.
@@ -127,14 +129,14 @@ teste-cod/
   4. Calcula o rotacional $\nabla \times \Phi(P) = \beta[4, :] - \beta[3, :]$ (dimensão 6).
 - **Retorno:** `(Phi, rot_Phi, beta)`.
 
-### Etapa 3: Avaliação em Grade e Teste na Malha Densa (`interpolacao_6_P1.py`)
+### Etapa 3: Avaliação em Grade e Teste na Malha Densa (`codigo/interpolacao_6_P1.py`)
 - **Cenário de Teste:** Cavidade PEC bidimensional de $20 \times 20\text{ m}$ com modo analítico $\text{TE}_{11}$.
 - **Malha Densa:** $N=1928$ nós ($128$ nós de contorno e $1800$ nós internos), espaçamento característico $h \approx 0.625\text{ m}$.
 - **Grade de Avaliação:** $15 \times 15 = 225$ pontos uniformemente distribuídos em $[-9.0, 9.0] \times [-9.0, 9.0]\text{ m}$.
 - **Métricas:** Erro RMS e Máximo de $\vec{E}^h$, Erro RMS e Máximo de $\nabla \times \vec{E}^h$, taxa de sucesso, $\vert\det(A)\vert_{méd}$ e $K_{méd}$.
 - **Comparação direta:** Comparar os resultados na mesma malha densa com a formulação 3-L1.
 
-### Etapa 4: Análise Paramétrica Completa (`analise_parametrica_6_P1.py`)
+### Etapa 4: Análise Paramétrica Completa (`codigo/analise_parametrica_6_P1.py`)
 Execução de dois estudos comparativos sistemáticos:
 
 #### Estudo 1: Varredura de Tolerância do Determinante ($Tol_{det}$)

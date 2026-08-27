@@ -8,8 +8,12 @@ from avaliar_grade_pontos import avaliar_grade_pontos
 from imprimir_detalhes_ponto import imprimir_detalhes_ponto
 
 
+DIRETORIO_CODIGO = os.path.dirname(os.path.abspath(__file__))
+DIRETORIO_RAIZ = os.path.dirname(DIRETORIO_CODIGO)
+
+
 def main():
-    nome_arquivo = os.path.join("malhas", "malha_densa.csv")
+    nome_arquivo = os.path.join(DIRETORIO_RAIZ, "malhas", "malha_densa.csv")
     arquivo_imagem = os.path.splitext(nome_arquivo)[0] + ".png"
     
     # 1. Leitura dos dados a partir do arquivo em disco
