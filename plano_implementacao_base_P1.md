@@ -71,7 +71,7 @@ $$
 #### 2. Rotacional das funções de forma:
 
 $$
-\nabla \times \vec{N}_i(P) = \begin{bmatrix} 0 \\\\ 0 \\\\ \beta_{5i} - \beta_{4i} \end{bmatrix}, \quad \text{rot\_Phi}(P) = \beta[4, :] - \beta[3, :]
+\nabla \times \vec{N}_i(P) = \begin{bmatrix} 0 \\\\ 0 \\\\ \beta_{5i} - \beta_{4i} \end{bmatrix}, \quad \nabla \times \Phi(P) = \beta[4, :] - \beta[3, :]
 $$
 
 #### 3. Campo vetorial interpolado:
@@ -115,7 +115,7 @@ teste-cod/
   3. Monta a matriz $A \in \mathbb{R}^{6 \times 6}$ de forma vetorizada via NumPy.
   4. Calcula $|\det(A)|$.
   5. Se $|\det(A)| \ge Tol_{det}$, aceita imediatamente o sexteto (*early stopping*).
-  6. Caso contrário, registra o melhor sexteto encontrado e, se `adaptativo=True`, expande a vizinhança $K \gets K + \text{passo\_K}$ até encontrar um sexteto válido ou atingir `K_max`.
+  6. Caso contrário, registra o melhor sexteto encontrado e, se `adaptativo=True`, expande a vizinhança $K \gets K + \text{passo}$ (com `passo_K=4`) até encontrar um sexteto válido ou atingir `K_max`.
 - **Retorno:** `(sexteto_indices, det_A, matriz_A, k_efetivo)`.
 
 ### Etapa 2: Módulo de Funções de Forma (`funcoes_forma_vnmm_2d_6_P1.py`)
@@ -124,7 +124,7 @@ teste-cod/
   1. Monta a matriz $A_{6 \times 6}$ em coordenadas locais $\Delta x_k = x_k - x_P, \Delta y_k = y_k - y_P$.
   2. Inverte o sistema: $\beta = A^{-1}$.
   3. Extrai $\Phi(P) = \beta[0:2, :]$ (dimensão $2 \times 6$).
-  4. Calcula $\text{rot\_Phi} = \beta[4, :] - \beta[3, :]$ (dimensão 6).
+  4. Calcula o rotacional $\nabla \times \Phi(P) = \beta[4, :] - \beta[3, :]$ (dimensão 6).
 - **Retorno:** `(Phi, rot_Phi, beta)`.
 
 ### Etapa 3: Avaliação em Grade e Teste na Malha Densa (`interpolacao_6_P1.py`)
