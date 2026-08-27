@@ -274,3 +274,10 @@ $$
 - **Ordens de Convergência:**
   - Campo vetorial $\vec{E}^h$: **Convergência de 2ª ordem $O(h^2)$**;
   - Rotacional $\nabla \times \vec{E}^h$: **Convergência de 1ª ordem $O(h)$**.
+
+---
+
+## 4. Próximos Passos e Implementação Computacional
+
+A implementação computacional da formulação com a base polinomial completa $\mathcal{P}^1$ (incluindo o algoritmo adaptativo para seleção dos 6 nós de suporte com escala quártica $Tol_{det}(h) \propto h^4$, geração das funções de forma, testes na malha densa e a análise paramétrica global) será realizada de acordo com a estratégia detalhada no [Plano de Implementação da Base $\mathcal{P}^1$](plano_implementacao_base_P1.md).
+
