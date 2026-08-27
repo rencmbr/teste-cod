@@ -29,7 +29,8 @@ def imprimir_detalhes_ponto(r, titulo, coords=None, vectors=None):
     if r.get('e_s') is not None:
         print(f"Projeções nodais e_s         : {np.round(r['e_s'], 4)}")
     if r.get('Phi') is not None:
-        print(f"Matriz Phi(P) (2x3):\n{np.round(r['Phi'], 4)}")
+        Phi = np.asarray(r['Phi'])
+        print(f"Matriz Phi(P) ({Phi.shape[0]}x{Phi.shape[1]}):\n{np.round(Phi, 4)}")
     if r.get('E_exato') is not None:
         print(f"Vetor Exato E(P)             : [{r['E_exato'][0]:.6f}, {r['E_exato'][1]:.6f}]^T")
     if r.get('E_interpolado') is not None:
