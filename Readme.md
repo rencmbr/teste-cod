@@ -197,7 +197,7 @@ $$
 \vec{N}_i(x_k, y_k) \cdot \vec{t}_k = \delta_{ik}, \quad \text{para } i, k = 1, 2, \dots, 6 \qquad (20)
 $$
 
-onde $\vec{t}_k$ é o vetor unitário de componentes cartesianas $(t_{kx}, t_{ky})$ associado ao $k$-ésimo nó de suporte, obtém-se o sistema linear:
+onde o vetor unitário associado ao $k$-ésimo nó de suporte possui componentes cartesianas $(t_{kx}, t_{ky})$, obtém-se o sistema linear:
 
 $$
 A \beta_i = L_i, \quad \text{para } i = 1, 2, \dots, 6 \qquad (21)
