@@ -21,7 +21,19 @@ $$
 \vec{N}_i(x, y) = \beta_{1i} \begin{bmatrix} 1 \\\\ 0 \end{bmatrix} + \beta_{2i} \begin{bmatrix} 0 \\\\ 1 \end{bmatrix} + \beta_{3i} \begin{bmatrix} x \\\\ 0 \end{bmatrix} + \beta_{4i} \begin{bmatrix} y \\\\ 0 \end{bmatrix} + \beta_{5i} \begin{bmatrix} 0 \\\\ x \end{bmatrix} + \beta_{6i} \begin{bmatrix} 0 \\\\ y \end{bmatrix}
 $$
 
-Impondo $\vec{N}_i(\mathbf{x}_k) \cdot \vec{t}_k = \delta_{ik}$ para $i, k \in \{1, 2, \dots, 6\}$, obtém-se o sistema linear $A \beta = I_6 \implies \beta = A^{-1}$, onde a matriz de colocação $A \in \mathbb{R}^{6 \times 6}$ é:
+Impondo a condição de colocação nodal nos 6 nós de suporte:
+
+$$
+\vec{N}_i(\mathbf{x}_k) \cdot \vec{t}_k = \delta_{ik}, \quad \text{para } i, k \in \{1, 2, \dots, 6\}
+$$
+
+obtém-se o sistema linear:
+
+$$
+A \beta = I_6 \implies \beta = A^{-1}
+$$
+
+onde a matriz de colocação $A \in \mathbb{R}^{6 \times 6}$ é expressa explicitamente por:
 
 $$
 A = \begin{bmatrix}
@@ -36,8 +48,8 @@ $$
 
 ### 1.2 Análise Dimensional e Lei de Escala do Determinante $Tol_{det}(h) \propto h^4$
 - As **colunas 1 e 2** de $A$ contêm apenas $(t_{kx}, t_{ky})$, sendo adimensionais ($O(1)$).
-- As **colunas 3, 4, 5 e 6** contêm produtos $\Delta x_k t_{kx}, \Delta y_k t_{kx}, \dots$, possuindo dimensão de comprimento ($O(h)$).
-- Portanto, o determinante escala com:
+- As **colunas 3, 4, 5 e 6** contêm produtos $\Delta x_k t_{kx}$, $\Delta y_k t_{kx}$, etc., possuindo dimensão de comprimento ($O(h)$).
+- Portanto, o determinante escala como:
   $$
   \det(A_{6 \times 6}) \sim O(1)^2 \cdot O(h)^4 = \mathbf{O(h^4)}
   $$
@@ -49,10 +61,26 @@ Tol_{det}(h) = Tol_{ref} \cdot \left(\frac{h}{h_{ref}}\right)^4
 $$
 
 ### 1.3 Avaliação no Ponto $P$ ($\Delta x = 0, \Delta y = 0$)
-- **Funções de forma:** $\vec{N}_i(P) = [\beta_{1i}, \beta_{2i}]^T \implies \Phi(P) = \beta[0:2, :]$ (matriz $2 \times 6$).
-- **Rotacional das funções de forma:** $\nabla \times \vec{N}_i(P) = (\beta_{5i} - \beta_{4i})\hat{z} \implies \text{rot\_Phi}(P) = \beta[4, :] - \beta[3, :]$ (vetor de dimensão 6).
-- **Campo interpolado:** $\vec{E}^h(P) = \Phi(P) e_s$, com $e_s = [e_1, \dots, e_6]^T$.
-- **Rotacional interpolado:** $(\nabla \times \vec{E}^h)(P) = \sum_{i=1}^6 (\beta_{5i} - \beta_{4i}) e_i$.
+
+1. **Funções de forma no ponto $P$:**
+$$
+\vec{N}_i(P) = \begin{bmatrix} \beta_{1i} \\\\ \beta_{2i} \end{bmatrix}, \quad \Phi(P) = \beta[0:2, :]
+$$
+
+2. **Rotacional das funções de forma:**
+$$
+\nabla \times \vec{N}_i(P) = \begin{bmatrix} 0 \\\\ 0 \\\\ \beta_{5i} - \beta_{4i} \end{bmatrix}, \quad \text{rot\_Phi}(P) = \beta[4, :] - \beta[3, :]
+$$
+
+3. **Campo vetorial interpolado:**
+$$
+\vec{E}^h(P) = \Phi(P) e_s, \quad \text{com } e_s = \begin{bmatrix} e_1 \\\\ \vdots \\\\ e_6 \end{bmatrix}
+$$
+
+4. **Rotacional interpolado:**
+$$
+\nabla \times \vec{E}^h(P) = \begin{bmatrix} 0 \\\\ 0 \\\\ \sum_{i=1}^6 (\beta_{5i} - \beta_{4i}) e_i \end{bmatrix}
+$$
 
 ---
 
