@@ -62,22 +62,26 @@ $$
 
 ### 1.3 Avaliação no Ponto $P$ ($\Delta x = 0, \Delta y = 0$)
 
-1. **Funções de forma no ponto $P$:**
+#### 1. Funções de forma no ponto $P$:
+
 $$
 \vec{N}_i(P) = \begin{bmatrix} \beta_{1i} \\\\ \beta_{2i} \end{bmatrix}, \quad \Phi(P) = \beta[0:2, :]
 $$
 
-2. **Rotacional das funções de forma:**
+#### 2. Rotacional das funções de forma:
+
 $$
 \nabla \times \vec{N}_i(P) = \begin{bmatrix} 0 \\\\ 0 \\\\ \beta_{5i} - \beta_{4i} \end{bmatrix}, \quad \text{rot\_Phi}(P) = \beta[4, :] - \beta[3, :]
 $$
 
-3. **Campo vetorial interpolado:**
+#### 3. Campo vetorial interpolado:
+
 $$
 \vec{E}^h(P) = \Phi(P) e_s, \quad \text{com } e_s = \begin{bmatrix} e_1 \\\\ \vdots \\\\ e_6 \end{bmatrix}
 $$
 
-4. **Rotacional interpolado:**
+#### 4. Rotacional interpolado:
+
 $$
 \nabla \times \vec{E}^h(P) = \begin{bmatrix} 0 \\\\ 0 \\\\ \sum_{i=1}^6 (\beta_{5i} - \beta_{4i}) e_i \end{bmatrix}
 $$
