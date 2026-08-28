@@ -86,14 +86,20 @@ $$
 $$
 
 Analisando a estrutura dimensional dos blocos da inversa $A^{-1}$:
-1. **Linhas 1 e 2 (Campo $\vec{E}(P)$):** Possuem dimensão $O(1)$. Logo:
-   $$
-   \|\vec{E}^h(P) - \vec{E}(P)\| \sim O(1) \cdot \|\mathbf{r}\| \sim O(1) \cdot O(h^2) = \mathbf{O(h^2)}
-   $$
-2. **Linhas 3 a 6 (Derivadas da Jacobiana e Rotacional):** Como multiplicam termos com dimensão de metros, possuem escala dimensional **$O(h^{-1})$**. Logo:
-   $$
-   \|\nabla \times \vec{E}^h(P) - \nabla \times \vec{E}(P)\| \sim O(h^{-1}) \cdot \|\mathbf{r}\| \sim O(h^{-1}) \cdot O(h^2) = \mathbf{O(h^1)}
-   $$
+
+#### 1. Linhas 1 e 2 (Campo $\vec{E}(P)$):
+Possuem dimensão $O(1)$. Logo:
+
+$$
+\|\vec{E}^h(P) - \vec{E}(P)\| \sim O(1) \cdot \|\mathbf{r}\| \sim O(1) \cdot O(h^2) = \mathbf{O(h^2)}
+$$
+
+#### 2. Linhas 3 a 6 (Derivadas da Jacobiana e Rotacional):
+Como multiplicam termos com dimensão de metros, possuem escala dimensional $O(h^{-1})$. Logo:
+
+$$
+\|\nabla \times \vec{E}^h(P) - \nabla \times \vec{E}(P)\| \sim O(h^{-1}) \cdot \|\mathbf{r}\| \sim O(h^{-1}) \cdot O(h^2) = \mathbf{O(h^1)}
+$$
 
 Conforme $h \to 0.21\text{ m}$, o operador de derivada $O(h^{-1})$ torna-se **15 vezes mais sensível** a qualquer assimetria ou subcondicionamento local de $A$ do que a interpolação direta do campo.
 
@@ -128,12 +134,27 @@ Ao ajustar a tolerância para $Tol_{det} = 5.0 \times 10^{-3}$ (expandindo $K_{m
 
 ## 4. Recomendações e Estratégias de Otimização
 
-1. **Adoção de Piso Mínimo de Tolerância (*Tolerance Floor*):**
-   Definir uma lei de tolerância truncada inferiormente:
-   $$
-   Tol_{det}(h) = \max\left(Tol_{ref} \cdot \left(\frac{h}{h_{ref}}\right)^4, \, Tol_{piso}\right)
-   $$
-   com $Tol_{piso} \approx 10^{-3}$, impedindo que malhas altamente refinadas aceitem sextetos com determinantes excessivamente pequenos.
+#### 1. Adoção de Piso Mínimo de Tolerância (*Tolerance Floor*):
+Definir uma lei de tolerância truncada inferiormente:
 
-2. **Critério de Qualidade Angular:**
-   Priorizar sextetos cuja matriz de direções $\begin{bmatrix} t_{kx} & t_{ky} \end{bmatrix}$ apresente cobertura angular abrangente (autovalores balanceados no tensor de orientação local).
+$$
+Tol_{det}(h) = \max\left(Tol_{ref} \cdot \left(\frac{h}{h_{ref}}\right)^4, \, Tol_{piso}\right)
+$$
+
+com $Tol_{piso} \approx 10^{-3}$, impedindo que malhas altamente refinadas aceitem sextetos com determinantes excessivamente pequenos.
+
+#### 2. Critério de Qualidade Angular:
+Priorizar sextetos cuja matriz de direções:
+
+$$
+T_{6 \times 2} = \begin{bmatrix}
+t_{1x} & t_{1y} \\\\
+t_{2x} & t_{2y} \\\\
+t_{3x} & t_{3y} \\\\
+t_{4x} & t_{4y} \\\\
+t_{5x} & t_{5y} \\\\
+t_{6x} & t_{6y}
+\end{bmatrix}
+$$
+
+apresente cobertura angular abrangente (autovalores balanceados no tensor de orientação local).
