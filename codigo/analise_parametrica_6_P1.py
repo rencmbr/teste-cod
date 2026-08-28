@@ -28,8 +28,8 @@ def executar_analise_tolerancia_6_P1(
     para a formulação com base completa P1 (6 nós).
     """
     if lista_tolerancias is None:
-        # Faixa calibrada para o determinante de ordem O(h^4)
-        lista_tolerancias = [1e-5, 1e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 2e-1]
+        # Faixa calibrada para o determinante de ordem O(h^4), estendida até Tol_det = 1.0
+        lista_tolerancias = [1e-5, 1e-4, 1e-3, 1e-2, 5e-2, 1e-1, 2e-1, 4e-1, 6e-1, 8e-1, 1.0]
         
     print(f"\n=======================================================")
     print(f"ESTUDO 1 (P1): Análise Paramétrica de Tolerância |det(A)|")

@@ -140,7 +140,7 @@ teste-cod/
 Execução de dois estudos comparativos sistemáticos:
 
 #### Estudo 1: Varredura de Tolerância do Determinante ($Tol_{det}$)
-- Fixar a malha intermediária ($N=416$) e variar $Tol_{det}$ em uma faixa representativa de valores calibrados para $O(h^4)$ (ex.: $10^{-5}$ a $10^{-1}$).
+- Fixar a malha intermediária ($N=416$) e variar $Tol_{det}$ em uma faixa representativa de valores calibrados para $O(h^4)$ (ex.: $10^{-5}$ a $1.0$).
 - Avaliar o impacto na taxa de sucesso (100%), qualidade do condicionamento e $K_{efetivo}$.
 
 #### Estudo 2: Varredura de Densidade de Nós com Escala Quártica $Tol_{det}(h) \propto h^4$
