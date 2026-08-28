@@ -4,8 +4,13 @@ import os
 from scipy.spatial import KDTree
 
 
+DIRETORIO_CODIGO = os.path.dirname(os.path.abspath(__file__))
+DIRETORIO_RAIZ = os.path.dirname(DIRETORIO_CODIGO)
+CAMINHO_MALHA_PADRAO = os.path.join(DIRETORIO_RAIZ, "malhas", "malha_densa.csv")
+
+
 def gerar_malha_densa(
-    nome_arquivo="malhas/malha_densa.csv",
+    nome_arquivo=CAMINHO_MALHA_PADRAO,
     num_nos_fronteira=40,
     num_nos_interior=150,
     limite=10.0,
