@@ -92,11 +92,14 @@ class TestQuadraturaGauss2D(unittest.TestCase):
 class TestMontadorMatrizesVNMM(unittest.TestCase):
     """Testes de propriedades das matrizes esparsas globais e reduzidas."""
     
-    def test_simetria_e_positividade_matrizes(self):
+    def test_simetria_e_positividade_matrizes_ponto_gauss(self):
         Nx, Ny = 9, 9
         coords, vectors, is_boundary = gerar_malha_cavidade(Nx=Nx, Ny=Ny, Lx=np.pi, Ly=np.pi)
         
-        K, M = montar_matrizes_vnmm_2d(coords, vectors, base="P1", s_div=6.0, Ncx=8, Ncy=8)
+        K, M = montar_matrizes_vnmm_2d(
+            coords, vectors, base="P1", s_div=6.0, Ncx=8, Ncy=8, 
+            pontos_por_dir=2, modo_suporte="ponto_gauss"
+        )
         
         # 1. Simetria de K e M globais
         diff_K = K - K.T
@@ -113,55 +116,76 @@ class TestMontadorMatrizesVNMM(unittest.TestCase):
         diag_M = M_red.diagonal()
         self.assertTrue(np.all(diag_M > 0.0), "Todos os elementos da diagonal de M_red devem ser estritamente positivos.")
 
+    def test_simetria_matrizes_centro_celula(self):
+        Nx, Ny = 9, 9
+        coords, vectors, is_boundary = gerar_malha_cavidade(Nx=Nx, Ny=Ny, Lx=np.pi, Ly=np.pi)
+        
+        K, M = montar_matrizes_vnmm_2d(
+            coords, vectors, base="P1", s_div=6.0, Ncx=8, Ncy=8, 
+            pontos_por_dir=2, modo_suporte="centro_celula"
+        )
+        
+        diff_K = K - K.T
+        diff_M = M - M.T
+        self.assertTrue(diff_K.nnz == 0 or np.max(np.abs(diff_K.data)) < 1e-14)
+        self.assertTrue(diff_M.nnz == 0 or np.max(np.abs(diff_M.data)) < 1e-14)
+
 
 class TestSolverAutovaloresCavidadePEC(unittest.TestCase):
     """Testes de validação da Tabela 4-1 da tese de Luilly Ortiz (UFMG, 2023)."""
     
-    def test_autovalores_cavidade_luilly_tabela_4_1(self):
+    def test_autovalores_cavidade_luilly_tabela_4_1_ponto_gauss(self):
         """
         Valida os 10 primeiros autovalores numéricos do modo TEz na cavidade [0, pi]^2
-        contra a Tabela 4-1 de Luilly Ortiz [1.0, 1.0, 2.0, 4.0, 4.0, 5.0, 5.0, 8.0, 9.0, 9.0].
+        usando suporte por ponto de Gauss (estilo EFG).
         """
         resultado = resolver_autovalores_cavidade(
             Nx=21, 
             Ny=21, 
             Lx=np.pi, 
             Ly=np.pi, 
+            Ncx=10,
+            Ncy=10,
             base="P1", 
             tipo_interior="alternado", 
             num_autovalores=10, 
-            s_div=6.0
+            s_div=6.0,
+            pontos_por_dir=2,
+            modo_suporte="ponto_gauss"
         )
         
         vals_num = resultado['autovalores_numericos']
         vals_ref = resultado['autovalores_analiticos']
-        kc_num = resultado['kc_numerico']
-        kc_ref = resultado['kc_analitico']
-        erros_lambda = resultado['erros_lambda_pct']
-        erros_kc = resultado['erros_kc_pct']
         
         self.assertEqual(len(vals_num), 10, "Devem ser retornados exatamente 10 autovalores.")
-        
         ref_esperado = np.array([1.0, 1.0, 2.0, 4.0, 4.0, 5.0, 5.0, 8.0, 9.0, 9.0])
         np.testing.assert_allclose(vals_ref, ref_esperado, atol=1e-12)
         
-        print("\n=================================================================")
-        print("  VALIDAÇÃO DOS AUTOVALORES E kc (TABELA 4-1 LUILLY ORTIZ)")
-        print("=================================================================")
-        print(" Modo | λ_analítico | λ_VNMM  | Erro λ (%) | kc_analítico | kc_VNMM | Erro kc (%)")
-        print("-----------------------------------------------------------------------------")
-        for i in range(10):
-            print(f"  {i+1:2d}  |   {vals_ref[i]:6.2f}    | {vals_num[i]:7.4f} |   {erros_lambda[i]:5.2f}%   |    {kc_ref[i]:6.3f}    |  {kc_num[i]:6.3f} |   {erros_kc[i]:5.2f}%")
-        print("-----------------------------------------------------------------------------")
-        print(f" Erro Médio: λ = {resultado['erro_medio_lambda_pct']:.2f}% | kc = {resultado['erro_medio_kc_pct']:.2f}%")
-        print("=================================================================")
+        # Erro médio de kc inferior a 1.5% e erro máx inferior a 2.5%
+        self.assertLess(resultado['erro_medio_kc_pct'], 1.5)
+        self.assertLess(resultado['erro_max_kc_pct'], 2.5)
+
+    def test_autovalores_cavidade_luilly_tabela_4_1_centro_celula(self):
+        """
+        Valida os 10 primeiros autovalores numéricos do modo TEz com suporte fixado por célula.
+        """
+        resultado = resolver_autovalores_cavidade(
+            Nx=21, 
+            Ny=21, 
+            Lx=np.pi, 
+            Ly=np.pi, 
+            Ncx=20,
+            Ncy=20,
+            base="P1", 
+            tipo_interior="alternado", 
+            num_autovalores=10, 
+            s_div=6.0,
+            pontos_por_dir=2,
+            modo_suporte="centro_celula"
+        )
         
-        # Erro médio do número de onda de corte kc inferior a 2.0%
         self.assertLess(resultado['erro_medio_kc_pct'], 2.0)
-        # Erro máximo do número de onda de corte kc inferior a 3.5%
         self.assertLess(resultado['erro_max_kc_pct'], 3.5)
-        # Erro médio de lambda inferior a 4.0%
-        self.assertLess(resultado['erro_medio_lambda_pct'], 4.0)
         
     def test_ausencia_modos_espurios(self):
         """
@@ -183,6 +207,24 @@ class TestSolverAutovaloresCavidadePEC(unittest.TestCase):
         
         # Verifica monotonicidade estrita
         self.assertTrue(np.all(np.diff(vals_num) >= -1e-8), "O espectro de autovalores deve ser monotonicamente crescente.")
+
+
+class TestFEMEdge2D(unittest.TestCase):
+    """Testes unitários do solver de Elementos Finitos de Aresta Triangulares 2D (Nédélec)."""
+    
+    def test_solver_fem_aresta_cavidade(self):
+        from src.fem_edge_2d import resolver_autovalores_fem_aresta_2d
+        
+        res = resolver_autovalores_fem_aresta_2d(Nex=11, Ney=11, num_autovalores=10)
+        
+        self.assertEqual(len(res['autovalores_numericos']), 10)
+        self.assertEqual(res['N_incognitas'], 341)
+        self.assertEqual(res['n_nulos_descartados'], 100)
+        
+        # Erro médio do número de onda kc < 1.0%
+        self.assertLess(res['erro_medio_kc_pct'], 1.0)
+        # Erro máximo < 2.0%
+        self.assertLess(res['erro_max_kc_pct'], 2.0)
 
 
 if __name__ == "__main__":

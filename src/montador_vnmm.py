@@ -33,7 +33,8 @@ def montar_matrizes_vnmm_2d(
     Ncy=None,
     Lx=np.pi,
     Ly=np.pi,
-    pontos_por_dir=2
+    pontos_por_dir=2,
+    modo_suporte="ponto_gauss"
 ):
     """
     Monta as matrizes globais de rigidez K (com regularização div-curl) e de massa M em formato CSR
@@ -57,6 +58,8 @@ def montar_matrizes_vnmm_2d(
     - Lx: Dimensão do domínio em x (padrão: pi).
     - Ly: Dimensão do domínio em y (padrão: pi).
     - pontos_por_dir: Número de pontos de Gauss por direção (padrão: 2 para 2x2 = 4 pontos/célula).
+    - modo_suporte: 'ponto_gauss' (estilo EFG, nós determinados em cada ponto de integração)
+                    ou 'centro_celula' (nós fixados no centro de cada célula).
     
     Retorna:
     - K: Matriz esparsa csr_matrix (N, N) de rigidez regularizada.
@@ -101,89 +104,161 @@ def montar_matrizes_vnmm_2d(
             x0, x1 = x_edges[i], x_edges[i + 1]
             dx = x1 - x0
             xc = 0.5 * (x0 + x1)
-            Pc = np.array([xc, yc])
-            
-            # 1. Seleção dos nós de suporte para o centro da célula
-            if is_P1:
-                nos, det_val, A_mat, _ = nos_suporte_vnmm_2d_6_P1(
-                    P=Pc,
-                    nodes_coords=coords,
-                    nodes_vectors=vectors,
-                    arvore_busca=arvore,
-                    K=12,
-                    Tol_det=tolerancia_det,
-                    adaptativo=True,
-                    passo_K=4
-                )
-                beta = np.linalg.inv(A_mat)
-                rot_Phi = beta[4, :] - beta[3, :]      # shape (6,)
-                div_Phi = beta[2, :] + beta[5, :]      # shape (6,)
-                n_supp = 6
-            else:
-                nos, det_val, A_mat, _ = nos_suporte_vnmm_2d_3_L1(
-                    P=Pc,
-                    nodes_coords=coords,
-                    nodes_vectors=vectors,
-                    arvore_busca=arvore,
-                    K=8,
-                    Tol_det=tolerancia_det,
-                    adaptativo=True,
-                    passo_K=2
-                )
-                beta = np.linalg.inv(A_mat)
-                rot_Phi = -2.0 * beta[2, :]             # shape (3,)
-                div_Phi = np.zeros(3, dtype=float)     # Base L1 é identicamente solenoidal
-                n_supp = 3
-                
             det_J = 0.25 * dx * dy
             
-            # 2. Integração numérica sobre os pontos de Gauss da célula
-            for wi, xi in zip(w_1d, xi_1d):
-                xg = xc + 0.5 * dx * xi
-                dx_g = xg - xc
-                for wj, eta in zip(w_1d, xi_1d):
-                    yg = yc + 0.5 * dy * eta
-                    dy_g = yg - yc
-                    
-                    wg = wi * wj * det_J
-                    
-                    if is_P1:
-                        Phi_x = beta[0, :] + beta[2, :] * dx_g + beta[3, :] * dy_g
-                        Phi_y = beta[1, :] + beta[4, :] * dx_g + beta[5, :] * dy_g
-                    else:
-                        Phi_x = beta[0, :] + beta[2, :] * dy_g
-                        Phi_y = beta[1, :] - beta[2, :] * dx_g
+            if modo_suporte == "centro_celula":
+                Pc = np.array([xc, yc])
+                # 1. Seleção dos nós de suporte para o centro da célula
+                if is_P1:
+                    nos, det_val, A_mat, _ = nos_suporte_vnmm_2d_6_P1(
+                        P=Pc,
+                        nodes_coords=coords,
+                        nodes_vectors=vectors,
+                        arvore_busca=arvore,
+                        K=12,
+                        Tol_det=tolerancia_det,
+                        adaptativo=True,
+                        passo_K=4
+                    )
+                    beta = np.linalg.inv(A_mat)
+                    rot_Phi = beta[4, :] - beta[3, :]      # shape (6,)
+                    div_Phi = beta[2, :] + beta[5, :]      # shape (6,)
+                    n_supp = 6
+                else:
+                    nos, det_val, A_mat, _ = nos_suporte_vnmm_2d_3_L1(
+                        P=Pc,
+                        nodes_coords=coords,
+                        nodes_vectors=vectors,
+                        arvore_busca=arvore,
+                        K=8,
+                        Tol_det=tolerancia_det,
+                        adaptativo=True,
+                        passo_K=2
+                    )
+                    beta = np.linalg.inv(A_mat)
+                    rot_Phi = -2.0 * beta[2, :]             # shape (3,)
+                    div_Phi = np.zeros(3, dtype=float)     # Base L1 é identicamente solenoidal
+                    n_supp = 3
+                
+                # 2. Integração numérica sobre os pontos de Gauss da célula
+                for wi, xi in zip(w_1d, xi_1d):
+                    xg = xc + 0.5 * dx * xi
+                    dx_g = xg - xc
+                    for wj, eta in zip(w_1d, xi_1d):
+                        yg = yc + 0.5 * dy * eta
+                        dy_g = yg - yc
                         
-                    Phi_g = np.vstack([Phi_x, Phi_y])  # shape (2, n_supp)
-                    
-                    rot_outer = np.outer(rot_Phi, rot_Phi) * (inv_mu * wg)
-                    div_outer = np.outer(div_Phi, div_Phi) * (inv_mu * wg)
-                    vec_dot = (Phi_g.T @ Phi_g) * (eps * wg)
-                    
-                    for a in range(n_supp):
-                        Ia = nos[a]
-                        for b in range(n_supp):
-                            Ib = nos[b]
+                        wg = wi * wj * det_J
+                        
+                        if is_P1:
+                            Phi_x = beta[0, :] + beta[2, :] * dx_g + beta[3, :] * dy_g
+                            Phi_y = beta[1, :] + beta[4, :] * dx_g + beta[5, :] * dy_g
+                        else:
+                            Phi_x = beta[0, :] + beta[2, :] * dy_g
+                            Phi_y = beta[1, :] - beta[2, :] * dx_g
                             
-                            val_kc = rot_outer[a, b]
-                            val_kd = div_outer[a, b]
-                            val_m = vec_dot[a, b]
+                        Phi_g = np.vstack([Phi_x, Phi_y])  # shape (2, n_supp)
+                        
+                        rot_outer = np.outer(rot_Phi, rot_Phi) * (inv_mu * wg)
+                        div_outer = np.outer(div_Phi, div_Phi) * (inv_mu * wg)
+                        vec_dot = (Phi_g.T @ Phi_g) * (eps * wg)
+                        
+                        for a in range(n_supp):
+                            Ia = nos[a]
+                            for b in range(n_supp):
+                                Ib = nos[b]
+                                
+                                val_kc = rot_outer[a, b]
+                                val_kd = div_outer[a, b]
+                                val_m = vec_dot[a, b]
+                                
+                                if abs(val_kc) > 1e-18:
+                                    rows_Kc.append(Ia)
+                                    cols_Kc.append(Ib)
+                                    data_Kc.append(val_kc)
+                                    
+                                if abs(val_kd) > 1e-18:
+                                    rows_Kd.append(Ia)
+                                    cols_Kd.append(Ib)
+                                    data_Kd.append(val_kd)
+                                    
+                                if abs(val_m) > 1e-18:
+                                    rows_M.append(Ia)
+                                    cols_M.append(Ib)
+                                    data_M.append(val_m)
+                                    
+            else:
+                # modo_suporte == "ponto_gauss" (Estilo EFG: suporte individual por ponto de integração)
+                for wi, xi in zip(w_1d, xi_1d):
+                    xg = xc + 0.5 * dx * xi
+                    for wj, eta in zip(w_1d, xi_1d):
+                        yg = yc + 0.5 * dy * eta
+                        Pg = np.array([xg, yg])
+                        wg = wi * wj * det_J
+                        
+                        if is_P1:
+                            nos, det_val, A_mat, _ = nos_suporte_vnmm_2d_6_P1(
+                                P=Pg,
+                                nodes_coords=coords,
+                                nodes_vectors=vectors,
+                                arvore_busca=arvore,
+                                K=12,
+                                Tol_det=tolerancia_det,
+                                adaptativo=True,
+                                passo_K=4
+                            )
+                            beta = np.linalg.inv(A_mat)
+                            # Como a origem local é o próprio Pg (Delta_x=0, Delta_y=0):
+                            Phi_g = beta[0:2, :]                   # shape (2, 6)
+                            rot_Phi = beta[4, :] - beta[3, :]      # shape (6,)
+                            div_Phi = beta[2, :] + beta[5, :]      # shape (6,)
+                            n_supp = 6
+                        else:
+                            nos, det_val, A_mat, _ = nos_suporte_vnmm_2d_3_L1(
+                                P=Pg,
+                                nodes_coords=coords,
+                                nodes_vectors=vectors,
+                                arvore_busca=arvore,
+                                K=8,
+                                Tol_det=tolerancia_det,
+                                adaptativo=True,
+                                passo_K=2
+                            )
+                            beta = np.linalg.inv(A_mat)
+                            # Como a origem local é o próprio Pg:
+                            Phi_g = beta[0:2, :]                   # shape (2, 3)
+                            rot_Phi = -2.0 * beta[2, :]             # shape (3,)
+                            div_Phi = np.zeros(3, dtype=float)     # Base L1 é identicamente solenoidal
+                            n_supp = 3
                             
-                            if abs(val_kc) > 1e-18:
-                                rows_Kc.append(Ia)
-                                cols_Kc.append(Ib)
-                                data_Kc.append(val_kc)
+                        rot_outer = np.outer(rot_Phi, rot_Phi) * (inv_mu * wg)
+                        div_outer = np.outer(div_Phi, div_Phi) * (inv_mu * wg)
+                        vec_dot = (Phi_g.T @ Phi_g) * (eps * wg)
+                        
+                        for a in range(n_supp):
+                            Ia = nos[a]
+                            for b in range(n_supp):
+                                Ib = nos[b]
                                 
-                            if abs(val_kd) > 1e-18:
-                                rows_Kd.append(Ia)
-                                cols_Kd.append(Ib)
-                                data_Kd.append(val_kd)
+                                val_kc = rot_outer[a, b]
+                                val_kd = div_outer[a, b]
+                                val_m = vec_dot[a, b]
                                 
-                            if abs(val_m) > 1e-18:
-                                rows_M.append(Ia)
-                                cols_M.append(Ib)
-                                data_M.append(val_m)
-                                
+                                if abs(val_kc) > 1e-18:
+                                    rows_Kc.append(Ia)
+                                    cols_Kc.append(Ib)
+                                    data_Kc.append(val_kc)
+                                    
+                                if abs(val_kd) > 1e-18:
+                                    rows_Kd.append(Ia)
+                                    cols_Kd.append(Ib)
+                                    data_Kd.append(val_kd)
+                                    
+                                if abs(val_m) > 1e-18:
+                                    rows_M.append(Ia)
+                                    cols_M.append(Ib)
+                                    data_M.append(val_m)
+                                    
     # 3. Montagem e simetrização
     Kc = coo_matrix((data_Kc, (rows_Kc, cols_Kc)), shape=(N_total, N_total)).tocsr()
     Kd = coo_matrix((data_Kd, (rows_Kd, cols_Kd)), shape=(N_total, N_total)).tocsr()
@@ -196,3 +271,4 @@ def montar_matrizes_vnmm_2d(
     K = Kc + s_div * Kd
     
     return K, M
+

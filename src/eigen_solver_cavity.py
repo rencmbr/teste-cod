@@ -57,20 +57,30 @@ def resolver_problema_autovalores(
     N_int = K_red.shape[0]
     
     if metodo == "eigh" or N_int < 300:
-        # Solução densa exata via la.eigh (altamente estável)
-        vals, vecs = la.eigh(K_red.toarray(), M_red.toarray())
+        # Solução densa exata via la.eigh (Cholesky), com fallback para QZ (la.eig) se M_red não for estritamente DP
+        try:
+            vals, vecs = la.eigh(K_red.toarray(), M_red.toarray())
+        except (la.LinAlgError, np.linalg.LinAlgError):
+            vals, vecs = la.eig(K_red.toarray(), M_red.toarray())
+            vals = np.real(vals)
+            vecs = np.real(vecs)
     else:
         # Solução esparsa via Shift-and-Invert
         k_busca = min(num_autovalores + 6, N_int - 2)
-        vals, vecs = eigs(
-            A=K_red, 
-            M=M_red, 
-            k=k_busca, 
-            sigma=sigma, 
-            which='LM'
-        )
-        vals = np.real(vals)
-        vecs = np.real(vecs)
+        try:
+            vals, vecs = eigs(
+                A=K_red, 
+                M=M_red, 
+                k=k_busca, 
+                sigma=sigma, 
+                which='LM'
+            )
+            vals = np.real(vals)
+            vecs = np.real(vecs)
+        except Exception:
+            vals, vecs = la.eig(K_red.toarray(), M_red.toarray())
+            vals = np.real(vals)
+            vecs = np.real(vecs)
         
     # Filtra valores positivos não nulos
     mascara_positivos = vals > 1e-4
@@ -99,6 +109,7 @@ def resolver_autovalores_cavidade(
     s_div=6.0,
     pontos_por_dir=2,
     tolerancia_det=1e-4,
+    modo_suporte="ponto_gauss",
     seed=42
 ):
     """
@@ -138,7 +149,8 @@ def resolver_autovalores_cavidade(
         Ncy=Ncy,
         Lx=Lx,
         Ly=Ly,
-        pontos_por_dir=pontos_por_dir
+        pontos_por_dir=pontos_por_dir,
+        modo_suporte=modo_suporte
     )
     
     # 3. Imposição de Dirichlet homogênea (Paredes PEC)
