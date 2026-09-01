@@ -25,7 +25,7 @@ def montar_matrizes_vnmm_2d(
     pontos_gauss=None, 
     pesos_gauss=None, 
     base="P1", 
-    tolerancia_det=1e-4, 
+    tolerancia_det=None, 
     mu_r=1.0, 
     epsilon_r=1.0,
     s_div=6.0,
@@ -33,7 +33,7 @@ def montar_matrizes_vnmm_2d(
     Ncy=None,
     Lx=np.pi,
     Ly=np.pi,
-    pontos_por_dir=2,
+    pontos_por_dir=3,
     modo_suporte="ponto_gauss"
 ):
     """
@@ -49,15 +49,15 @@ def montar_matrizes_vnmm_2d(
     - coords: Array numpy (N, 2) com as coordenadas dos nós.
     - vectors: Array numpy (N, 2) com as componentes dos vetores diretores unitários.
     - base: 'P1' (6 nós/termos, linear completa) ou 'L1' (3 nós/termos, Nedelec de 1ª ordem).
-    - tolerancia_det: Tolerância do determinante |det(A)| para a seleção adaptativa de nós.
+    - tolerancia_det: Tolerância do determinante |det(A)| para a seleção adaptativa de nós (padrão: adaptativo O(h^4)).
     - mu_r: Permeabilidade magnética relativa (padrão: 1.0).
     - epsilon_r: Permissividade elétrica relativa (padrão: 1.0).
     - s_div: Fator de penalidade de divergência para eliminação de modos espúrios de gradiente (padrão: 6.0).
-    - Ncx: Número de células de integração na direção x (padrão: derivado das coordenadas).
-    - Ncy: Número de células de integração na direção y (padrão: derivado das coordenadas).
+    - Ncx: Número de células de integração na direção x (padrão: round(0.6 * Nx)).
+    - Ncy: Número de células de integração na direção y (padrão: round(0.6 * Ny)).
     - Lx: Dimensão do domínio em x (padrão: pi).
     - Ly: Dimensão do domínio em y (padrão: pi).
-    - pontos_por_dir: Número de pontos de Gauss por direção (padrão: 2 para 2x2 = 4 pontos/célula).
+    - pontos_por_dir: Número de pontos de Gauss por direção (padrão: 3 para 3x3 = 9 pontos/célula).
     - modo_suporte: 'ponto_gauss' (estilo EFG, nós determinados em cada ponto de integração)
                     ou 'centro_celula' (nós fixados no centro de cada célula).
     
@@ -79,12 +79,17 @@ def montar_matrizes_vnmm_2d(
     else:
         raise ValueError(f"Base '{base}' não suportada. Opções: 'P1' ou 'L1'.")
         
-    # Determina o número de células de integração a partir da grade
-    if Ncx is None or Ncy is None:
-        # Tenta inferir da raiz quadrada do número de nós
-        N_lado = int(np.round(np.sqrt(N_total)))
-        Ncx = N_lado - 1 if Ncx is None else Ncx
-        Ncy = N_lado - 1 if Ncy is None else Ncy
+    # Determina o número de células de integração e espaçamento característico
+    N_lado = int(np.round(np.sqrt(N_total)))
+    if Ncx is None:
+        Ncx = max(4, int(np.round(0.6 * N_lado)))
+    if Ncy is None:
+        Ncy = max(4, int(np.round(0.6 * N_lado)))
+        
+    h_char = max(Lx / max(N_lado - 1, 1), Ly / max(N_lado - 1, 1))
+    h_ref = np.pi / 20.0
+    if tolerancia_det is None:
+        tolerancia_det = 1e-4 * (h_char / h_ref)**4 if is_P1 else 1e-4 * (h_char / h_ref)
         
     x_edges = np.linspace(0.0, Lx, Ncx + 1)
     y_edges = np.linspace(0.0, Ly, Ncy + 1)

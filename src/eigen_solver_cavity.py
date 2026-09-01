@@ -107,8 +107,8 @@ def resolver_autovalores_cavidade(
     num_autovalores=10, 
     sigma=0.5,
     s_div=6.0,
-    pontos_por_dir=2,
-    tolerancia_det=1e-4,
+    pontos_por_dir=3,
+    tolerancia_det=None,
     modo_suporte="ponto_gauss",
     seed=42
 ):
@@ -123,9 +123,14 @@ def resolver_autovalores_cavidade(
     5. Comparação e cálculo de erros com relação à Tabela 4-1 da tese de Luilly Ortiz.
     """
     if Ncx is None:
-        Ncx = Nx - 1
+        Ncx = max(4, int(np.round(0.6 * Nx)))
     if Ncy is None:
-        Ncy = Ny - 1
+        Ncy = max(4, int(np.round(0.6 * Ny)))
+        
+    h_char = max(Lx / max(Nx - 1, 1), Ly / max(Ny - 1, 1))
+    h_ref = np.pi / 20.0
+    if tolerancia_det is None:
+        tolerancia_det = 1e-4 * (h_char / h_ref)**4 if base.upper() in ["P1", "6_P1"] else 1e-4 * (h_char / h_ref)
         
     # 1. Discretização nodal
     coords, vectors, is_boundary = gerar_malha_cavidade(
