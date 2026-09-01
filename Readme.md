@@ -16,7 +16,11 @@ $$
 \vec{N}_i(\mathbf{x}_k) \cdot \vec{t}_k = \delta_{ik} \qquad (1)
 $$
 
-onde $\vec{t}_k$ é o vetor unitário associado ao nó $n_k$ e $\delta_{ik}$ assume o valor $1$ se $k=i$ e $0$ se $k \neq i$. A aplicação desta restrição gera um sistema linear local $A \beta_i = L_i$, cuja inversão define as funções de forma vetoriais locais $\vec{N}_i$ para a representação do campo $\vec{E}^h(x, y) = \sum_i \vec{N}_i(x, y) e_i$.
+onde $\vec{t}_k$ é o vetor unitário associado ao nó $n_k$ e $\delta_{ik}$ assume o valor $1$ se $k=i$ e $0$ se $k \neq i$. A aplicação desta restrição gera um sistema linear local $A \beta_i = L_i$, cuja inversão define as funções de forma vetoriais locais $\vec{N}_i$ para a representação do campo vetorial aproximado:
+
+$$
+\vec{E}^h(x, y) = \sum_{i=1}^M \vec{N}_i(x, y) e_i \qquad (2)
+$$
 
 ---
 
@@ -25,24 +29,34 @@ onde $\vec{t}_k$ é o vetor unitário associado ao nó $n_k$ e $\delta_{ik}$ ass
 A formulação original utilizava uma base vetorial linear de 3 termos com 3 nós de suporte locais:
 
 $$
-\mathcal{L}^1 = \left\langle \begin{bmatrix} 1 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 1 \end{bmatrix}, \begin{bmatrix} y \\ -x \end{bmatrix} \right\rangle \qquad (2)
+\mathcal{L}^1 = \left\langle \begin{bmatrix} 1 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 1 \end{bmatrix}, \begin{bmatrix} y \\ -x \end{bmatrix} \right\rangle \qquad (3)
 $$
 
-A função de forma é $\vec{N}_i = \beta_{1i} [1, 0]^T + \beta_{2i} [0, 1]^T + \beta_{3i} [y, -x]^T$, com matriz de momento $A \in \mathbb{R}^{3 \times 3}$:
+A função de forma local associada é expressa por:
+
+$$
+\vec{N}_i = \beta_{1i} \begin{bmatrix} 1 \\ 0 \end{bmatrix} + \beta_{2i} \begin{bmatrix} 0 \\ 1 \end{bmatrix} + \beta_{3i} \begin{bmatrix} y \\ -x \end{bmatrix} \qquad (4)
+$$
+
+com a correspondente matriz de momento $A \in \mathbb{R}^{3 \times 3}$:
 
 $$
 A = \begin{bmatrix}
 t_{1x} & t_{1y} & y_1 t_{1x} - x_1 t_{1y} \\
 t_{2x} & t_{2y} & y_2 t_{2x} - x_2 t_{2y} \\
 t_{3x} & t_{3y} & y_3 t_{3x} - x_3 t_{3y}
-\end{bmatrix} \qquad (3)
+\end{bmatrix} \qquad (5)
 $$
 
-O rotacional é dado analiticamente por $(\nabla \times \vec{E}^h)_z = -2 \sum_{i=1}^3 \beta_{3i} e_i$.
+O rotacional resultante é dado analiticamente por:
+
+$$
+(\nabla \times \vec{E}^h)_z = -2 \sum_{i=1}^3 \beta_{3i} e_i \qquad (6)
+$$
 
 ### Resultados de Convergência da Interpolação com $\mathcal{L}^1$:
 
-| Configuração | $N_{total}$ | $h_{méd}$ | $Tol_{det}(h)$ | Erro RMS $\vec{E}$ | Ordem $\vec{E}$ | Erro RMS $\nabla\times\vec{E}$ | Ordem $\nabla\times\vec{E}$ |
+| Configuração | $N_{\text{total}}$ | $h_{\text{méd}}$ | $Tol_{\text{det}}(h)$ | Erro RMS $\vec{E}$ | Ordem $\vec{E}$ | Erro RMS $\nabla\times\vec{E}$ | Ordem $\nabla\times\vec{E}$ |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **Esparsa** | 84 | 3.3333 | 1.6667 | $1.63 \times 10^{-1}$ | — | $1.29 \times 10^{-1}$ | — |
 | **Média** | 416 | 1.4286 | 0.7143 | $6.75 \times 10^{-2}$ | $O(h)$ | $1.37 \times 10^{-1}$ | $O(1)$ |
@@ -54,9 +68,15 @@ O rotacional é dado analiticamente por $(\nabla \times \vec{E}^h)_z = -2 \sum_{
 ## 2. Diagnóstico do Vazamento Modal (*Aliasing*) na Base $\mathcal{L}^1$
 
 A estagnação do erro do rotacional em $O(1)$ ($\approx 15\%$) decorre da **incompletude da matriz Jacobiana de Taylor** associada à base $\mathcal{L}^1$:
-- A expansão linear completa em 2D requer 4 derivadas parciais: $\frac{\partial E_x}{\partial x}, \frac{\partial E_x}{\partial y}, \frac{\partial E_y}{\partial x}, \frac{\partial E_y}{\partial y}$.
+- A expansão linear completa em 2D requer 4 derivadas espaciais: $\frac{\partial E_x}{\partial x}, \frac{\partial E_x}{\partial y}, \frac{\partial E_y}{\partial x}, \frac{\partial E_y}{\partial y}$.
 - A base $\mathcal{L}^1$ possui apenas 3 graus de liberdade, forçando artificialmente $\frac{\partial E_x^h}{\partial x} \equiv 0$ e $\frac{\partial E_y^h}{\partial y} \equiv 0$.
-- **Mecanismo de Vazamento:** O resíduo das derivadas normais não representadas $\mathbf{r} \sim O(h)$ é multiplicado pela 3ª linha de $A^{-1}$ (que escala com $O(1/h)$), resultando em um erro residual constante de ordem $O(1/h) \times O(h) = \mathbf{O(1)}$ no coeficiente $\beta_3$, impedindo a convergência do rotacional.
+- **Mecanismo de Vazamento:** O resíduo das derivadas normais não representadas $\mathbf{r} \sim O(h)$ é multiplicado pela 3ª linha de $A^{-1}$ (que escala com $O(1/h)$), resultando em um erro residual constante de ordem:
+
+$$
+\text{Erro no Rotacional} \sim O\left(\frac{1}{h}\right) \times O(h) = \mathbf{O(1) \quad (Constante)} \qquad (7)
+$$
+
+no coeficiente $\beta_3$, impedindo a convergência do rotacional.
 
 ---
 
@@ -65,7 +85,7 @@ A estagnação do erro do rotacional em $O(1)$ ($\approx 15\%$) decorre da **inc
 Para eliminar o vazamento modal e garantir completude de 1ª ordem, adota-se o espaço polinomial vetorial linear completo $\mathcal{P}_1 \times \mathcal{P}_1$ com **6 nós de suporte**:
 
 $$
-\mathcal{P}^1 = \left\langle \begin{bmatrix} 1 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 1 \end{bmatrix}, \begin{bmatrix} x \\ 0 \end{bmatrix}, \begin{bmatrix} y \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ x \end{bmatrix}, \begin{bmatrix} 0 \\ y \end{bmatrix} \right\rangle \qquad (4)
+\mathcal{P}^1 = \left\langle \begin{bmatrix} 1 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 1 \end{bmatrix}, \begin{bmatrix} x \\ 0 \end{bmatrix}, \begin{bmatrix} y \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ x \end{bmatrix}, \begin{bmatrix} 0 \\ y \end{bmatrix} \right\rangle \qquad (8)
 $$
 
 A matriz de momento $A \in \mathbb{R}^{6 \times 6}$ em coordenadas locais $(\Delta x_k = x_k - x_P, \Delta y_k = y_k - y_P)$ é dada por:
@@ -76,13 +96,13 @@ t_{1x} & t_{1y} & \Delta x_1 t_{1x} & \Delta y_1 t_{1x} & \Delta x_1 t_{1y} & \D
 t_{2x} & t_{2y} & \Delta x_2 t_{2x} & \Delta y_2 t_{2x} & \Delta x_2 t_{2y} & \Delta y_2 t_{2y} \\
 \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
 t_{6x} & t_{6y} & \Delta x_6 t_{6x} & \Delta y_6 t_{6x} & \Delta x_6 t_{6y} & \Delta y_6 t_{6y}
-\end{bmatrix} \qquad (5)
+\end{bmatrix} \qquad (9)
 $$
 
 O campo e o rotacional interpolados no ponto de avaliação $P$ ($\Delta x = 0, \Delta y = 0$) são:
 
 $$
-\vec{E}^h(P) = \begin{bmatrix} \sum_{i=1}^6 \beta_{1i} e_i \\ \sum_{i=1}^6 \beta_{2i} e_i \end{bmatrix}, \quad (\nabla \times \vec{E}^h)_z(P) = \sum_{i=1}^6 (\beta_{5i} - \beta_{4i}) e_i \qquad (6)
+\vec{E}^h(P) = \begin{bmatrix} \sum_{i=1}^6 \beta_{1i} e_i \\ \sum_{i=1}^6 \beta_{2i} e_i \end{bmatrix}, \quad (\nabla \times \vec{E}^h)_z(P) = \sum_{i=1}^6 (\beta_{5i} - \beta_{4i}) e_i \qquad (10)
 $$
 
 ---
@@ -91,7 +111,7 @@ $$
 
 A análise paramétrica comparativa entre $\mathcal{L}^1$ e $\mathcal{P}^1$ comprovou a restauração plena das taxas assintóticas de convergência:
 
-| Malha | $N_{total}$ | $h_{méd}$ | Erro RMS $\vec{E}$ ($\mathcal{L}^1$) | Erro RMS $\vec{E}$ ($\mathcal{P}^1$) | Erro RMS $\nabla \times \vec{E}$ ($\mathcal{L}^1$) | Erro RMS $\nabla \times \vec{E}$ ($\mathcal{P}^1$) |
+| Malha | $N_{\text{total}}$ | $h_{\text{méd}}$ | Erro RMS $\vec{E}$ ($\mathcal{L}^1$) | Erro RMS $\vec{E}$ ($\mathcal{P}^1$) | Erro RMS $\nabla \times \vec{E}$ ($\mathcal{L}^1$) | Erro RMS $\nabla \times \vec{E}$ ($\mathcal{P}^1$) |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|
 | **Esparsa** | 84 | 3.3333 | $1.63 \times 10^{-1}$ | **$2.51 \times 10^{-2}$** | $1.29 \times 10^{-1}$ | **$5.98 \times 10^{-2}$** |
 | **Média** | 416 | 1.4286 | $6.75 \times 10^{-2}$ | **$4.20 \times 10^{-3}$** | $1.37 \times 10^{-1}$ | **$1.60 \times 10^{-2}$** |
@@ -102,7 +122,13 @@ A análise paramétrica comparativa entre $\mathcal{L}^1$ e $\mathcal{P}^1$ comp
 ### Principais Conclusões da Interpolação:
 1. **Eliminação Integral do Vazamento Modal:** O erro do rotacional caiu de $1.58 \times 10^{-1}$ para $2.45 \times 10^{-4}$ (redução de mais de **600 vezes**), confirmando convergência monotônica de 1ª ordem $O(h)$.
 2. **Superconvergência do Campo $\vec{E}$:** A representação completa elevou a taxa de convergência do campo de $O(h)$ para $O(h^2)$.
-3. **Escala Quártica do Determinante:** Como $\det(A) \sim O(h^4)$ para a base de 6 nós, a calibração adaptativa $Tol_{\text{det}}(h) = Tol_{\text{ref}} (h/h_{\text{ref}})^4$ garante 100% de sucesso na seleção de nós pela `KDTree` mantendo a localidade geométrica ótima.
+3. **Escala Quártica do Determinante:** Como $\det(A) \sim O(h^4)$ para a base de 6 nós, a calibração adaptativa:
+
+$$
+Tol_{\text{det}}(h) = Tol_{\text{ref}} \left(\frac{h}{h_{\text{ref}}}\right)^4 \qquad (11)
+$$
+
+garante 100% de sucesso na seleção de nós pela `KDTree` mantendo a localidade geométrica ótima.
 
 > 📄 **Relatórios Detalhados da Interpolação:**
 > - [Relatório da Análise Paramétrica com a Base $\mathcal{P}^1$](relatorios/relatorio_analise_parametrica_P1.md)
@@ -118,7 +144,7 @@ O problema de autovalores bidimensional consiste em determinar as frequências d
 O problema de Helmholtz vetorial $\nabla \times (\nabla \times \vec{E}) = \lambda \vec{E}$ com $\hat{n} \times \vec{E} = \mathbf{0}$ em $\partial \Omega$ é formulado pelo princípio variacional de Ritz-Galerkin:
 
 $$
-\int_{\Omega} (\nabla \times \vec{W})_z (\nabla \times \vec{E})_z \, d\Omega + s_{\text{div}} \int_{\Omega} (\nabla \cdot \vec{W}) (\nabla \cdot \vec{E}) \, d\Omega = \lambda \int_{\Omega} \vec{W} \cdot \vec{E} \, d\Omega \qquad (7)
+\int_{\Omega} (\nabla \times \vec{W})_z (\nabla \times \vec{E})_z \, d\Omega + s_{\text{div}} \int_{\Omega} (\nabla \cdot \vec{W}) (\nabla \cdot \vec{E}) \, d\Omega = \lambda \int_{\Omega} \vec{W} \cdot \vec{E} \, d\Omega \qquad (12)
 $$
 
 onde $s_{\text{div}} = 6.0$ é o parâmetro de penalização que desloca os modos espúrios de gradiente ($\vec{E} = \nabla \phi$) para altas frequências ($\lambda > 50$), mantendo os modos físicos $TE_z$ ($\nabla \cdot \vec{E} \equiv 0$) inalterados.
@@ -132,7 +158,13 @@ onde $s_{\text{div}} = 6.0$ é o parâmetro de penalização que desloca os modo
 3. **Condições de Contorno PEC (Dirichlet Homogêneo):**  
    Como os nós de fronteira possuem vetor diretor alinhado com a tangente ($\vec{t} \parallel \partial \Omega$), a condição $\vec{E} \cdot \vec{t} = 0$ é imposta diretamente pela eliminação dos graus de liberdade de fronteira ($c_{\text{borda}} = 0$).
 4. **Solver de Autovalores Generalizado:**  
-   Resolve-se $K_{\text{red}} \mathbf{c}_{\text{red}} = \lambda M_{\text{red}} \mathbf{c}_{\text{red}}$ via `scipy.linalg.eigh` (com fallback robusto QZ).
+   Resolve-se o sistema generalizado de autovalores reduzido:
+
+$$
+K_{\text{red}} \mathbf{c}_{\text{red}} = \lambda M_{\text{red}} \mathbf{c}_{\text{red}} \qquad (13)
+$$
+
+via `scipy.linalg.eigh` (com fallback robusto QZ).
 
 > 📄 **Relatórios de Implementação e Quadratura:**
 > - [Estudo de Integração Numérica e Quadratura no Caso Base](relatorios/relatorio_estudo_integracao_caso_base.md)
@@ -179,9 +211,9 @@ Implementamos um solver independente de **Elementos Finitos de Aresta Triangular
 
 ### 6.3 Avaliação de Formulações Alternativas Testadas
 
-1. **Base Incompleta $\mathcal{L}^1$ (3 Nós):** Como $\nabla \cdot \vec{N}_i \equiv 0$, a matriz $K_{\text{div}} \equiv 0$ não permite regularização. O erro médio de $k_c$ fica entre **$28.32\% - 48.95\%$** devido a vazamento modal.
-2. **Formulação Sem Penalização ($s_{\text{div}} = 0.0$ na Base $\mathcal{P}^1$):** Modos espúrios de gradiente invadem a faixa espectral física ($0.8 < \lambda < 5.0$), elevando o erro médio para **$19.75\% - 90\%$**.
-3. **Formulação Mimética de Stokes ($\oint_{\partial \Omega_e} \vec{E} \cdot d\vec{\ell}$ com $s_{\text{div}} = 0$):** Consegue colapsar $262$ modos espúrios para autovalores nulos exatos ($\lambda \approx 0$), atingindo erro médio de $12.76\%$. Contudo, a aproximação de rotacional constante por célula a torna menos acurada que o VNMM diferencial pontual ($1.00\%$).
+1. **Base Incompleta $\mathcal{L}^1$ (3 Nós):** Como $\nabla \cdot \vec{N}_i \equiv 0$, a matriz de divergência é identicamente nula ($K_{\text{div}} \equiv 0$), não permitindo regularização. O erro médio de $k_c$ fica entre **$28.32\%$ e $48.95\%$** devido a vazamento modal.
+2. **Formulação Sem Penalização ($s_{\text{div}} = 0.0$ na Base $\mathcal{P}^1$):** Modos espúrios de gradiente invadem a faixa espectral física ($0.8 < \lambda < 5.0$), elevando o erro médio para **$19.75\%$ a $90\%$**.
+3. **Formulação Mimética de Stokes ($\oint_{\partial \Omega_e} \vec{E} \cdot d\vec{\ell}$ com $s_{\text{div}} = 0$):** Consegue colapsar $262$ modos espúrios para autovalores nulos exatos ($\lambda \approx 0$), atingindo erro médio de **$12.76\%$**. Contudo, a aproximação de rotacional constante por célula a torna menos acurada que o VNMM diferencial pontual (**$1.00\%$**).
 
 ### 6.4 Conclusões Globais:
 - O VNMM 2D com a base linear completa $\mathcal{P}^1$, suporte individual por ponto de Gauss (estilo EFG) e regularização div-curl ($s_{\text{div}} = 6.0$) consolida-se como a formulação ótima definitiva, combinando **alta acurácia espectral ($\le 1\%$)**, **eliminação total de modos espúrios** e a **plena flexibilidade de um método sem malha**.
