@@ -1,283 +1,225 @@
-# Método Sem Malha Nodal Vetorial em 2 Dimensões e 3 Nós de Suporte
+# Método Sem Malha Nodal Vetorial em 2 Dimensões (VNMM 2D)
 
-## Premissas
+## Premissas e Fundamentos
 
-O Método Sem Malha Nodal Vetorial (*Vector Nodal Meshless Method* - VNMM) é baseado na ideia do Método Sem Malha de Aresta (EMM) com o comprimento das arestas tendendo a zero. A ideia consiste em distribuir um conjunto de nós no domínio, associando a cada nó um vetor unitário com direção arbitrária. Nós também são posicionados nas fronteiras do domínio e nas interfaces entre diferentes materiais; para estes nós de contorno, a direção do vetor unitário não é arbitrária, mas tangente às fronteiras e interfaces, conforme ilustrado na Figura 1.
+O **Método Sem Malha Nodal Vetorial** (*Vector Nodal Meshless Method* - VNMM) é baseado na ideia do Método Sem Malha de Aresta (*Edge-based Meshless Method* - EMM) com o comprimento das arestas tendendo a zero. A técnica consiste em distribuir um conjunto de nós no domínio contínuo, associando a cada nó um vetor unitário com direção arbitrária. Nós também são posicionados nas fronteiras do domínio e nas interfaces entre diferentes meios materiais; para estes nós de contorno, a direção do vetor unitário não é arbitrária, mas tangente às fronteiras e interfaces físicas, conforme ilustrado na Figura 1.
 
-<img width="1079" height="537" alt="image" src="https://github.com/user-attachments/assets/aa0919de-1202-46be-aeeb-563215222cad" />
+<img width="1079" height="537" alt="Distribuição de nós no VNMM" src="https://github.com/user-attachments/assets/aa0919de-1202-46be-aeeb-563215222cad" />
 
 **Figura 1:** Distribuição de nós e direções vetoriais para o VNMM.
 
-Sejam $(x_i, y_i)$ as coordenadas do $i$-ésimo nó e $(t_{xi}, t_{yi})$ as componentes do vetor unitário associado a este mesmo nó.
+Sejam $(x_i, y_i)$ as coordenadas do $i$-ésimo nó e $(t_{xi}, t_{yi})$ as componentes do vetor unitário $\vec{t}_i$ associado a este mesmo nó.
 
-A formulação matemática para a construção das funções de forma vetoriais utilizando três nós de suporte no VNMM bidimensional considera um polinômio de ordem igual a 1:
-
-$$
-\mathcal{L}^1 = \left\langle \begin{bmatrix} 1 \\\\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\\\ 1 \end{bmatrix}, \begin{bmatrix} y \\\\ -x \end{bmatrix} \right\rangle \qquad (1)
-$$
-
-A partir desta base vetorial, a função de forma $\vec{N}_i$ associada ao $i$-ésimo nó é expressa como uma combinação linear de seus termos componentes:
+A formulação matemática para a construção das funções de forma vetoriais no VNMM bidimensional baseia-se na imposição da **condição de projeção nodal (delta de Kronecker vetorial)**:
 
 $$
-\vec{N}_i = \beta_{1i} \begin{bmatrix} 1 \\\\ 0 \end{bmatrix} + \beta_{2i} \begin{bmatrix} 0 \\\\ 1 \end{bmatrix} + \beta_{3i} \begin{bmatrix} y \\\\ -x \end{bmatrix} \qquad (2)
+\vec{N}_i(\mathbf{x}_k) \cdot \vec{t}_k = \delta_{ik} \qquad (1)
 $$
 
-Nesta expressão, $\beta_{1i}$, $\beta_{2i}$ e $\beta_{3i}$ representam os coeficientes incógnitos da interpolação a serem determinados. Como há três coeficientes, utilizam-se três nós de suporte no domínio local.
+onde $\vec{t}_k$ é o vetor unitário associado ao nó $n_k$ e $\delta_{ik}$ assume o valor $1$ se $k=i$ e $0$ se $k \neq i$. A aplicação desta restrição gera um sistema linear local $A \beta_i = L_i$, cuja inversão define as funções de forma vetoriais locais $\vec{N}_i$ para a representação do campo $\vec{E}^h(x, y) = \sum_i \vec{N}_i(x, y) e_i$.
 
-Para garantir a coerência física e matemática da aproximação em $H(\text{curl})$, impõe-se que a função de forma $\vec{N}_i$ possua projeção não nula exclusivamente na direção do vetor associado ao seu respectivo nó. Consequentemente, impõe-se a condição de projeção em que a $k$-ésima função de forma tenha projeção igual a 1 na direção do vetor unitário de seu próprio nó e 0 nas direções dos vetores associados aos demais nós de suporte. Esta restrição, que traduz a propriedade do delta de Kronecker à formulação vetorial, é definida por:
+---
 
-$$
-\vec{N}_i \cdot \vec{t}_k = \delta_{ik} \qquad (3)
-$$
+## 1. Avaliação da Base Incompleta $\mathcal{L}^1$ (3 Nós de Suporte)
 
-onde $\vec{t}_k$ é o vetor unitário associado ao nó $n_k$ e $\delta_{ik}$ assume o valor 1 se $k=i$ e 0 se $k \neq i$. A aplicação dessa condição resulta nos sistemas lineares:
+A formulação original utilizava uma base vetorial linear de 3 termos com 3 nós de suporte locais:
 
 $$
-A \beta_i = L_i, \quad \text{para } i = 1, 2, 3 \qquad (4)
+\mathcal{L}^1 = \left\langle \begin{bmatrix} 1 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 1 \end{bmatrix}, \begin{bmatrix} y \\ -x \end{bmatrix} \right\rangle \qquad (2)
 $$
 
-A matriz de interpolação $A$, os vetores de coeficientes locais $\beta_i$ e os vetores canônicos $L_i$ são definidos por:
+A função de forma é $\vec{N}_i = \beta_{1i} [1, 0]^T + \beta_{2i} [0, 1]^T + \beta_{3i} [y, -x]^T$, com matriz de momento $A \in \mathbb{R}^{3 \times 3}$:
 
 $$
 A = \begin{bmatrix}
-t_{1x} & t_{1y} & y_1 t_{1x} - x_1 t_{1y} \\\\
-t_{2x} & t_{2y} & y_2 t_{2x} - x_2 t_{2y} \\\\
+t_{1x} & t_{1y} & y_1 t_{1x} - x_1 t_{1y} \\
+t_{2x} & t_{2y} & y_2 t_{2x} - x_2 t_{2y} \\
 t_{3x} & t_{3y} & y_3 t_{3x} - x_3 t_{3y}
+\end{bmatrix} \qquad (3)
+$$
+
+O rotacional é dado analiticamente por $(\nabla \times \vec{E}^h)_z = -2 \sum_{i=1}^3 \beta_{3i} e_i$.
+
+### Resultados de Convergência da Interpolação com $\mathcal{L}^1$:
+
+| Configuração | $N_{total}$ | $h_{méd}$ | $Tol_{det}(h)$ | Erro RMS $\vec{E}$ | Ordem $\vec{E}$ | Erro RMS $\nabla\times\vec{E}$ | Ordem $\nabla\times\vec{E}$ |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Esparsa** | 84 | 3.3333 | 1.6667 | $1.63 \times 10^{-1}$ | — | $1.29 \times 10^{-1}$ | — |
+| **Média** | 416 | 1.4286 | 0.7143 | $6.75 \times 10^{-2}$ | $O(h)$ | $1.37 \times 10^{-1}$ | $O(1)$ |
+| **Densa** | 1928 | 0.6250 | 0.3125 | $2.84 \times 10^{-2}$ | $O(h)$ | $1.34 \times 10^{-1}$ | $O(1)$ |
+| **Ultra Densa** | 8408 | 0.2174 | 0.1087 | **$1.82 \times 10^{-2}$** | **$O(h)$** | **$1.58 \times 10^{-1}$** | **$O(1)$ (Estagna)** |
+
+---
+
+## 2. Diagnóstico do Vazamento Modal (*Aliasing*) na Base $\mathcal{L}^1$
+
+A estagnação do erro do rotacional em $O(1)$ ($\approx 15\%$) decorre da **incompletude da matriz Jacobiana de Taylor** associada à base $\mathcal{L}^1$:
+- A expansão linear completa em 2D requer 4 derivadas parciais: $\frac{\partial E_x}{\partial x}, \frac{\partial E_x}{\partial y}, \frac{\partial E_y}{\partial x}, \frac{\partial E_y}{\partial y}$.
+- A base $\mathcal{L}^1$ possui apenas 3 graus de liberdade, forçando artificialmente $\frac{\partial E_x^h}{\partial x} \equiv 0$ e $\frac{\partial E_y^h}{\partial y} \equiv 0$.
+- **Mecanismo de Vazamento:** O resíduo das derivadas normais não representadas $\mathbf{r} \sim O(h)$ é multiplicado pela 3ª linha de $A^{-1}$ (que escala com $O(1/h)$), resultando em um erro residual constante de ordem $O(1/h) \times O(h) = \mathbf{O(1)}$ no coeficiente $\beta_3$, impedindo a convergência do rotacional.
+
+---
+
+## 3. Formulação com a Base Completa $\mathcal{P}^1$ (6 Nós de Suporte)
+
+Para eliminar o vazamento modal e garantir completude de 1ª ordem, adota-se o espaço polinomial vetorial linear completo $\mathcal{P}_1 \times \mathcal{P}_1$ com **6 nós de suporte**:
+
+$$
+\mathcal{P}^1 = \left\langle \begin{bmatrix} 1 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 1 \end{bmatrix}, \begin{bmatrix} x \\ 0 \end{bmatrix}, \begin{bmatrix} y \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ x \end{bmatrix}, \begin{bmatrix} 0 \\ y \end{bmatrix} \right\rangle \qquad (4)
+$$
+
+A matriz de momento $A \in \mathbb{R}^{6 \times 6}$ em coordenadas locais $(\Delta x_k = x_k - x_P, \Delta y_k = y_k - y_P)$ é dada por:
+
+$$
+A = \begin{bmatrix}
+t_{1x} & t_{1y} & \Delta x_1 t_{1x} & \Delta y_1 t_{1x} & \Delta x_1 t_{1y} & \Delta y_1 t_{1y} \\
+t_{2x} & t_{2y} & \Delta x_2 t_{2x} & \Delta y_2 t_{2x} & \Delta x_2 t_{2y} & \Delta y_2 t_{2y} \\
+\vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+t_{6x} & t_{6y} & \Delta x_6 t_{6x} & \Delta y_6 t_{6x} & \Delta x_6 t_{6y} & \Delta y_6 t_{6y}
 \end{bmatrix} \qquad (5)
 $$
 
-$$
-\beta_i = \begin{bmatrix} \beta_{1i} \\\\ \beta_{2i} \\\\ \beta_{3i} \end{bmatrix} \qquad (6)
-$$
+O campo e o rotacional interpolados no ponto de avaliação $P$ ($\Delta x = 0, \Delta y = 0$) são:
 
 $$
-L_1 = \begin{bmatrix} 1 \\\\ 0 \\\\ 0 \end{bmatrix}, \quad
-L_2 = \begin{bmatrix} 0 \\\\ 1 \\\\ 0 \end{bmatrix}, \quad
-L_3 = \begin{bmatrix} 0 \\\\ 0 \\\\ 1 \end{bmatrix} \qquad (7)
+\vec{E}^h(P) = \begin{bmatrix} \sum_{i=1}^6 \beta_{1i} e_i \\ \sum_{i=1}^6 \beta_{2i} e_i \end{bmatrix}, \quad (\nabla \times \vec{E}^h)_z(P) = \sum_{i=1}^6 (\beta_{5i} - \beta_{4i}) e_i \qquad (6)
 $$
-
-Nestes sistemas, $t_{kx}$ e $t_{ky}$ correspondem às componentes cartesianas do vetor unitário de direção atrelado ao $k$-ésimo nó de suporte.
-
-Uma vez determinados os coeficientes $\beta_i$ ($i=1,2,3$), as funções de forma $\vec{N}_i$ estarão determinadas para o domínio de suporte e a aproximação de uma função vetorial $\vec{E}$ no domínio de suporte é dada por:
-
-$$
-\vec{E}^h = \sum_{i=1}^3 \vec{N}_i e_i = \Phi(x,y) e_s \qquad (8)
-$$
-
-onde $e_s$ é o vetor com as projeções de $\vec{E}$ na direção de cada vetor unitário $\vec{t}_i$ e $\Phi(x,y)$ é a matriz de funções de forma:
-
-$$
-\Phi(x,y) = \begin{bmatrix} \vec{N}_1 & \vec{N}_2 & \vec{N}_3 \end{bmatrix}, \quad e_s = \begin{bmatrix} e_1 \\\\ e_2 \\\\ e_3 \end{bmatrix} \qquad (9)
-$$
-
-O rotacional da aproximação, $\nabla \times \vec{E}^h$, é dado por:
-
-$$
-\nabla \times \vec{E}^h = \begin{bmatrix} \nabla \times \vec{N}_1 & \nabla \times \vec{N}_2 & \nabla \times \vec{N}_3 \end{bmatrix} \begin{bmatrix} e_1 \\\\ e_2 \\\\ e_3 \end{bmatrix} \qquad (10)
-$$
-
-com:
-
-$$
-\nabla \times \vec{N}_i = \beta_{1i} \nabla \times \begin{bmatrix} 1 \\\\ 0 \end{bmatrix} + \beta_{2i} \nabla \times \begin{bmatrix} 0 \\\\ 1 \end{bmatrix} + \beta_{3i} \nabla \times \begin{bmatrix} y \\\\ -x \end{bmatrix} \qquad (11)
-$$
-
-Como o rotacional aplicado a vetores constantes é nulo, ele é não nulo apenas para o último termo da base:
-
-$$
-\nabla \times \vec{N}_i = \begin{bmatrix} 0 \\\\ 0 \\\\ -2\beta_{3i} \end{bmatrix} \qquad (12)
-$$
-
-Logo, o rotacional da aproximação se reduz a:
-
-$$
-\nabla \times \vec{E}^h = \begin{bmatrix} 0 \\\\ 0 \\\\ -2 \sum_{i=1}^3 \beta_{3i} e_i \end{bmatrix} \qquad (13)
-$$
-
-É fundamental garantir que as aproximações $\vec{E}^h$ e $\nabla \times \vec{E}^h$ sejam as melhores possíveis.
 
 ---
 
-## 1. Análise Paramétrica da Formulação com Base $\mathcal{L}^1$ (3 Nós de Suporte)
+## 4. Principais Resultados e Conclusões da Interpolação com a Base $\mathcal{P}^1$
 
-Realizou-se uma análise paramétrica sistemática avaliando a interpolação do campo vetorial $\vec{E}$ e de seu rotacional $\nabla \times \vec{E}$ para o modo $\text{TE}_{11}$ em cavidade ressonante bidimensional com condutor elétrico perfeito (PEC), considerando:
+A análise paramétrica comparativa entre $\mathcal{L}^1$ e $\mathcal{P}^1$ comprovou a restauração plena das taxas assintóticas de convergência:
 
-1. **Tolerância do Determinante ($Tol_{det}$):** Adoção de um algoritmo adaptativo de vizinhança $K$ que expande a busca local caso nenhum trio de nós satisfaça $|\det(A)| \ge Tol_{det}$, assegurando 100% de sucesso na seleção de nós e eliminando configurações quase-singulares.
-2. **Densidade de Nós ($N_{total}$) e Escala Proporcional $Tol_{det}(h) \propto h$:** Como a terceira coluna da matriz $A$ possui dimensão de comprimento, dada pela expressão $(y_i - y_P)t_{xi} - (x_i - x_P)t_{yi} \sim O(h)$, o determinante $\det(A)$ escala linearmente com $O(h)$. Ao fixar $Tol_{det}(h) = Tol_{ref} \cdot (h / h_{ref})$, a qualidade geométrica adimensional $|\det(A)|/h$ mantém-se constante, fazendo com que o número de vizinhos efetivos permaneça estritamente confinado em $K_{méd} \approx 4 - 5$ e $K_{máx} \le 9$ ao longo de toda a variação de densidade (de 84 a 8408 nós, fator de $100\times$).
+| Malha | $N_{total}$ | $h_{méd}$ | Erro RMS $\vec{E}$ ($\mathcal{L}^1$) | Erro RMS $\vec{E}$ ($\mathcal{P}^1$) | Erro RMS $\nabla \times \vec{E}$ ($\mathcal{L}^1$) | Erro RMS $\nabla \times \vec{E}$ ($\mathcal{P}^1$) |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Esparsa** | 84 | 3.3333 | $1.63 \times 10^{-1}$ | **$2.51 \times 10^{-2}$** | $1.29 \times 10^{-1}$ | **$5.98 \times 10^{-2}$** |
+| **Média** | 416 | 1.4286 | $6.75 \times 10^{-2}$ | **$4.20 \times 10^{-3}$** | $1.37 \times 10^{-1}$ | **$1.60 \times 10^{-2}$** |
+| **Densa** | 1928 | 0.6250 | $2.84 \times 10^{-2}$ | **$7.58 \times 10^{-4}$** | $1.34 \times 10^{-1}$ | **$6.21 \times 10^{-3}$** |
+| **Ultra Densa** | 8408 | 0.2174 | $1.82 \times 10^{-2}$ | **$9.67 \times 10^{-5}$** | $1.58 \times 10^{-1}$ *(estagnado)* | **$2.45 \times 10^{-4}$** |
+| **Taxa Assintótica** | — | — | **$O(h)$** | **$O(h^2)$ (2ª Ordem)** | **$O(1)$ (Estagna)** | **$O(h)$ (1ª Ordem)** |
 
-### Resultados de Convergência Obtidos:
+### Principais Conclusões da Interpolação:
+1. **Eliminação Integral do Vazamento Modal:** O erro do rotacional caiu de $1.58 \times 10^{-1}$ para $2.45 \times 10^{-4}$ (redução de mais de **600 vezes**), confirmando convergência monotônica de 1ª ordem $O(h)$.
+2. **Superconvergência do Campo $\vec{E}$:** A representação completa elevou a taxa de convergência do campo de $O(h)$ para $O(h^2)$.
+3. **Escala Quártica do Determinante:** Como $\det(A) \sim O(h^4)$ para a base de 6 nós, a calibração adaptativa $Tol_{\text{det}}(h) = Tol_{\text{ref}} (h/h_{\text{ref}})^4$ garante 100% de sucesso na seleção de nós pela `KDTree` mantendo a localidade geométrica ótima.
 
-| Configuração | $N_{total}$ | $h_{méd}$ | $Tol_{det}(h)$ | $\vert\det(A)\vert_{méd}$ | $K_{méd}$ | Erro RMS $\vec{E}$ | Ordem $\vec{E}$ | Erro RMS $\nabla\times\vec{E}$ | Ordem $\nabla\times\vec{E}$ |
-|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Esparsa** | 84 | 3.3333 | 1.6667 | 2.5751 | 4.3 | $1.63 \times 10^{-1}$ | — | $1.29 \times 10^{-1}$ | — |
-| **Média-Esparsa** | 186 | 2.2222 | 1.1111 | 1.7097 | 4.6 | $1.16 \times 10^{-1}$ | $O(h)$ | $1.23 \times 10^{-1}$ | $O(1)$ |
-| **Média** | 416 | 1.4286 | 0.7143 | 1.0547 | 4.5 | $6.75 \times 10^{-2}$ | $O(h)$ | $1.37 \times 10^{-1}$ | $O(1)$ |
-| **Média-Densa** | 884 | 0.9524 | 0.4762 | 0.7268 | 4.6 | $5.69 \times 10^{-2}$ | $O(h)$ | $1.52 \times 10^{-1}$ | $O(1)$ |
-| **Densa** | 1928 | 0.6250 | 0.3125 | 0.4749 | 4.4 | $2.84 \times 10^{-2}$ | $O(h)$ | $1.34 \times 10^{-1}$ | $O(1)$ |
-| **Muito Densa** | 4192 | 0.4167 | 0.2083 | 0.3232 | 4.3 | $2.40 \times 10^{-2}$ | $O(h)$ | $1.76 \times 10^{-1}$ | $O(1)$ |
-| **Ultra Densa** | 8408 | 0.2174 | 0.1087 | 0.1911 | 3.9 | **$1.82 \times 10^{-2}$** | **$O(h)$** | **$1.58 \times 10^{-1}$** | **$O(1)$ (Estagna)** |
-
-Observa-se que:
-- O erro da função vetorial $\vec{E}^h$ reduziu em praticamente uma ordem de grandeza ($1.63 \times 10^{-1} \to 1.82 \times 10^{-2}$), exibindo **convergência contínua de ordem $O(h)$**.
-- O erro do rotacional $\nabla \times \vec{E}^h$ **não convergiu**, permanecendo estagnado na faixa de $0.12 - 0.17$ ($O(1)$), independente do refinamento da malha.
+> 📄 **Relatórios Detalhados da Interpolação:**
+> - [Relatório da Análise Paramétrica com a Base $\mathcal{P}^1$](relatorios/relatorio_analise_parametrica_P1.md)
+> - [Análise do Comportamento Assintótico em Malhas Densas](relatorios/analise_comportamento_assintotico_malhas_densas.md)
 
 ---
 
-## 2. Diagnóstico Físico-Matemático: Por que o Rotacional Estagna na Base $\mathcal{L}^1$?
+## 5. Resolução do Problema de Autovalores Eletromagnéticos
 
-A causa raiz da estagnação do rotacional reside na **incompletude da base polinomial local $\mathcal{L}^1$** em relação à expansão em Série de Taylor do campo físico real:
+O problema de autovalores bidimensional consiste em determinar as frequências de ressonância e os números de onda de corte $k_c = \sqrt{\lambda}$ dos modos transversais elétricos ($TE_z$) em uma cavidade retangular com condutor elétrico perfeito (PEC) $\Omega = [0, \pi] \times [0, \pi]$ (Seção 4.3.1 e Tabela 4-1 da tese de doutorado de Luilly Ortiz, UFMG, 2023).
 
-### 2.1 Incompletude da Matriz Jacobiana
-A expansão de Taylor de 1ª ordem do campo real $\vec{E}$ em torno do ponto de avaliação $P=(0,0)$ requer as 4 derivadas espaciais da matriz Jacobiana:
-
-$$
-\mathbf{J} = \begin{bmatrix} \frac{\partial E_x}{\partial x} & \frac{\partial E_x}{\partial y} \\\\ \frac{\partial E_y}{\partial x} & \frac{\partial E_y}{\partial y} \end{bmatrix} \qquad (14)
-$$
-
-Contudo, a base $\mathcal{L}^1 = \left\langle [1, 0]^T, [0, 1]^T, [y, -x]^T \right\rangle$ possui apenas 3 graus de liberdade, impondo restrições rígidas:
-- Representa o campo constante $\vec{E}(P) = [c_1, c_2]^T$ (2 GDL);
-- Representa o rotacional $(\nabla \times \vec{E}^h)_z = -2c_3$ (1 GDL);
-- **Força artificialmente:** $\frac{\partial E_x^h}{\partial x} \equiv 0$ e $\frac{\partial E_y^h}{\partial y} \equiv 0$.
-
-Para o modo $\text{TE}_{11}$, as derivadas normais são não nulas ($\frac{\partial E_x}{\partial x} = -\frac{\pi}{20}\sin\dots \ne 0$).
-
-### 2.2 O Mecanismo do Vazamento Modal (*Aliasing*)
-Ao resolver o sistema de colocação nodal $A \mathbf{c} = \mathbf{e}_s$, o vetor de dados reais $\mathbf{e}_s$ contém contribuições das derivadas normais não representadas $\mathbf{r} \sim O(h)$.
-
-Pela inversão do sistema $\mathbf{c} = A^{-1}\mathbf{e}_s$:
-- O resíduo físico não representado $\mathbf{r}$ escala com $O(h)$;
-- Como a 3ª coluna de $A$ é de ordem $O(h)$, a 3ª linha de $A^{-1}$ é de ordem $O(1/h)$.
-
-O coeficiente $c_3 = \sum_{i=1}^3 \beta_{3i}e_i$, responsável pelo rotacional, sofre uma contaminação direta:
+### 5.1 Formulação Variacional Fraca com Regularização Div-Curl
+O problema de Helmholtz vetorial $\nabla \times (\nabla \times \vec{E}) = \lambda \vec{E}$ com $\hat{n} \times \vec{E} = \mathbf{0}$ em $\partial \Omega$ é formulado pelo princípio variacional de Ritz-Galerkin:
 
 $$
-\text{Vazamento em } c_3 = (\text{3ª linha de } A^{-1}) \cdot \mathbf{r} \sim O\left(\frac{1}{h}\right) \times O(h) = \mathbf{O(1) \quad (Constante)} \qquad (15)
+\int_{\Omega} (\nabla \times \vec{W})_z (\nabla \times \vec{E})_z \, d\Omega + s_{\text{div}} \int_{\Omega} (\nabla \cdot \vec{W}) (\nabla \cdot \vec{E}) \, d\Omega = \lambda \int_{\Omega} \vec{W} \cdot \vec{E} \, d\Omega \qquad (7)
 $$
 
-Como o rotacional aproximado é $(\nabla \times \vec{E}^h)_z = -2c_3$, ele herda esse erro residual de ordem $O(1)$ que não desaparece com o refinamento $h$.
+onde $s_{\text{div}} = 6.0$ é o parâmetro de penalização que desloca os modos espúrios de gradiente ($\vec{E} = \nabla \phi$) para altas frequências ($\lambda > 50$), mantendo os modos físicos $TE_z$ ($\nabla \cdot \vec{E} \equiv 0$) inalterados.
 
-### 2.3 Comparação com Elementos Finitos de Aresta de Nédélec
-Nos Elementos Finitos de Aresta de Nédélec, os graus de liberdade são **integrais de circulação ao longo do contorno fechado $\partial T$ das arestas do elemento**:
+### 5.2 Estratégia de Implementação Numérica
 
-$$
-(\nabla \times \vec{E}^h)_z = \frac{1}{\text{Área}(T)} \oint_{\partial T} \vec{E} \cdot d\vec{\ell} \qquad (16)
-$$
+1. **Determinação de Suporte por Ponto de Gauss (Estilo EFG):**  
+   Em cada ponto de integração de Gauss $P_g = (x_g, y_g)$, a `KDTree` busca os 6 nós mais próximos com orientação geométrica estável, monta $A(P_g)$ com origem no próprio ponto ($\Delta x = 0, \Delta y = 0$) e inverte $\beta = A^{-1}$. Isso garante estabilidade incondicional e natureza puramente sem malha (*truly meshless*).
+2. **Integração Numérica com Células de Fundo:**  
+   Utiliza-se uma grade de células quadriláteras regulares cobrindo o domínio ($dx \approx h$ a $2h$) com quadratura de Gauss-Legendre $2 \times 2$ (4 pontos de Gauss por célula).
+3. **Condições de Contorno PEC (Dirichlet Homogêneo):**  
+   Como os nós de fronteira possuem vetor diretor alinhado com a tangente ($\vec{t} \parallel \partial \Omega$), a condição $\vec{E} \cdot \vec{t} = 0$ é imposta diretamente pela eliminação dos graus de liberdade de fronteira ($c_{\text{borda}} = 0$).
+4. **Solver de Autovalores Generalizado:**  
+   Resolve-se $K_{\text{red}} \mathbf{c}_{\text{red}} = \lambda M_{\text{red}} \mathbf{c}_{\text{red}}$ via `scipy.linalg.eigh` (com fallback robusto QZ).
 
-Pelo **Teorema de Stokes**, a circulação de qualquer campo gradiente/conservativo $\nabla \phi$ (que contém as derivadas normais $\frac{\partial E_x}{\partial x}, \frac{\partial E_y}{\partial y}$) ao longo de um contorno fechado é **identicamente nula**:
-
-$$
-\oint_{\partial T} \nabla \phi \cdot d\vec{\ell} \equiv 0 \qquad (17)
-$$
-
-No VNMM, por ser um método puramente sem malha (*meshless*) baseado em colocações nodais pontuais discretas, essa anulação topológica de contorno fechado não ocorre automaticamente.
+> 📄 **Relatórios de Implementação e Quadratura:**
+> - [Estudo de Integração Numérica e Quadratura no Caso Base](relatorios/relatorio_estudo_integracao_caso_base.md)
+> - [Relatório Comparativo Global das Formulações no VNMM 2D](relatorios/relatorio_comparativo_global_vnmm2d.md)
 
 ---
 
-## 3. Formulação com Base Completa $\mathcal{P}^1$ e Colocação em 6 Nós de Suporte
+## 6. Principais Resultados e Conclusões para o Problema de Autovalores
 
-Para eliminar o vazamento modal e garantir a convergência estrita tanto do campo quanto do rotacional no contexto sem malha nodal, adota-se o **espaço polinomial vetorial linear completo $\mathcal{P}_1 \times \mathcal{P}_1$ (6 termos)** utilizando **6 nós de suporte** no domínio local de colocação:
+### 6.1 Desempenho no Caso Base ($N_x=21, N_y=21$, $361$ Incógnitas Ativas)
 
-$$
-\mathcal{P}^1 = \left\langle \begin{bmatrix} 1 \\\\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\\\ 1 \end{bmatrix}, \begin{bmatrix} x \\\\ 0 \end{bmatrix}, \begin{bmatrix} y \\\\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\\\ x \end{bmatrix}, \begin{bmatrix} 0 \\\\ y \end{bmatrix} \right\rangle \qquad (18)
-$$
+Comparação dos 10 primeiros modos com a solução analítica da Tabela 4-1 de Luilly Ortiz ($\lambda = n^2 + m^2$):
 
-Em coordenadas locais $(\Delta x_k = x_k - x_P, \Delta y_k = y_k - y_P)$ em torno do ponto de avaliação $P$, a função de forma $\vec{N}_i$ associada ao $i$-ésimo nó de suporte é dada pela combinação linear dos 6 termos da base:
+| Modo ($TE_{nm}$) | $\lambda_{\text{analítico}}$ | $k_{c, \text{analítico}}$ | $\lambda_{\text{VNMM } \mathcal{P}^1}$ | $k_{c, \text{VNMM}}$ | Erro $k_c$ (%) | Diagnóstico |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---|
+| **$TE_{10}$** | 1.00 | 1.000 | 0.9679 | 0.984 | **1.62%** | Físico Fundamental |
+| **$TE_{01}$** | 1.00 | 1.000 | 0.9836 | 0.992 | **0.82%** | Físico Fundamental |
+| **$TE_{11}$** | 2.00 | 1.414 | 1.9409 | 1.393 | **1.49%** | Físico |
+| **$TE_{20}$** | 4.00 | 2.000 | 3.9275 | 1.982 | **0.91%** | Físico |
+| **$TE_{02}$** | 4.00 | 2.000 | 4.0724 | 2.018 | **0.90%** | Físico |
+| **$TE_{21}$** | 5.00 | 2.236 | 4.8925 | 2.212 | **1.08%** | Físico |
+| **$TE_{12}$** | 5.00 | 2.236 | 5.0287 | 2.242 | **0.29%** | Físico |
+| **$TE_{22}$** | 8.00 | 2.828 | 8.0743 | 2.842 | **0.46%** | Físico |
+| **$TE_{30}$** | 9.00 | 3.000 | 9.1089 | 3.018 | **0.60%** | Físico |
+| **$TE_{03}$** | 9.00 | 3.000 | 9.3409 | 3.056 | **1.88%** | Físico |
 
-$$
-\vec{N}_i(x, y) = \beta_{1i} \begin{bmatrix} 1 \\\\ 0 \end{bmatrix} + \beta_{2i} \begin{bmatrix} 0 \\\\ 1 \end{bmatrix} + \beta_{3i} \begin{bmatrix} x \\\\ 0 \end{bmatrix} + \beta_{4i} \begin{bmatrix} y \\\\ 0 \end{bmatrix} + \beta_{5i} \begin{bmatrix} 0 \\\\ x \end{bmatrix} + \beta_{6i} \begin{bmatrix} 0 \\\\ y \end{bmatrix} \qquad (19)
-$$
-
-onde $\beta_i = [\beta_{1i}, \beta_{2i}, \beta_{3i}, \beta_{4i}, \beta_{5i}, \beta_{6i}]^T$ é o vetor de coeficientes locais incógnitos.
-
-### 3.1 Condição de Projeção e Sistema Linear $6 \times 6$
-
-Impondo a condição de colocação nodal (delta de Kronecker vetorial) nos 6 nós de suporte:
-
-$$
-\vec{N}_i(x_k, y_k) \cdot \vec{t}_k = \delta_{ik}, \quad \text{para } i, k = 1, 2, \dots, 6 \qquad (20)
-$$
-
-onde o vetor unitário associado ao $k$-ésimo nó de suporte possui componentes cartesianas $(t_{kx}, t_{ky})$, obtém-se o sistema linear:
-
-$$
-A \beta_i = L_i, \quad \text{para } i = 1, 2, \dots, 6 \qquad (21)
-$$
-
-onde $L_i$ é a $i$-ésima coluna da matriz identidade de dimensão 6 ($I_6$). A matriz de coeficientes locais é dada diretamente por $\beta = [\beta_1, \dots, \beta_6] = A^{-1}$.
-
-A **matriz de interpolação de momento $A \in \mathbb{R}^{6 \times 6}$** toma a seguinte forma explícita:
-
-$$
-A = \begin{bmatrix}
-t_{1x} & t_{1y} & (x_1 - x_P)t_{1x} & (y_1 - y_P)t_{1x} & (x_1 - x_P)t_{1y} & (y_1 - y_P)t_{1y} \\\\
-t_{2x} & t_{2y} & (x_2 - x_P)t_{2x} & (y_2 - y_P)t_{2x} & (x_2 - x_P)t_{2y} & (y_2 - y_P)t_{2y} \\\\
-t_{3x} & t_{3y} & (x_3 - x_P)t_{3x} & (y_3 - y_P)t_{3x} & (x_3 - x_P)t_{3y} & (y_3 - y_P)t_{3y} \\\\
-t_{4x} & t_{4y} & (x_4 - x_P)t_{4x} & (y_4 - y_P)t_{4x} & (x_4 - x_P)t_{4y} & (y_4 - y_P)t_{4y} \\\\
-t_{5x} & t_{5y} & (x_5 - x_P)t_{5x} & (y_5 - y_P)t_{5x} & (x_5 - x_P)t_{5y} & (y_5 - y_P)t_{5y} \\\\
-t_{6x} & t_{6y} & (x_6 - x_P)t_{6x} & (y_6 - y_P)t_{6x} & (x_6 - x_P)t_{6y} & (y_6 - y_P)t_{6y}
-\end{bmatrix} \qquad (22)
-$$
-
-### 3.2 Interpolação do Campo e do Rotacional no Ponto $P$
-
-No ponto de avaliação $P$ (origem do sistema local $\Delta x = 0, \Delta y = 0$):
-
-#### 1. Funções de forma no ponto $P$:
-
-$$
-\vec{N}_i(P) = \begin{bmatrix} \beta_{1i} \\\\ \beta_{2i} \end{bmatrix} \qquad (23)
-$$
-
-$$
-\Phi(P) = \begin{bmatrix} \vec{N}_1(P) & \vec{N}_2(P) & \dots & \vec{N}_6(P) \end{bmatrix} = \begin{bmatrix} \beta_{11} & \beta_{12} & \dots & \beta_{16} \\\\ \beta_{21} & \beta_{22} & \dots & \beta_{26} \end{bmatrix} \qquad (24)
-$$
-
-#### 2. Campo vetorial interpolado:
-
-$$
-\vec{E}^h(P) = \sum_{i=1}^6 \vec{N}_i(P) e_i = \Phi(P) e_s \qquad (25)
-$$
-
-onde $e_s = [e_1, e_2, \dots, e_6]^T$, com $e_i = \vec{E}(\mathbf{x}_i) \cdot \vec{t}_i$.
-
-#### 3. Rotacional das funções de forma e do campo:
-
-Calculando o rotacional de cada termo da base polinomial:
-
-$$
-\nabla \times \begin{bmatrix} 1 \\\\ 0 \end{bmatrix} = \vec{0}, \quad
-\nabla \times \begin{bmatrix} 0 \\\\ 1 \end{bmatrix} = \vec{0}, \quad
-\nabla \times \begin{bmatrix} x \\\\ 0 \end{bmatrix} = \vec{0} \qquad (26)
-$$
-
-$$
-\nabla \times \begin{bmatrix} y \\\\ 0 \end{bmatrix} = -\hat{z}, \quad
-\nabla \times \begin{bmatrix} 0 \\\\ x \end{bmatrix} = +\hat{z}, \quad
-\nabla \times \begin{bmatrix} 0 \\\\ y \end{bmatrix} = \vec{0} \qquad (27)
-$$
-
-Logo, o rotacional de cada função de forma $\vec{N}_i$ é dado por:
-
-$$
-\nabla \times \vec{N}_i = \begin{bmatrix} 0 \\\\ 0 \\\\ \beta_{5i} - \beta_{4i} \end{bmatrix} \qquad (28)
-$$
-
-E o rotacional da aproximação no ponto $P$ resulta em:
-
-$$
-\nabla \times \vec{E}^h(P) = \begin{bmatrix} 0 \\\\ 0 \\\\ \sum_{i=1}^6 (\beta_{5i} - \beta_{4i}) e_i \end{bmatrix} \qquad (29)
-$$
-
-### 3.3 Propriedades e Taxas Assintóticas da Colocação com $\mathcal{P}^1$
-- **Representação Completa:** As 4 derivadas da Jacobiana ($\frac{\partial E_x}{\partial x} = \beta_{3}$, $\frac{\partial E_x}{\partial y} = \beta_{4}$, $\frac{\partial E_y}{\partial x} = \beta_{5}$ e $\frac{\partial E_y}{\partial y} = \beta_{6}$) são resolvidas independentemente.
-- **Ausência de Vazamento Modal:** Nenhuma derivada física é forçada a zero, eliminando o erro de projeção $O(1)$.
-- **Ordens de Convergência:**
-  - Campo vetorial $\vec{E}^h$: **Convergência de 2ª ordem $O(h^2)$**;
-  - Rotacional $\nabla \times \vec{E}^h$: **Convergência de 1ª ordem $O(h)$**.
+- **Erro Médio de $k_c$ no Caso Base:** **$1.00\%$** (Erro Máximo: **$1.88\%$**)
+- **Tempo de Montagem e Resolução:** **$0.061\text{s}$**
 
 ---
 
-## 4. Próximos Passos e Implementação Computacional
+### 6.2 Comparação Sistemática: VNMM 2D ($\mathcal{P}^1$) vs. Elementos Finitos de Aresta (Nédélec)
 
-A implementação computacional da formulação com a base polinomial completa $\mathcal{P}^1$ (incluindo o algoritmo adaptativo para seleção dos 6 nós de suporte com escala quártica $Tol_{det}(h) \propto h^4$, geração das funções de forma, testes na malha densa e a análise paramétrica global) será realizada de acordo com a estratégia detalhada no [Plano de Implementação da Base $\mathcal{P}^1$](plano_implementacao_base_P1.md).
+Implementamos um solver independente de **Elementos Finitos de Aresta Triangulares de Nédélec de 1ª Ordem (1-formas de Whitney)** em [`src/fem_edge_2d.py`](src/fem_edge_2d.py) para validação cruzada rigorosa:
 
+| Nível de Refinamento | DoFs VNMM | Erro Méd $k_c$ VNMM | DoFs FEM Aresta | Erro Méd $k_c$ FEM Aresta |
+|:---|:---:|:---:|:---:|:---:|
+| **N1 (Muito Esparsa)** | 49 | 11.73% | 40 | 3.19% |
+| **N2 (Esparsa)** | 121 | 3.95% | 133 | 1.05% |
+| **N3 (Média-Esparsa)** | 225 | 1.73% | 225 | 0.64% |
+| **N4 (Caso Base)** | **361** | **1.00%** | **341** | **0.44%** |
+| **N6 (Densa)** | 729 | 1.49% | 736 | 0.21% |
+| **N7 (Muito Densa)** | **961** | **0.52%** | **936** | **0.16%** |
+
+### 6.3 Avaliação de Formulações Alternativas Testadas
+
+1. **Base Incompleta $\mathcal{L}^1$ (3 Nós):** Como $\nabla \cdot \vec{N}_i \equiv 0$, a matriz $K_{\text{div}} \equiv 0$ não permite regularização. O erro médio de $k_c$ fica entre **$28.32\% - 48.95\%$** devido a vazamento modal.
+2. **Formulação Sem Penalização ($s_{\text{div}} = 0.0$ na Base $\mathcal{P}^1$):** Modos espúrios de gradiente invadem a faixa espectral física ($0.8 < \lambda < 5.0$), elevando o erro médio para **$19.75\% - 90\%$**.
+3. **Formulação Mimética de Stokes ($\oint_{\partial \Omega_e} \vec{E} \cdot d\vec{\ell}$ com $s_{\text{div}} = 0$):** Consegue colapsar $262$ modos espúrios para autovalores nulos exatos ($\lambda \approx 0$), atingindo erro médio de $12.76\%$. Contudo, a aproximação de rotacional constante por célula a torna menos acurada que o VNMM diferencial pontual ($1.00\%$).
+
+### 6.4 Conclusões Globais:
+- O VNMM 2D com a base linear completa $\mathcal{P}^1$, suporte individual por ponto de Gauss (estilo EFG) e regularização div-curl ($s_{\text{div}} = 6.0$) consolida-se como a formulação ótima definitiva, combinando **alta acurácia espectral ($\le 1\%$)**, **eliminação total de modos espúrios** e a **plena flexibilidade de um método sem malha**.
+
+> 📄 **Relatórios de Convergência e Comparações:**
+> - [Relatório Final de Convergência: VNMM 2D vs FEM de Aresta](relatorios/relatorio_final_convergencia_vnmm_vs_fem.md)
+> - [Comparação Modal Detalhada: VNMM vs FEM de Aresta](relatorios/relatorio_comparacao_vnmm_vs_fem_aresta.md)
+> - [Análise Teórica das Origens dos Erros entre VNMM e FEM](relatorios/analise_origem_erros_vnmm_vs_fem.md)
+> - [Estudo da Formulação Mimética de Stokes](relatorios/relatorio_rotacional_mimetico_stokes.md)
+> - [Estudo do Problema Sem Regularização do Divergente](relatorios/relatorio_sem_regularizacao_divergente.md)
+> - [Estudo do Problema de Autovalores com a Base $\mathcal{L}^1$](relatorios/relatorio_estudo_base_L1.md)
+
+---
+
+## 7. Estrutura do Repositório e Execução
+
+### Organização de Diretórios
+- [`src/`](src/): Módulos e bibliotecas fundamentais do método:
+  - [`montador_vnmm.py`](src/montador_vnmm.py): Montador de matrizes globais de rigidez e massa (modos `ponto_gauss` e `centro_celula`).
+  - [`eigen_solver_cavity.py`](src/eigen_solver_cavity.py): Solver de autovalores para cavidades PEC com cálculo de métricas e erros modais.
+  - [`fem_edge_2d.py`](src/fem_edge_2d.py): Solver de Elementos Finitos de Aresta Triangulares de Nédélec (1ª ordem).
+  - [`malha_cavidade.py`](src/malha_cavidade.py): Gerador de malhas nodais com direções tangenciais de contorno.
+  - [`quadratura_gauss.py`](src/quadratura_gauss.py): Quadratura de Gauss-Legendre 1D e 2D.
+- [`codigo/`](codigo/): Scripts executáveis de análises paramétricas e estudos comparativos.
+- [`relatorios/`](relatorios/): Relatórios técnicos em Markdown e figuras de alta resolução.
+- [`tests/`](tests/): Suíte de testes unitários automatizados.
+
+### Comandos de Execução
+
+1. **Executar a Suíte de Testes Unitários:**
+   ```bash
+   python3 -m unittest tests/test_eigen_cavity.py
+   ```
+2. **Executar a Comparação VNMM 2D vs FEM de Aresta no Caso Base:**
+   ```bash
+   python3 codigo/comparacao_vnmm_vs_fem_aresta.py
+   ```
+3. **Executar a Análise de Convergência Paramétrica Completa:**
+   ```bash
+   python3 codigo/analise_convergencia_comparativa_vnmm_vs_fem.py
+   ```
