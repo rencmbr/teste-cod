@@ -27,13 +27,13 @@ def executar_analise_convergencia_comparativa():
     
     # Pares de configurações com graus de liberdade (DoFs) estritamente emparelhados
     configuracoes = [
-        {"nivel": "N1 (Muito Esparsa)", "Nx": 9,  "Nc": 4,  "Nex": 4},
-        {"nivel": "N2 (Esparsa)",       "Nx": 13, "Nc": 6,  "Nex": 7},
-        {"nivel": "N3 (Média-Esparsa)", "Nx": 17, "Nc": 8,  "Nex": 9},
-        {"nivel": "N4 (Caso Base)",     "Nx": 21, "Nc": 10, "Nex": 11},
-        {"nivel": "N5 (Média-Densa)",   "Nx": 25, "Nc": 12, "Nex": 14},
-        {"nivel": "N6 (Densa)",         "Nx": 29, "Nc": 14, "Nex": 16},
-        {"nivel": "N7 (Muito Densa)",   "Nx": 33, "Nc": 16, "Nex": 18},
+        {"nivel": "N1 (Muito Esparsa)", "Nx": 9,  "Nc": 5,  "Nex": 4},
+        {"nivel": "N2 (Esparsa)",       "Nx": 13, "Nc": 8,  "Nex": 7},
+        {"nivel": "N3 (Média-Esparsa)", "Nx": 17, "Nc": 10, "Nex": 9},
+        {"nivel": "N4 (Caso Base)",     "Nx": 21, "Nc": 13, "Nex": 11},
+        {"nivel": "N5 (Média-Densa)",   "Nx": 25, "Nc": 15, "Nex": 14},
+        {"nivel": "N6 (Densa)",         "Nx": 29, "Nc": 17, "Nex": 16},
+        {"nivel": "N7 (Muito Densa)",   "Nx": 33, "Nc": 20, "Nex": 18},
     ]
     
     resultados_vnmm = []
@@ -45,7 +45,7 @@ def executar_analise_convergencia_comparativa():
         Nc = cfg["Nc"]
         Nex = cfg["Nex"]
         
-        # 1. VNMM 2D Base P1 (com escala quártica Tol_det(h) ~ h^4)
+        # 1. VNMM 2D Base P1 (com escala quártica Tol_det(h) ~ h^4 e 3x3 Gauss)
         h_atual = np.pi / (Nx - 1)
         h_ref = np.pi / 20.0 # h do caso base Nx=21
         tol_det_h = 1e-4 * (h_atual / h_ref)**4
@@ -62,7 +62,7 @@ def executar_analise_convergencia_comparativa():
             tipo_interior="alternado", 
             num_autovalores=10, 
             s_div=6.0, 
-            pontos_por_dir=2, 
+            pontos_por_dir=3, 
             tolerancia_det=tol_det_h,
             modo_suporte="ponto_gauss"
         )
