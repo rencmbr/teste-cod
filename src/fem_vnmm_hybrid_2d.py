@@ -225,9 +225,9 @@ def gerar_malha_hibrida_cavidade(
 def montar_matrizes_hibridas_fem_vnmm(
     dados_fem, 
     dados_vnmm, 
-    Ncx_vnmm=8, 
-    Ncy_vnmm=10, 
-    pontos_por_dir=2, 
+    Ncx_vnmm=None, 
+    Ncy_vnmm=None, 
+    pontos_por_dir=3, 
     s_div_vnmm=6.0, 
     mu_r=1.0, 
     epsilon_r=1.0
@@ -276,6 +276,11 @@ def montar_matrizes_hibridas_fem_vnmm(
     Lx = dados_vnmm['Lx']
     Ly = dados_vnmm['Ly']
     
+    if Ncx_vnmm is None:
+        Ncx_vnmm = max(4, int(np.round(0.6 * dados_vnmm['Nx'])))
+    if Ncy_vnmm is None:
+        Ncy_vnmm = max(4, int(np.round(0.6 * dados_vnmm['Ny'])))
+        
     x_edges_vnmm = np.linspace(x_int, Lx, Ncx_vnmm + 1)
     y_edges_vnmm = np.linspace(0.0, Ly, Ncy_vnmm + 1)
     
@@ -413,8 +418,9 @@ def resolver_autovalores_hibrido_fem_vnmm(
     Ney=12, 
     Nx_vnmm=9, 
     Ny_vnmm=13,
-    Ncx_vnmm=8, 
-    Ncy_vnmm=10, 
+    Ncx_vnmm=None, 
+    Ncy_vnmm=None, 
+    pontos_por_dir=3,
     s_div_vnmm=6.0, 
     num_autovalores=10, 
     tol_zero=0.1
@@ -429,7 +435,7 @@ def resolver_autovalores_hibrido_fem_vnmm(
     
     K_glob, M_glob, info_dofs = montar_matrizes_hibridas_fem_vnmm(
         dados_fem, dados_vnmm, Ncx_vnmm=Ncx_vnmm, Ncy_vnmm=Ncy_vnmm,
-        s_div_vnmm=s_div_vnmm
+        pontos_por_dir=pontos_por_dir, s_div_vnmm=s_div_vnmm
     )
     
     K_dense = K_glob.toarray()

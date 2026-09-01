@@ -12,7 +12,7 @@ Este relatório documenta a implementação e os resultados numéricos do solver
   - Arestas Internas FEM: 268
   - Arestas da Interface $\Gamma_{\text{int}}$: 12
   - Nós Internos VNMM: 77
-- **Tempo Total de Execução:** **0.065s**
+- **Tempo Total de Execução:** **0.096s**
 
 ![Malha Híbrida](malha_hibrida_fem_vnmm.png)
 
@@ -22,19 +22,19 @@ Este relatório documenta a implementação e os resultados numéricos do solver
 
 | Modo ($TE_{nm}$) | $\lambda_{\text{analítico}}$ | $k_{c, \text{analítico}}$ | $\lambda_{\text{híbrido}}$ | $k_{c, \text{híbrido}}$ | Erro $k_c$ (%) |
 |:---:|:---:|:---:|:---:|:---:|:---:|
-| $TE_{10}$ |   1.00 |  1.000 |  0.9994 |  1.000 | ** 0.03%** |
-| $TE_{01}$ |   1.00 |  1.000 |  0.9994 |  1.000 | ** 0.03%** |
-| $TE_{11}$ |   2.00 |  1.414 |  2.0816 |  1.443 | ** 2.02%** |
-| $TE_{20}$ |   4.00 |  2.000 |  4.0497 |  2.012 | ** 0.62%** |
-| $TE_{02}$ |   4.00 |  2.000 |  4.0497 |  2.012 | ** 0.62%** |
-| $TE_{21}$ |   5.00 |  2.236 |  5.3875 |  2.321 | ** 3.80%** |
-| $TE_{12}$ |   5.00 |  2.236 |  5.3875 |  2.321 | ** 3.80%** |
-| $TE_{22}$ |   8.00 |  2.828 |  8.6341 |  2.938 | ** 3.89%** |
-| $TE_{30}$ |   9.00 |  3.000 |  9.0976 |  3.016 | ** 0.54%** |
-| $TE_{03}$ |   9.00 |  3.000 |  9.0976 |  3.016 | ** 0.54%** |
+| $TE_{10}$ |   1.00 |  1.000 |  1.0157 |  1.008 | ** 0.78%** |
+| $TE_{01}$ |   1.00 |  1.000 |  1.0157 |  1.008 | ** 0.78%** |
+| $TE_{11}$ |   2.00 |  1.414 |  2.0985 |  1.449 | ** 2.43%** |
+| $TE_{20}$ |   4.00 |  2.000 |  4.3247 |  2.080 | ** 3.98%** |
+| $TE_{02}$ |   4.00 |  2.000 |  4.3247 |  2.080 | ** 3.98%** |
+| $TE_{21}$ |   5.00 |  2.236 |  5.0563 |  2.249 | ** 0.56%** |
+| $TE_{12}$ |   5.00 |  2.236 |  5.0563 |  2.249 | ** 0.56%** |
+| $TE_{22}$ |   8.00 |  2.828 |  9.0760 |  3.013 | ** 6.51%** |
+| $TE_{30}$ |   9.00 |  3.000 |  9.0760 |  3.013 | ** 0.42%** |
+| $TE_{03}$ |   9.00 |  3.000 |  9.0760 |  3.013 | ** 0.42%** |
 
-- **Erro Médio de $k_c$ no Solver Híbrido:** **1.59%**
-- **Erro Máximo de $k_c$ no Solver Híbrido:** **3.89%**
+- **Erro Médio de $k_c$ no Solver Híbrido:** **2.04%**
+- **Erro Máximo de $k_c$ no Solver Híbrido:** **6.51%**
 
 ## 3. Conclusões da Implementação do Acoplamento Direto
 

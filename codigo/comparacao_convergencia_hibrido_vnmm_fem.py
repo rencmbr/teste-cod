@@ -38,12 +38,11 @@ def executar_estudo_convergencia_comparativa():
         h_valores.append(h)
         
         # -------------------------------------------------------------
-        # 1. VNMM 2D Puro (P1, suporte por ponto de Gauss)
+        # 1. VNMM 2D Puro (P1, suporte por ponto de Gauss, 3x3 Gauss, Nc = round(0.6*N))
         # -------------------------------------------------------------
-        Nc_v = max(4, N // 2)
         t0 = time.time()
         res_v = resolver_autovalores_cavidade(
-            Nx=N, Ny=N, Ncx=Nc_v, Ncy=Nc_v, s_div=6.0, num_autovalores=10, modo_suporte="ponto_gauss"
+            Nx=N, Ny=N, s_div=6.0, num_autovalores=10, modo_suporte="ponto_gauss"
         )
         t_v = time.time() - t0
         res_v['tempo'] = t_v
@@ -67,13 +66,11 @@ def executar_estudo_convergencia_comparativa():
         Ney_f = N - 1
         Nx_v = (N + 1) // 2
         Ny_v = N
-        Ncx_vh = max(4, Nx_v - 1)
-        Ncy_vh = max(4, Ny_v - 1)
         
         t0 = time.time()
         res_h = resolver_autovalores_hibrido_fem_vnmm(
             Nex_fem=Nex_f, Ney=Ney_f, Nx_vnmm=Nx_v, Ny_vnmm=Ny_v,
-            Ncx_vnmm=Ncx_vh, Ncy_vnmm=Ncy_vh, s_div_vnmm=6.0, num_autovalores=10
+            s_div_vnmm=6.0, num_autovalores=10
         )
         t_h = time.time() - t0
         res_h['tempo'] = t_h

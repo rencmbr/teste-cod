@@ -153,8 +153,8 @@ onde $s_{\text{div}} = 6.0$ é o parâmetro de penalização que desloca os modo
 
 1. **Determinação de Suporte por Ponto de Gauss (Estilo EFG):**  
    Em cada ponto de integração de Gauss $P_g = (x_g, y_g)$, a `KDTree` busca os 6 nós mais próximos com orientação geométrica estável, monta $A(P_g)$ com origem no próprio ponto ($\Delta x = 0, \Delta y = 0$) e inverte $\beta = A^{-1}$. Isso garante estabilidade incondicional e natureza puramente sem malha (*truly meshless*).
-2. **Integração Numérica com Células de Fundo:**  
-   Utiliza-se uma grade de células quadriláteras regulares cobrindo o domínio ($dx \approx h$ a $2h$) com quadratura de Gauss-Legendre $2 \times 2$ (4 pontos de Gauss por célula).
+2. **Integração Numérica com Células de Fundo e Densidade Adaptativa:**  
+   Utiliza-se uma grade de células quadriláteras regulares com dimensionamento proporcional ao número de nós ($N_c = \max(4, \text{round}(0.6 \times N))$) e quadratura de Gauss-Legendre $3 \times 3$ (9 pontos de Gauss por célula, assegurando $> 2.4$ pontos de integração por grau de liberdade e eliminando qualquer risco de sub-integração ou aliasing espacial).
 3. **Condições de Contorno PEC (Dirichlet Homogêneo):**  
    Como os nós de fronteira possuem vetor diretor alinhado com a tangente ($\vec{t} \parallel \partial \Omega$), a condição $\vec{E} \cdot \vec{t} = 0$ é imposta diretamente pela eliminação dos graus de liberdade de fronteira ($c_{\text{borda}} = 0$).
 4. **Solver de Autovalores Generalizado:**  
@@ -168,6 +168,7 @@ via `scipy.linalg.eigh` (com fallback robusto QZ).
 
 > 📄 **Relatórios de Implementação e Quadratura:**
 > - [Estudo de Integração Numérica e Quadratura no Caso Base](relatorios/relatorio_estudo_integracao_caso_base.md)
+> - [Diagnóstico de Sub-integração e Soluções para Malhas Densas](relatorios/diagnostico_caso_N25_vnmm.md)
 > - [Relatório Comparativo Global das Formulações no VNMM 2D](relatorios/relatorio_comparativo_global_vnmm2d.md)
 
 ---
@@ -180,48 +181,51 @@ Comparação dos 10 primeiros modos com a solução analítica da Tabela 4-1 de 
 
 | Modo ($TE_{nm}$) | $\lambda_{\text{analítico}}$ | $k_{c, \text{analítico}}$ | $\lambda_{\text{VNMM } \mathcal{P}^1}$ | $k_{c, \text{VNMM}}$ | Erro $k_c$ (%) | Diagnóstico |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---|
-| **$TE_{10}$** | 1.00 | 1.000 | 0.9679 | 0.984 | **1.62%** | Físico Fundamental |
-| **$TE_{01}$** | 1.00 | 1.000 | 0.9836 | 0.992 | **0.82%** | Físico Fundamental |
-| **$TE_{11}$** | 2.00 | 1.414 | 1.9409 | 1.393 | **1.49%** | Físico |
-| **$TE_{20}$** | 4.00 | 2.000 | 3.9275 | 1.982 | **0.91%** | Físico |
-| **$TE_{02}$** | 4.00 | 2.000 | 4.0724 | 2.018 | **0.90%** | Físico |
-| **$TE_{21}$** | 5.00 | 2.236 | 4.8925 | 2.212 | **1.08%** | Físico |
-| **$TE_{12}$** | 5.00 | 2.236 | 5.0287 | 2.242 | **0.29%** | Físico |
-| **$TE_{22}$** | 8.00 | 2.828 | 8.0743 | 2.842 | **0.46%** | Físico |
-| **$TE_{30}$** | 9.00 | 3.000 | 9.1089 | 3.018 | **0.60%** | Físico |
-| **$TE_{03}$** | 9.00 | 3.000 | 9.3409 | 3.056 | **1.88%** | Físico |
+| **$TE_{10}$** | 1.00 | 1.000 | 0.9785 | 0.989 | **1.08%** | Físico Fundamental |
+| **$TE_{01}$** | 1.00 | 1.000 | 0.9904 | 0.995 | **0.48%** | Físico Fundamental |
+| **$TE_{11}$** | 2.00 | 1.414 | 1.9723 | 1.404 | **0.70%** | Físico |
+| **$TE_{20}$** | 4.00 | 2.000 | 3.9634 | 1.991 | **0.46%** | Físico |
+| **$TE_{02}$** | 4.00 | 2.000 | 4.0152 | 2.004 | **0.19%** | Físico |
+| **$TE_{21}$** | 5.00 | 2.236 | 4.9650 | 2.228 | **0.35%** | Físico |
+| **$TE_{12}$** | 5.00 | 2.236 | 5.0341 | 2.244 | **0.34%** | Físico |
+| **$TE_{22}$** | 8.00 | 2.828 | 7.9734 | 2.824 | **0.17%** | Físico |
+| **$TE_{30}$** | 9.00 | 3.000 | 9.3872 | 3.064 | **2.13%** | Físico |
+| **$TE_{03}$** | 9.00 | 3.000 | 9.4751 | 3.078 | **2.61%** | Físico |
 
-- **Erro Médio de $k_c$ no Caso Base:** **$1.00\%$** (Erro Máximo: **$1.88\%$**)
-- **Tempo de Montagem e Resolução:** **$0.061\text{s}$**
+- **Erro Médio de $k_c$ no Caso Base:** **$0.85\%$** (Erro Máximo: **$2.61\%$**)
+- **Tempo de Montagem e Resolução:** **$0.128\text{s}$**
 
 ---
 
-### 6.2 Comparação Sistemática: VNMM 2D ($\mathcal{P}^1$) vs. Elementos Finitos de Aresta (Nédélec)
+### 6.2 Comparação Sistemática de Convergência: VNMM 2D vs. Híbrido FEM-VNMM vs. FEM de Aresta
 
-Implementamos um solver independente de **Elementos Finitos de Aresta Triangulares de Nédélec de 1ª Ordem (1-formas de Whitney)** em [`src/fem_edge_2d.py`](src/fem_edge_2d.py) para validação cruzada rigorosa:
-
-| Nível de Refinamento | DoFs VNMM | Erro Méd $k_c$ VNMM | DoFs FEM Aresta | Erro Méd $k_c$ FEM Aresta |
-|:---|:---:|:---:|:---:|:---:|
-| **N1 (Muito Esparsa)** | 49 | 11.73% | 40 | 3.19% |
-| **N2 (Esparsa)** | 121 | 3.95% | 133 | 1.05% |
-| **N3 (Média-Esparsa)** | 225 | 1.73% | 225 | 0.64% |
-| **N4 (Caso Base)** | **361** | **1.00%** | **341** | **0.44%** |
-| **N6 (Densa)** | 729 | 1.49% | 736 | 0.21% |
-| **N7 (Muito Densa)** | **961** | **0.52%** | **936** | **0.16%** |
+| Nível ($N$) | $h$ (m) | DoFs VNMM | Erro Méd $k_c$ VNMM | DoFs Híbrido | Erro Méd $k_c$ Híbrido | DoFs FEM | Erro Méd $k_c$ FEM |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **N1 (Muito Esparsa)** | 0.3927 | 49 | **32.42%** | 113 | **3.74%** | 40 | **3.19%** |
+| **N2 (Esparsa)** | 0.2618 | 121 | **10.82%** | 265 | **2.40%** | 133 | **1.05%** |
+| **N3 (Média-Esparsa)** | 0.1963 | 225 | **5.01%** | 481 | **0.71%** | 225 | **0.64%** |
+| **N4 (Caso Base)** | 0.1571 | **361** | **2.53%** | **761** | **0.53%** | **341** | **0.44%** |
+| **N5 (Média-Densa)** | 0.1309 | 529 | **1.31%** | 1105 | **0.22%** | 560 | **0.27%** |
+| **N6 (Densa)** | 0.1122 | 729 | **0.79%** | 1513 | **0.36%** | 736 | **0.21%** |
+| **N7 (Muito Densa)** | 0.0982 | **961** | **0.50%** | **1985** | **0.26%** | **936** | **0.16%** |
 
 ### 6.3 Avaliação de Formulações Alternativas Testadas
 
 1. **Base Incompleta $\mathcal{L}^1$ (3 Nós):** Como $\nabla \cdot \vec{N}_i \equiv 0$, a matriz de divergência é identicamente nula ($K_{\text{div}} \equiv 0$), não permitindo regularização. O erro médio de $k_c$ fica entre **$28.32\%$ e $48.95\%$** devido a vazamento modal.
 2. **Formulação Sem Penalização ($s_{\text{div}} = 0.0$ na Base $\mathcal{P}^1$):** Modos espúrios de gradiente invadem a faixa espectral física ($0.8 < \lambda < 5.0$), elevando o erro médio para **$19.75\%$ a $90\%$**.
-3. **Formulação Mimética de Stokes ($\oint_{\partial \Omega_e} \vec{E} \cdot d\vec{\ell}$ com $s_{\text{div}} = 0$):** Consegue colapsar $262$ modos espúrios para autovalores nulos exatos ($\lambda \approx 0$), atingindo erro médio de **$12.76\%$**. Contudo, a aproximação de rotacional constante por célula a torna menos acurada que o VNMM diferencial pontual (**$1.00\%$**).
+3. **Formulação Mimética de Stokes ($\oint_{\partial \Omega_e} \vec{E} \cdot d\vec{\ell}$ com $s_{\text{div}} = 0$):** Consegue colapsar $262$ modos espúrios para autovalores nulos exatos ($\lambda \approx 0$), atingindo erro médio de **$12.76\%$**. Contudo, a aproximação de rotacional constante por célula a torna menos acurada que o VNMM diferencial pontual (**$0.85\%$**).
 
 ### 6.4 Conclusões Globais:
-- O VNMM 2D com a base linear completa $\mathcal{P}^1$, suporte individual por ponto de Gauss (estilo EFG) e regularização div-curl ($s_{\text{div}} = 6.0$) consolida-se como a formulação ótima definitiva, combinando **alta acurácia espectral ($\le 1\%$)**, **eliminação total de modos espúrios** e a **plena flexibilidade de um método sem malha**.
+- O VNMM 2D com a base linear completa $\mathcal{P}^1$, suporte individual por ponto de Gauss (estilo EFG), quadratura $3 \times 3$ com $N_c = \text{round}(0.6 N)$ e regularização div-curl ($s_{\text{div}} = 6.0$) consolida-se como a formulação ótima definitiva, combinando **convergência monotônica estrita até $0.50\%$**, **eliminação total de modos espúrios** e a **plena flexibilidade de um método sem malha**.
 
 > 📄 **Relatórios de Convergência e Comparações:**
+> - [Relatório Comparativo de Convergência: Híbrido vs VNMM vs FEM](relatorios/relatorio_convergencia_hibrido_vs_vnmm_vs_fem.md)
+> - [Relatório de Acoplamento Híbrido FEM-VNMM](relatorios/relatorio_acoplamento_hibrido_fem_vnmm.md)
+> - [Estratégias Teóricas de Acoplamento Híbrido](relatorios/estrategias_acoplamento_fem_vnmm.md)
 > - [Relatório Final de Convergência: VNMM 2D vs FEM de Aresta](relatorios/relatorio_final_convergencia_vnmm_vs_fem.md)
 > - [Comparação Modal Detalhada: VNMM vs FEM de Aresta](relatorios/relatorio_comparacao_vnmm_vs_fem_aresta.md)
 > - [Análise Teórica das Origens dos Erros entre VNMM e FEM](relatorios/analise_origem_erros_vnmm_vs_fem.md)
+> - [Diagnóstico de Sub-integração e Soluções para Malhas Densas](relatorios/diagnostico_caso_N25_vnmm.md)
 > - [Estudo da Formulação Mimética de Stokes](relatorios/relatorio_rotacional_mimetico_stokes.md)
 > - [Estudo do Problema Sem Regularização do Divergente](relatorios/relatorio_sem_regularizacao_divergente.md)
 > - [Estudo do Problema de Autovalores com a Base $\mathcal{L}^1$](relatorios/relatorio_estudo_base_L1.md)
@@ -232,9 +236,10 @@ Implementamos um solver independente de **Elementos Finitos de Aresta Triangular
 
 ### Organização de Diretórios
 - [`src/`](src/): Módulos e bibliotecas fundamentais do método:
-  - [`montador_vnmm.py`](src/montador_vnmm.py): Montador de matrizes globais de rigidez e massa (modos `ponto_gauss` e `centro_celula`).
+  - [`montador_vnmm.py`](src/montador_vnmm.py): Montador de matrizes globais de rigidez e massa com quadratura $3 \times 3$ e suporte por ponto de Gauss.
   - [`eigen_solver_cavity.py`](src/eigen_solver_cavity.py): Solver de autovalores para cavidades PEC com cálculo de métricas e erros modais.
   - [`fem_edge_2d.py`](src/fem_edge_2d.py): Solver de Elementos Finitos de Aresta Triangulares de Nédélec (1ª ordem).
+  - [`fem_vnmm_hybrid_2d.py`](src/fem_vnmm_hybrid_2d.py): Solver Híbrido Acoplado FEM de Aresta + VNMM 2D com acoplamento direto conforme.
   - [`malha_cavidade.py`](src/malha_cavidade.py): Gerador de malhas nodais com direções tangenciais de contorno.
   - [`quadratura_gauss.py`](src/quadratura_gauss.py): Quadratura de Gauss-Legendre 1D e 2D.
 - [`codigo/`](codigo/): Scripts executáveis de análises paramétricas e estudos comparativos.
