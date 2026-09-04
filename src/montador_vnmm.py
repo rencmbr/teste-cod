@@ -28,13 +28,15 @@ def montar_matrizes_vnmm_2d(
     tolerancia_det=None, 
     mu_r=1.0, 
     epsilon_r=1.0,
-    s_div=6.0,
+    s_div=4.0,
+    tol_piso=1e-4,
     Ncx=None,
     Ncy=None,
     Lx=np.pi,
     Ly=np.pi,
     pontos_por_dir=3,
-    modo_suporte="ponto_gauss"
+    modo_suporte="ponto_gauss",
+    retornar_detalhes_suporte=False
 ):
     """
     Monta as matrizes globais de rigidez K (com regularização div-curl) e de massa M em formato CSR
@@ -89,7 +91,8 @@ def montar_matrizes_vnmm_2d(
     h_char = max(Lx / max(N_lado - 1, 1), Ly / max(N_lado - 1, 1))
     h_ref = np.pi / 20.0
     if tolerancia_det is None:
-        tolerancia_det = 1e-4 * (h_char / h_ref)**4 if is_P1 else 1e-4 * (h_char / h_ref)
+        tol_base = 1e-4 * (h_char / h_ref)**4 if is_P1 else 1e-4 * (h_char / h_ref)
+        tolerancia_det = max(tol_base, tol_piso) if tol_piso is not None else tol_base
         
     x_edges = np.linspace(0.0, Lx, Ncx + 1)
     y_edges = np.linspace(0.0, Ly, Ncy + 1)
@@ -99,6 +102,9 @@ def montar_matrizes_vnmm_2d(
     rows_Kc, cols_Kc, data_Kc = [], [], []
     rows_Kd, cols_Kd, data_Kd = [], [], []
     rows_M, cols_M, data_M = [], [], []
+    
+    ks_efetivos = []
+    dets = []
     
     for j in range(Ncy):
         y0, y1 = y_edges[j], y_edges[j + 1]
@@ -115,7 +121,7 @@ def montar_matrizes_vnmm_2d(
                 Pc = np.array([xc, yc])
                 # 1. Seleção dos nós de suporte para o centro da célula
                 if is_P1:
-                    nos, det_val, A_mat, _ = nos_suporte_vnmm_2d_6_P1(
+                    nos, det_val, A_mat, k_efetivo = nos_suporte_vnmm_2d_6_P1(
                         P=Pc,
                         nodes_coords=coords,
                         nodes_vectors=vectors,
@@ -130,7 +136,7 @@ def montar_matrizes_vnmm_2d(
                     div_Phi = beta[2, :] + beta[5, :]      # shape (6,)
                     n_supp = 6
                 else:
-                    nos, det_val, A_mat, _ = nos_suporte_vnmm_2d_3_L1(
+                    nos, det_val, A_mat, k_efetivo = nos_suporte_vnmm_2d_3_L1(
                         P=Pc,
                         nodes_coords=coords,
                         nodes_vectors=vectors,
@@ -202,7 +208,7 @@ def montar_matrizes_vnmm_2d(
                         wg = wi * wj * det_J
                         
                         if is_P1:
-                            nos, det_val, A_mat, _ = nos_suporte_vnmm_2d_6_P1(
+                            nos, det_val, A_mat, k_efetivo = nos_suporte_vnmm_2d_6_P1(
                                 P=Pg,
                                 nodes_coords=coords,
                                 nodes_vectors=vectors,
@@ -219,7 +225,7 @@ def montar_matrizes_vnmm_2d(
                             div_Phi = beta[2, :] + beta[5, :]      # shape (6,)
                             n_supp = 6
                         else:
-                            nos, det_val, A_mat, _ = nos_suporte_vnmm_2d_3_L1(
+                            nos, det_val, A_mat, k_efetivo = nos_suporte_vnmm_2d_3_L1(
                                 P=Pg,
                                 nodes_coords=coords,
                                 nodes_vectors=vectors,
@@ -236,6 +242,9 @@ def montar_matrizes_vnmm_2d(
                             div_Phi = np.zeros(3, dtype=float)     # Base L1 é identicamente solenoidal
                             n_supp = 3
                             
+                        ks_efetivos.append(k_efetivo)
+                        dets.append(det_val)
+                        
                         rot_outer = np.outer(rot_Phi, rot_Phi) * (inv_mu * wg)
                         div_outer = np.outer(div_Phi, div_Phi) * (inv_mu * wg)
                         vec_dot = (Phi_g.T @ Phi_g) * (eps * wg)
@@ -275,5 +284,20 @@ def montar_matrizes_vnmm_2d(
     
     K = Kc + s_div * Kd
     
+    if retornar_detalhes_suporte:
+        ks_arr = np.array(ks_efetivos) if ks_efetivos else np.array([0])
+        dets_arr = np.array(dets) if dets else np.array([0.0])
+        stats_suporte = {
+            'k_medio': float(np.mean(ks_arr)),
+            'k_max': int(np.max(ks_arr)),
+            'k_min': int(np.min(ks_arr)),
+            'det_medio': float(np.mean(dets_arr)),
+            'det_min': float(np.min(dets_arr)),
+            'det_max': float(np.max(dets_arr)),
+            'num_pontos_integracao': len(ks_efetivos),
+            'n_supp': 6 if is_P1 else 3
+        }
+        return K, M, stats_suporte
+        
     return K, M
 

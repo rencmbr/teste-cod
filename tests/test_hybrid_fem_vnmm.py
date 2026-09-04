@@ -85,6 +85,24 @@ class TestHybridFemVnmm(unittest.TestCase):
             
         self.assertLess(res['erro_medio_kc_pct'], 4.0)
 
+    def test_hibrido_com_malhas_aleatorias(self):
+        """Valida o funcionamento e acurácia do acoplamento híbrido com malhas e direções aleatórias."""
+        res = resolver_autovalores_hibrido_fem_vnmm(
+            Lx=np.pi, Ly=np.pi, frac_fem=0.5,
+            Nex_fem=6, Ney=10, Nx_vnmm=7, Ny_vnmm=11,
+            Ncx_vnmm=6, Ncy_vnmm=8, s_div_vnmm=6.0,
+            pontos_por_dir=2,
+            tipo_interior_vnmm="aleatorio",
+            jitter_frac_fem=0.25,
+            jitter_frac_vnmm=0.25,
+            num_autovalores=3,
+            seed=42
+        )
+        
+        # Verifica que o erro médio dos 3 primeiros modos permanece contido abaixo de 5%
+        self.assertLess(res['erro_medio_kc_pct'], 5.0)
+        self.assertEqual(len(res['autovalores_numericos']), 3)
+
 
 if __name__ == "__main__":
     unittest.main()

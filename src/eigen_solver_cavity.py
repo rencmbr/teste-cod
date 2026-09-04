@@ -106,9 +106,10 @@ def resolver_autovalores_cavidade(
     jitter_frac=0.0, 
     num_autovalores=10, 
     sigma=0.5,
-    s_div=6.0,
+    s_div=4.0,
     pontos_por_dir=3,
     tolerancia_det=None,
+    tol_piso=1e-4,
     modo_suporte="ponto_gauss",
     seed=42
 ):
@@ -130,7 +131,8 @@ def resolver_autovalores_cavidade(
     h_char = max(Lx / max(Nx - 1, 1), Ly / max(Ny - 1, 1))
     h_ref = np.pi / 20.0
     if tolerancia_det is None:
-        tolerancia_det = 1e-4 * (h_char / h_ref)**4 if base.upper() in ["P1", "6_P1"] else 1e-4 * (h_char / h_ref)
+        tol_base = 1e-4 * (h_char / h_ref)**4 if base.upper() in ["P1", "6_P1"] else 1e-4 * (h_char / h_ref)
+        tolerancia_det = max(tol_base, tol_piso) if tol_piso is not None else tol_base
         
     # 1. Discretização nodal
     coords, vectors, is_boundary = gerar_malha_cavidade(
@@ -144,18 +146,20 @@ def resolver_autovalores_cavidade(
     )
     
     # 2. Montagem das matrizes globais K e M
-    K, M = montar_matrizes_vnmm_2d(
+    K, M, stats_suporte = montar_matrizes_vnmm_2d(
         coords=coords, 
         vectors=vectors, 
         base=base, 
         tolerancia_det=tolerancia_det,
+        tol_piso=tol_piso,
         s_div=s_div,
         Ncx=Ncx,
         Ncy=Ncy,
         Lx=Lx,
         Ly=Ly,
         pontos_por_dir=pontos_por_dir,
-        modo_suporte=modo_suporte
+        modo_suporte=modo_suporte,
+        retornar_detalhes_suporte=True
     )
     
     # 3. Imposição de Dirichlet homogênea (Paredes PEC)
@@ -208,5 +212,14 @@ def resolver_autovalores_cavidade(
         'erro_max_kc_pct': float(np.max(erros_kc_pct)),
         'autovetores': autovetores_globais,
         'K_red': K_red,
-        'M_red': M_red
+        'M_red': M_red,
+        'k_medio': stats_suporte['k_medio'],
+        'k_max': stats_suporte['k_max'],
+        'k_min': stats_suporte['k_min'],
+        'det_medio': stats_suporte['det_medio'],
+        'det_min': stats_suporte['det_min'],
+        'det_max': stats_suporte['det_max'],
+        'num_pontos_integracao': stats_suporte['num_pontos_integracao'],
+        'n_nos_suporte_selecionados': stats_suporte['n_supp'],
+        'stats_suporte': stats_suporte
     }

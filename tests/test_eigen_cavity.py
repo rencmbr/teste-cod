@@ -226,6 +226,18 @@ class TestFEMEdge2D(unittest.TestCase):
         # Erro máximo < 2.0%
         self.assertLess(res['erro_max_kc_pct'], 2.0)
 
+    def test_solver_fem_aresta_malha_aleatoria(self):
+        from src.fem_edge_2d import resolver_autovalores_fem_aresta_2d
+        
+        res = resolver_autovalores_fem_aresta_2d(
+            Nex=12, Ney=12, num_autovalores=10, jitter_frac=0.25, seed=42
+        )
+        
+        self.assertEqual(len(res['autovalores_numericos']), 10)
+        # Mesmo sob malha com jitter de 25%, erro médio de kc < 1.0%
+        self.assertLess(res['erro_medio_kc_pct'], 1.0)
+        self.assertLess(res['erro_max_kc_pct'], 2.5)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

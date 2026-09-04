@@ -6,10 +6,18 @@ from scipy.sparse import coo_matrix, csr_matrix
 from scipy.sparse.linalg import eigs
 
 
-def gerar_malha_triangular_cavidade(Nex=11, Ney=11, Lx=np.pi, Ly=np.pi):
+def gerar_malha_triangular_cavidade(
+    Nex=11, 
+    Ney=11, 
+    Lx=np.pi, 
+    Ly=np.pi, 
+    jitter_frac=0.0, 
+    seed=42
+):
     """
-    Gera uma malha triangular estruturada 2D cobrindo o domínio [0, Lx] x [0, Ly].
+    Gera uma malha triangular 2D cobrindo o domínio [0, Lx] x [0, Ly].
     Cada célula retangular é subdividida em 2 triângulos.
+    Suporta perturbação estocástica controlada (jitter) para os nós internos.
     
     Retorna:
     - nodes: Array numpy (N_nodes, 2) com as coordenadas cartesianas (x, y) de cada vértice.
@@ -19,8 +27,13 @@ def gerar_malha_triangular_cavidade(Nex=11, Ney=11, Lx=np.pi, Ly=np.pi):
     - elem_edge_signs: Array numpy (N_elem, 3) com +1 ou -1 indicando a orientação relativa da aresta no elemento.
     - is_boundary_edge: Array booleano (N_edges,) indicando True para arestas na fronteira PEC.
     """
+    if seed is not None:
+        np.random.seed(seed)
+        
     x_lin = np.linspace(0.0, Lx, Nex + 1)
     y_lin = np.linspace(0.0, Ly, Ney + 1)
+    dx = Lx / Nex
+    dy = Ly / Ney
     
     # 1. Criação dos nós
     nodes_list = []
@@ -28,7 +41,12 @@ def gerar_malha_triangular_cavidade(Nex=11, Ney=11, Lx=np.pi, Ly=np.pi):
     node_id = 0
     for j in range(Ney + 1):
         for i in range(Nex + 1):
-            nodes_list.append([x_lin[i], y_lin[j]])
+            x, y = x_lin[i], y_lin[j]
+            # Aplica perturbação aleatória estocástica (jitter) apenas aos nós estritamente internos
+            if jitter_frac > 0.0 and 0 < i < Nex and 0 < j < Ney:
+                x += np.random.uniform(-jitter_frac * dx, jitter_frac * dx)
+                y += np.random.uniform(-jitter_frac * dy, jitter_frac * dy)
+            nodes_list.append([x, y])
             node_grid[j, i] = node_id
             node_id += 1
     nodes = np.array(nodes_list, dtype=float)
@@ -206,7 +224,9 @@ def resolver_autovalores_fem_aresta_2d(
     mu_r=1.0, 
     epsilon_r=1.0, 
     num_autovalores=10, 
-    tol_zero=1e-3
+    tol_zero=1e-3,
+    jitter_frac=0.0,
+    seed=42
 ):
     """
     Pipeline completo do solver de autovalores com elementos de aresta triangulares 2D (Nédélec 1ª ordem).
@@ -214,7 +234,7 @@ def resolver_autovalores_fem_aresta_2d(
     Retorna dicionário completo com os autovalores, erros percentuais e estatísticas da malha.
     """
     nodes, elements, edges, elem_edges, elem_edge_signs, is_boundary_edge = gerar_malha_triangular_cavidade(
-        Nex=Nex, Ney=Ney, Lx=Lx, Ly=Ly
+        Nex=Nex, Ney=Ney, Lx=Lx, Ly=Ly, jitter_frac=jitter_frac, seed=seed
     )
     
     K_glob, M_glob = montar_matrizes_fem_aresta_2d(
