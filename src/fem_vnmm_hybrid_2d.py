@@ -25,24 +25,33 @@ def gerar_malha_hibrida_cavidade(
     Ney=12, 
     Nx_vnmm=9, 
     Ny_vnmm=13,
-    tipo_interior_vnmm="alternado"
+    tipo_interior_vnmm="alternado",
+    jitter_frac_fem=0.0,
+    jitter_frac_vnmm=0.0,
+    seed=42
 ):
     """
     Gera as malhas particionadas para o acoplamento híbrido FEM-VNMM:
-    - Subdomínio 1 (FEM): [0, x_int] x [0, Ly] com malha triangular estruturada (Nex_fem x Ney células).
+    - Subdomínio 1 (FEM): [0, x_int] x [0, Ly] com malha triangular (Nex_fem x Ney células).
     - Subdomínio 2 (VNMM): [x_int, Lx] x [0, Ly] com nuvem de nós.
       Na interface x = x_int, os nós de contorno do VNMM são posicionados exatamente
       nos pontos médios das Ney arestas verticais da interface FEM, com vetor t = [0, 1]^T.
+    Suporta perturbação estocástica controlada (jitter) para os nós internos de ambos os subdomínios.
     
     Retorna:
     - dados_fem: dicionário com nós, elementos, arestas e mapeamento de interface.
     - dados_vnmm: dicionário com coordenadas dos nós, vetores diretores e índices de contorno/interface.
     """
+    if seed is not None:
+        np.random.seed(seed)
+        
     x_int = frac_fem * Lx
     
     # =========================================================================
     # 1. SUBDOMÍNIO FEM [0, x_int] x [0, Ly]
     # =========================================================================
+    dx_fem = x_int / Nex_fem
+    dy_fem = Ly / Ney
     x_lin_fem = np.linspace(0.0, x_int, Nex_fem + 1)
     y_lin_fem = np.linspace(0.0, Ly, Ney + 1)
     
@@ -51,7 +60,12 @@ def gerar_malha_hibrida_cavidade(
     node_id = 0
     for j in range(Ney + 1):
         for i in range(Nex_fem + 1):
-            nodes_fem.append([x_lin_fem[i], y_lin_fem[j]])
+            x, y = x_lin_fem[i], y_lin_fem[j]
+            # Perturbação estocástica apenas para nós estritamente internos do FEM
+            if jitter_frac_fem > 0.0 and 0 < i < Nex_fem and 0 < j < Ney:
+                x += np.random.uniform(-jitter_frac_fem * dx_fem, jitter_frac_fem * dx_fem)
+                y += np.random.uniform(-jitter_frac_fem * dy_fem, jitter_frac_fem * dy_fem)
+            nodes_fem.append([x, y])
             node_grid_fem[j, i] = node_id
             node_id += 1
     nodes_fem = np.array(nodes_fem, dtype=float)
@@ -168,39 +182,49 @@ def gerar_malha_hibrida_cavidade(
     is_interface_vnmm.append(False)
     
     # 2.3 Nós do interior e fronteiras externas PEC do subdomínio VNMM
+    dx_vnmm = (Lx - x_int) / max(Nx_vnmm - 1, 1)
+    dy_vnmm = Ly / max(Ny_vnmm - 1, 1)
+    
     for i in range(1, Nx_vnmm): # i=0 é a interface, já criada acima
-        x = x_lin_vnmm[i]
+        x_base = x_lin_vnmm[i]
         for j in range(Ny_vnmm):
-            y = y_lin_vnmm[j]
-            vnmm_nid = len(nodes_vnmm)
-            nodes_vnmm.append([x, y])
+            y_base = y_lin_vnmm[j]
             
-            # Fronteira externa PEC direita (x = Lx)
-            if abs(x - Lx) < tol:
-                vectors_vnmm.append([0.0, 1.0]) # Tangente à parede vertical
-                is_pec_vnmm.append(True)
-                is_interface_vnmm.append(False)
-            # Fronteira externa PEC inferior (y = 0)
-            elif abs(y) < tol:
-                vectors_vnmm.append([1.0, 0.0]) # Tangente à parede horizontal
-                is_pec_vnmm.append(True)
-                is_interface_vnmm.append(False)
-            # Fronteira externa PEC superior (y = Ly)
-            elif abs(y - Ly) < tol:
-                vectors_vnmm.append([1.0, 0.0]) # Tangente à parede horizontal
-                is_pec_vnmm.append(True)
-                is_interface_vnmm.append(False)
-            # Nós internos de VNMM
-            else:
-                is_pec_vnmm.append(False)
-                is_interface_vnmm.append(False)
-                if tipo_interior_vnmm == "alternado":
-                    # Alternância 45° e 135°
-                    ang = np.pi / 4.0 if (i + j) % 2 == 0 else 3.0 * np.pi / 4.0
-                    vectors_vnmm.append([np.cos(ang), np.sin(ang)])
+            eh_dir = abs(x_base - Lx) < tol
+            eh_inf = abs(y_base) < tol
+            eh_sup = abs(y_base - Ly) < tol
+            eh_pec = eh_dir or eh_inf or eh_sup
+            
+            if eh_pec:
+                pos = [x_base, y_base]
+                if eh_dir:
+                    vec = [0.0, 1.0] # Parede vertical direita
                 else:
-                    vectors_vnmm.append([1.0 / np.sqrt(2), 1.0 / np.sqrt(2)])
+                    vec = [1.0, 0.0] # Paredes horizontais
+            else:
+                # Nó estritamente interno do VNMM
+                pos_x = x_base
+                pos_y = y_base
+                if jitter_frac_vnmm > 0.0:
+                    pos_x += np.random.uniform(-jitter_frac_vnmm * dx_vnmm, jitter_frac_vnmm * dx_vnmm)
+                    pos_y += np.random.uniform(-jitter_frac_vnmm * dy_vnmm, jitter_frac_vnmm * dy_vnmm)
+                pos = [pos_x, pos_y]
+                
+                if tipo_interior_vnmm == "aleatorio":
+                    theta = np.random.uniform(0.0, 2.0 * np.pi)
+                    vec = [np.cos(theta), np.sin(theta)]
+                elif tipo_interior_vnmm == "alternado":
+                    ang = np.pi / 4.0 if (i + j) % 2 == 0 else 3.0 * np.pi / 4.0
+                    vec = [np.cos(ang), np.sin(ang)]
+                else:
+                    vec = [1.0 / np.sqrt(2), 1.0 / np.sqrt(2)]
                     
+            vnmm_nid = len(nodes_vnmm)
+            nodes_vnmm.append(pos)
+            vectors_vnmm.append(vec)
+            is_pec_vnmm.append(eh_pec)
+            is_interface_vnmm.append(False)
+            
     nodes_vnmm = np.array(nodes_vnmm, dtype=float)
     vectors_vnmm = np.array(vectors_vnmm, dtype=float)
     is_pec_vnmm = np.array(is_pec_vnmm, dtype=bool)
@@ -228,7 +252,9 @@ def montar_matrizes_hibridas_fem_vnmm(
     Ncx_vnmm=None, 
     Ncy_vnmm=None, 
     pontos_por_dir=3, 
-    s_div_vnmm=6.0, 
+    s_div_vnmm=4.0, 
+    tol_piso_vnmm=1e-4,
+    tolerancia_det_vnmm=None,
     mu_r=1.0, 
     epsilon_r=1.0
 ):
@@ -288,7 +314,11 @@ def montar_matrizes_hibridas_fem_vnmm(
     
     h_ref = np.pi / 20.0
     h_vnmm = max((Lx - x_int) / (dados_vnmm['Nx'] - 1), Ly / (dados_vnmm['Ny'] - 1))
-    tol_det_vnmm = 1e-4 * (h_vnmm / h_ref)**4
+    if tolerancia_det_vnmm is None:
+        tol_base = 1e-4 * (h_vnmm / h_ref)**4
+        tol_det_vnmm = max(tol_base, tol_piso_vnmm) if tol_piso_vnmm is not None else tol_base
+    else:
+        tol_det_vnmm = tolerancia_det_vnmm
     
     rows_Kc, cols_Kc, data_Kc = [], [], []
     rows_Kd, cols_Kd, data_Kd = [], [], []
@@ -421,21 +451,30 @@ def resolver_autovalores_hibrido_fem_vnmm(
     Ncx_vnmm=None, 
     Ncy_vnmm=None, 
     pontos_por_dir=3,
-    s_div_vnmm=6.0, 
+    s_div_vnmm=4.0, 
+    tol_piso_vnmm=1e-4,
+    tolerancia_det_vnmm=None,
     num_autovalores=10, 
-    tol_zero=0.1
+    tol_zero=0.1,
+    tipo_interior_vnmm="alternado",
+    jitter_frac_fem=0.0,
+    jitter_frac_vnmm=0.0,
+    seed=42
 ):
     """
     Pipeline completo do solver híbrido acoplado FEM de Aresta + VNMM 2D.
+    Suporta malhas aleatórias tanto no lado FEM quanto no lado VNMM.
     """
     dados_fem, dados_vnmm = gerar_malha_hibrida_cavidade(
         Lx=Lx, Ly=Ly, frac_fem=frac_fem, Nex_fem=Nex_fem, Ney=Ney,
-        Nx_vnmm=Nx_vnmm, Ny_vnmm=Ny_vnmm
+        Nx_vnmm=Nx_vnmm, Ny_vnmm=Ny_vnmm, tipo_interior_vnmm=tipo_interior_vnmm,
+        jitter_frac_fem=jitter_frac_fem, jitter_frac_vnmm=jitter_frac_vnmm, seed=seed
     )
     
     K_glob, M_glob, info_dofs = montar_matrizes_hibridas_fem_vnmm(
         dados_fem, dados_vnmm, Ncx_vnmm=Ncx_vnmm, Ncy_vnmm=Ncy_vnmm,
-        pontos_por_dir=pontos_por_dir, s_div_vnmm=s_div_vnmm
+        pontos_por_dir=pontos_por_dir, s_div_vnmm=s_div_vnmm,
+        tol_piso_vnmm=tol_piso_vnmm, tolerancia_det_vnmm=tolerancia_det_vnmm
     )
     
     K_dense = K_glob.toarray()
@@ -468,8 +507,29 @@ def resolver_autovalores_hibrido_fem_vnmm(
     erros_lambda = np.abs(autovalores_num - ref_vals) / ref_vals * 100.0
     erros_kc = np.abs(kc_num - ref_kc) / ref_kc * 100.0
     
+    # Cálculo de métricas de h_max nos dois subdomínios
+    edges_fem = dados_fem['edges']
+    nodes_fem = dados_fem['nodes']
+    len_fem = [np.linalg.norm(nodes_fem[e[0]] - nodes_fem[e[1]]) for e in edges_fem]
+    h_max_fem = float(np.max(len_fem))
+    
+    from scipy.spatial import Delaunay
+    tri_v = Delaunay(dados_vnmm['coords'])
+    edges_v = set()
+    for s in tri_v.simplices:
+        for i in range(3):
+            edges_v.add(tuple(sorted([s[i], s[(i + 1) % 3]])))
+    len_v = [np.linalg.norm(dados_vnmm['coords'][e[0]] - dados_vnmm['coords'][e[1]]) for e in edges_v]
+    h_max_vnmm = float(np.max(len_v))
+    h_max_global = max(h_max_fem, h_max_vnmm)
+    
     return {
         'info_dofs': info_dofs,
+        'h_max': h_max_global,
+        'h_max_fem': h_max_fem,
+        'h_max_vnmm': h_max_vnmm,
+        'dados_fem': dados_fem,
+        'dados_vnmm': dados_vnmm,
         'autovalores_todos': vals,
         'autovalores_numericos': autovalores_num,
         'autovalores_analiticos': ref_vals,
