@@ -21,7 +21,7 @@ def executar_estudo_convergencia_comparativa():
     print("  Cavidade Ressonante PEC [0, pi]^2 (10 Primeiros Modos TEz - Tabela 4-1 Luilly Ortiz)")
     print("==========================================================================================\n")
     
-    N_list = [9, 13, 17, 21, 25, 29, 33]
+    N_list = [9, 13, 17, 21, 25, 29]
     
     resultados_vnmm = []
     resultados_fem = []
@@ -60,16 +60,17 @@ def executar_estudo_convergencia_comparativa():
         resultados_fem.append(res_f)
         
         # -------------------------------------------------------------
-        # 3. Acoplamento Híbrido FEM-VNMM (50% FEM, 50% VNMM)
+        # 3. Acoplamento Híbrido FEM-VNMM Balanceado (rho_edge,FEM approx rho_node,VNMM)
         # -------------------------------------------------------------
         Nex_f = (N - 1) // 2
         Ney_f = N - 1
-        Nx_v = (N + 1) // 2
-        Ny_v = N
+        Nx_v = int(np.round(np.sqrt(3) * Nex_f)) + 1
+        Ny_v = int(np.round(np.sqrt(3) * Ney_f)) + 1
         
         t0 = time.time()
         res_h = resolver_autovalores_hibrido_fem_vnmm(
             Nex_fem=Nex_f, Ney=Ney_f, Nx_vnmm=Nx_v, Ny_vnmm=Ny_v,
+            Ncx_vnmm=Nx_v-1, Ncy_vnmm=Ny_v-1,
             s_div_vnmm=6.0, num_autovalores=10
         )
         t_h = time.time() - t0
@@ -103,17 +104,22 @@ def gerar_graficos_comparativos(dados, diretorio_saida=DIRETORIO_RELATORIOS):
     err_h = [r['erro_medio_kc_pct'] for r in dados['hibrido']]
     dofs_h = [r['info_dofs']['N_global'] for r in dados['hibrido']]
     
+    area_dom = np.pi**2
+    h_dof_v = np.sqrt(area_dom / np.array(dofs_v))
+    h_dof_f = np.sqrt(area_dom / np.array(dofs_f))
+    h_dof_h = np.sqrt(area_dom / np.array(dofs_h))
+    
     # -------------------------------------------------------------
-    # Gráfico 1: Curva de Convergência Erro kc (%) vs. h (Tamanho da Malha)
+    # Gráfico 1: Curva de Convergência Erro kc (%) vs. h_DoF (Espaçamento Característico)
     # -------------------------------------------------------------
     fig, ax = plt.subplots(figsize=(8.5, 6))
-    ax.loglog(h_vals, err_v, 'o-', color='#1f77b4', linewidth=2.0, markersize=7, label=r"VNMM 2D Puro ($\mathcal{P}^1$)")
-    ax.loglog(h_vals, err_h, 's--', color='#ff7f0e', linewidth=2.2, markersize=8, label="Acoplamento Híbrido (FEM + VNMM)")
-    ax.loglog(h_vals, err_f, '^-.', color='#2ca02c', linewidth=2.0, markersize=7, label="FEM de Aresta Puro (Nédélec 1ª Ordem)")
+    ax.loglog(h_dof_v, err_v, 'o-', color='#1f77b4', linewidth=2.0, markersize=7, label=r"VNMM 2D Puro ($\mathcal{P}^1$)")
+    ax.loglog(h_dof_h, err_h, 's--', color='#ff7f0e', linewidth=2.2, markersize=8, label="Acoplamento Híbrido Balanceado (FEM + VNMM)")
+    ax.loglog(h_dof_f, err_f, '^-.', color='#2ca02c', linewidth=2.0, markersize=7, label="FEM de Aresta Puro (Nédélec 1ª Ordem)")
     
-    ax.set_xlabel(r"Espaçamento Médio da Malha $h = \pi / (N-1)$ [m]", fontsize=11)
+    ax.set_xlabel(r"Espaçamento Característico $h_{\mathrm{DoF}} = \sqrt{|\Omega|/N_{\mathrm{DoF}}}$ [m]", fontsize=11)
     ax.set_ylabel(r"Erro Relativo Médio em $k_c$ (%)", fontsize=11)
-    ax.set_title("Convergência com Refinamento de Malha ($h \to 0$): VNMM vs. Híbrido vs. FEM", fontsize=12, fontweight="bold")
+    ax.set_title("Convergência com Refinamento Característico ($h_{\mathrm{DoF}} \to 0$)", fontsize=12, fontweight="bold")
     ax.grid(True, which="both", linestyle=":", alpha=0.6)
     ax.legend(fontsize=10.5)
     fig.tight_layout()
