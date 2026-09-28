@@ -785,7 +785,15 @@ To obtain a mesh-connectivity-free field approximation, we employ a point-based 
     \item At each Gauss integration point $P_g(x_g, y_g)$, the algorithm queries the global $k$-d tree independently to select an optimal, well-conditioned support sextet $\{P_k, \vec{t}_k\}_{k=1}^6$ satisfying $|\det(\mathbf{A}_{6 \times 6})| \ge \operatorname{Tol}_{\mathrm{det}}(h)$.
     \item Local translated coordinates are anchored directly at the evaluation point ($\Delta x = x_k - x_g = 0$, $\Delta y = y_k - y_g = 0$), ensuring that shape functions $\vec{N}_i(P_g)$ and their derivatives $\nabla \times \vec{N}_i(P_g)$, $\nabla \cdot \vec{N}_i(P_g)$ are evaluated with maximum floating-point precision without Taylor expansion drift.
 \end{enumerate}
-Employing a $3 \times 3$ Gauss-Legendre quadrature rule (9 points per cell) guarantees a high integration-to-DoF ratio ($N_g / N_{\mathrm{DoF}} \ge 2.0$), preventing spatial sub-integration and mesh aliasing \cite{dolbow1999numerical, liu2009mesh}.
+Employing a $3 \times 3$ Gauss-Legendre quadrature rule (9 points per cell) ensures an adequate integration-to-DoF ratio ($N_g / N_{\mathrm{DoF}} \ge 2.0$), preventing spatial sub-integration and mesh aliasing \cite{dolbow1999numerical, liu2009mesh}.
+
+\paragraph{Classification as a Meshless Formulation}
+In classical meshfree literature \cite{belytschko1994element, atluri2002meshless, liu2009mesh}, a distinction is drawn between methods that construct approximations free of mesh connectivity (such as EFG, PIM, and the present VNMM) and methods that evaluate weak integrals without background cells (such as nodal integration or MLPG). In the present VNMM formulation:
+\begin{itemize}
+    \item The field approximation and shape functions $\vec{N}_i(\mathbf{x})$ are strictly meshless and connectivity-free: no triangulation, polygonization, or element topological data structures are created or maintained between approximation nodes.
+    \item Background quadrilateral cells serve solely as a geometric scaffolding for evaluating numerical integrals via Gauss-Legendre quadrature, exactly as in standard Element-Free Galerkin (EFG) schemes \cite{belytschko1994element, parreira2006efficient}.
+    \item The background integration grid does not define or constrain the interpolation topology; support selection at any point is governed exclusively by $k$-d tree spatial proximity and algebraic determinant qualification.
+\end{itemize}
 
 \subsection{Algebraic Discretization and Generalized Eigenvalue System}
 \label{subsec:algebraic_system}
