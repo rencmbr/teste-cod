@@ -93,7 +93,7 @@
 %% \fntext[label3]{}
 
 % --- TÍTULO DO ARTIGO ---
-\title{Vector Nodal Meshless Method (VNMM) for Electromagnetic Problems: Support Stabilization, Complete Bases, and Conforming Hybrid EFEM Coupling}
+\title{The Vector Nodal Meshless Method (VNMM 2D): Mathematical Incompleteness of the Solenoidal Basis, Complete Polynomial Stabilization, and Spurious-Free Resonant Cavity Analysis}
 
 
 %% use optional labels to link authors explicitly to addresses:
@@ -129,17 +129,15 @@
 
 %% Abstract
 \begin{abstract}
-The Vector Nodal Meshless Method (VNMM) provides an attractive meshfree alternative to the Edge Finite Element Method (EFEM) by defining vector approximations within $H(\mathrm{curl})$ Sobolev spaces through point-collocated nodes assigned unit vector directors. However, conventional formulations based on Nédélec's incomplete solenoidal polynomial space ($\mathcal{L}^1$) suffer from a severe mathematical limitation when operating on arbitrary point clouds: numerical approximation of the curl operator $(\nabla \times \vec{E})$ fails to converge, stagnating at an irreducible $\mathcal{O}(1)$ relative error plateau. 
+The Vector Nodal Meshless Method (VNMM) provides an attractive meshfree alternative to the Edge Finite Element Method (EFEM) by defining vector approximations directly within $H(\mathrm{curl})$ Sobolev spaces through point-collocated nodes assigned unit vector directors. However, conventional formulations based on N\'ed\'elec's incomplete solenoidal polynomial space ($\mathcal{L}^1$) suffer from a severe mathematical limitation when operating on arbitrary point clouds: numerical approximation of the curl operator $(\nabla \times \vec{E})$ fails to converge, stagnating at an irreducible $\mathcal{O}(1)$ relative error plateau.
 
-This paper presents a stabilized 2D VNMM framework that addresses this limitation and provides a general vector approximation formulation for mesh-independent point distributions. First, we introduce the complete linear polynomial vector space $\mathcal{P}^1 = \mathcal{P}_1 \times \mathcal{P}_1$ ($6$ support nodes per evaluation point), which resolves all four spatial components of the local Taylor Jacobian tensor. This removes the derivative modal aliasing mechanism, breaking the $\mathcal{O}(1)$ stagnation plateau, restoring first-order asymptotic convergence $\mathcal{O}(h^{1})$ for the curl operator, and yielding an observed approximately quadratic convergence rate $\mathcal{O}(h^{2})$ for electric field interpolation in the investigated benchmark.
+This paper presents a stabilized, mathematically rigorous 2D VNMM framework that addresses this limitation and provides a general vector approximation formulation for mesh-independent point distributions. First, we introduce the complete linear polynomial vector space $\mathcal{P}^1 = \mathcal{P}_1 \times \mathcal{P}_1$ ($6$ support nodes per evaluation point), which resolves all four spatial components of the local Taylor Jacobian tensor. This removes the derivative modal aliasing mechanism, breaking the $\mathcal{O}(1)$ stagnation plateau, restoring first-order asymptotic convergence $\mathcal{O}(h^{1})$ for the curl operator, and yielding an observed approximately quadratic convergence rate $\mathcal{O}(h^{2})$ for electric field interpolation.
 
-Second, to ensure algebraic stability across arbitrary node clouds, we develop a 4-phase automated support selection algorithm combining $k$-d tree spatial queries with scale-dependent local placement matrix $\mathbf{A}$ determinant thresholding. Enforcing an absolute tolerance floor provides a unified algebraic criterion for rejecting ill-conditioned local placement configurations, maintaining bounded condition numbers ($\kappa(\mathbf{A}) \le 73$) and restoring monotonic error reduction under a representative $25\%$ stochastic spatial jitter with random unit director orientations.
+Second, to ensure algebraic stability across arbitrary node clouds, we develop a 4-phase automated support selection algorithm combining $k$-d tree spatial queries with scale-dependent placement matrix determinant thresholding. Enforcing an absolute tolerance floor provides a unified algebraic criterion for rejecting ill-conditioned local placement configurations, maintaining bounded condition numbers ($\kappa_2(\mathbf{A}) \le 73$, reaching $\approx 64$ at the optimal threshold) and restoring monotonic error reduction under a representative $25\%$ stochastic spatial jitter with random unit director orientations.
 
 Third, to mitigate non-physical spurious modes caused by discrete gradient nullspace leakage ($\nabla \times (\nabla \phi) \neq \mathbf{0}$ at quadrature points), we implement a Ritz-Galerkin weak formulation with div-curl penalty regularization and point-based Element-Free Galerkin (EFG) Gauss integration. This shifts non-physical gradient states outside the operational frequency window, yielding spurious-free modal pairing for the investigated transverse electric cavity resonances ($TE_z$) with a $1.00\%$ mean wavenumber error across the tested band.
 
-Finally, we establish a conforming master-slave hybrid EFEM-VNMM domain decomposition solver based on the exact dimensional scale transformation. This direct reduction enforces interface tangential continuity without auxiliary Lagrange multipliers, avoiding zero-mass saddle-point indefiniteness, preserving symmetric positive-definite (SPD) system properties under regularized boundary conditions, and preventing spurious infinite eigenvalues ($\lambda = \infty$) in the discrete spectrum.
-
-Crucially, the proposed formulation liberates the VNMM from the topological constraints of prior literature, eliminating the requirement for auxiliary planar subdivisions or Delaunay triangulations and enabling robust electromagnetic analysis on unstructured vector node distributions.
+Finally, we validate the asymptotic convergence of the regularized pure VNMM 2D against canonical Edge FEM over six successive mesh refinement levels. The VNMM achieves a steeper asymptotic convergence rate ($\mathcal{O}(h_{\mathrm{DoF}}^{2.80})$ vs $\mathcal{O}(h_{\mathrm{DoF}}^{1.93})$), rapidly closing the error gap with finite elements as $h \to 0$ without requiring volumetric mesh connectivity. Crucially, the proposed formulation liberates the VNMM from the topological constraints of prior literature, eliminating the requirement for auxiliary planar subdivisions or Delaunay triangulations and enabling robust electromagnetic analysis on unstructured vector node distributions.
 \end{abstract}
 
 %%Graphical abstract
@@ -153,13 +151,13 @@ Crucially, the proposed formulation liberates the VNMM from the topological cons
 \item Breaks the $\mathcal{O}(1)$ curl stagnation, restoring $\mathcal{O}(h)$ asymptotic convergence.
 \item Scale-dependent determinant thresholding stabilizes stencils under 25\% jitter.
 \item Div-curl Ritz-Galerkin penalty shifts spurious gradient modes outside spectrum.
-\item Master-slave hybrid coupling eliminates saddle-point indefiniteness without multipliers.
+\item Asymptotic convergence benchmark against Edge FEM validates mesh-free accuracy.
 \end{highlights}
 
 %% Keywords
 \begin{keyword}
 %% keywords here, in the form: keyword \sep keyword
-Meshless methods \sep Vector Nodal Meshless Method (VNMM) \sep Curl-conforming \sep Conforming hybrid coupling \sep Spurious modes
+Meshless methods \sep Vector Nodal Meshless Method (VNMM) \sep Curl-conforming \sep Spurious modes \sep Resonant cavities \sep Electromagnetics
 %% PACS codes here, in the form: \PACS code \sep code
 
 %% MSC codes here, in the form: \MSC code \sep code
@@ -179,7 +177,7 @@ Meshless methods \sep Vector Nodal Meshless Method (VNMM) \sep Curl-conforming \
 \section{Introduction}
 \label{sec:intro}
 
-This section provides the contextual framework, fundamental motivations, and key scientific challenges that drive the development of advanced meshless methods for computational electromagnetics. First, the historical evolution and practical advantages of meshless paradigms over traditional grid-based methods are outlined. Subsequently, the mathematical bottlenecks of earlier vector meshless formulations---specifically derivative stagnation and support instability---are detailed, highlighting the necessity for the stabilized Vector Nodal Meshless Method (VNMM 2D) and the conforming hybrid coupling strategy proposed in this work.
+This section provides the contextual framework, fundamental motivations, and key scientific challenges that drive the development of advanced meshless methods for computational electromagnetics. First, the historical evolution and practical advantages of meshless paradigms over traditional grid-based methods are outlined. Subsequently, the mathematical bottlenecks of earlier vector meshless formulations---specifically derivative stagnation and support instability---are detailed, highlighting the necessity for the stabilized Vector Nodal Meshless Method (VNMM 2D) proposed in this work.
 
 % ---------------------------------------------------------
 % SUBSECTION 1.1: CONTEXT AND MOTIVATION
@@ -298,7 +296,7 @@ A complete, step-by-step mathematical derivation of this modal aliasing mechanis
 % ---------------------------------------------------------
 \subsection{Scope and Main Contributions of the Paper}
 \label{subsec:scope_contributions}
-This paper presents a stabilized Vector Nodal Meshless Method (VNMM 2D) for robust and accurate vector approximation on arbitrary point clouds without mesh connectivity. By resolving the mathematical origin of modal aliasing, establishing algebraic support qualification, and introducing conforming hybrid domain decomposition, this work delivers five primary contributions to computational electromagnetics:
+This paper presents a stabilized Vector Nodal Meshless Method (VNMM 2D) for robust and accurate vector approximation on arbitrary point clouds without mesh connectivity. By resolving the mathematical origin of modal aliasing, establishing algebraic support qualification, and regularizing the variational system, this work delivers four primary contributions to computational electromagnetics:
 
 \begin{enumerate}
     \item \textbf{Transition to Mesh-Connectivity-Free Support Qualification:} By replacing pre-defined spatial subdivisions with a 4-phase automated support selection algorithm combining $k$-d tree spatial queries with scale-dependent determinant thresholding, the proposed solver automatically identifies well-conditioned support sextets across arbitrary node clouds. As detailed in Section~\ref{sec:conditioning} and evaluated with random spatial jitter in Section~\ref{subsec:stochastic_perturbations}, this removes background mesh connectivity requirements and enables robust operation under unconstrained vector orientations.
@@ -307,13 +305,11 @@ This paper presents a stabilized Vector Nodal Meshless Method (VNMM 2D) for robu
     
     \item \textbf{Elimination of Modal Aliasing via Complete $\mathcal{P}^1$ Vector Basis:} Transitioning from the incomplete 3-term solenoidal space $\mathcal{L}^1$ to the complete linear polynomial vector space $\mathcal{P}^1 = \mathcal{P}_1 \times \mathcal{P}_1$ resolves all four independent spatial components of the local Jacobian tensor $\mathbf{J}^h = \nabla \vec{E}^h$, as formulated in Section~\ref{subsec:complete_P1_basis} following the aliasing diagnosis in Section~\ref{subsec:L1_aliasing_analysis}. As demonstrated numerically in Section~\ref{subsec:arbitrary_meshless_interpolation}, this removes the derivative modal aliasing mechanism, breaking the $\mathcal{O}(1)$ curl stagnation plateau of $\mathcal{L}^1$ and restoring first-order convergence $\mathcal{O}(h^{0.97})$ for the curl operator $(\nabla \times \vec{E}^h)_z$ alongside an observed rate $\mathcal{O}(h^{2.17})$ for the electric field $\vec{E}^h$ ($19.8\times$ precision gain and $25.9\times$ curl error reduction on the finest mesh).
     
-    \item \textbf{Spectral Purification via Div-Curl Regularization:} To suppress non-physical spurious gradient modes caused by discrete nullspace leakage ($\nabla \times (\nabla \phi) \neq \mathbf{0}$ at quadrature points), we implement a Ritz-Galerkin weak formulation regularized by a div-curl penalty term ($s_{\mathrm{div}} = 6.0$). As developed in Section~\ref{sec:variational_formulation} and validated in Section~\ref{subsec:cavity_eigenvalues}, this shifts irrotational gradient states far outside the operational frequency window ($\lambda > 50$), yielding spurious-free spectral pairing across the investigated $TE_z$ bandwidth and restricting the mean cutoff wavenumber error to $1.00\%$.
-    
-    \item \textbf{Conforming Master-Slave Hybrid EFEM-VNMM Coupling:} Developed in Section~\ref{sec:hybrid_coupling}, we establish a conforming domain decomposition strategy connecting Whitney edge finite elements and VNMM midpoint nodes through an exact dimensional scale transformation $c_k = e_k / l_k$. As validated in Section~\ref{subsec:convergence_comparison}, this direct reduction eliminates interface DoFs without auxiliary Lagrange multipliers, avoiding zero-mass saddle-point indefiniteness, preserving symmetric positive-definite (SPD) system properties under regularized boundary conditions, and preventing spurious infinite eigenvalues ($\lambda = \infty$).
+    \item \textbf{Spectral Purification via Div-Curl Regularization and Asymptotic Benchmark:} To suppress non-physical spurious gradient modes caused by discrete nullspace leakage ($\nabla \times (\nabla \phi) \neq \mathbf{0}$ at quadrature points), we implement a Ritz-Galerkin weak formulation regularized by a div-curl penalty term ($s_{\mathrm{div}} = 6.0$). As developed in Section~\ref{sec:variational_formulation} and validated in Sections~\ref{subsec:cavity_eigenvalues}--\ref{subsec:convergence_comparison}, this shifts irrotational gradient states far outside the operational frequency window ($\lambda > 50$), yielding spurious-free spectral pairing across the investigated $TE_z$ bandwidth and demonstrating a steep asymptotic convergence rate of $\mathcal{O}(h_{\mathrm{DoF}}^{2.80})$ that rapidly closes the error gap with canonical Edge FEM.
 \end{enumerate}
 
 
-The remainder of this paper is organized as follows: Section~\ref{sec:formulations} details the 2D VNMM vector shape function construction for $\mathcal{L}^1$ and $\mathcal{P}^1$ spaces and proves the Dual Equivalence Theorem; Section~\ref{sec:conditioning} analyzes local placement matrix singularities and formulates the support selection algorithm; Section~\ref{sec:variational_formulation} presents the div-curl regularized weak form and point-based EFG Gauss quadrature; Section~\ref{sec:hybrid_coupling} develops the conforming master-slave hybrid FEM-VNMM solver; Section~\ref{sec:numerical_results} presents numerical benchmarks and convergence studies; and Section~\ref{sec:conclusion} concludes the paper with future research perspectives.
+The remainder of this paper is organized as follows: Section~\ref{sec:formulations} details the 2D VNMM vector shape function construction for $\mathcal{L}^1$ and $\mathcal{P}^1$ spaces and proves the Dual Equivalence Theorem; Section~\ref{sec:conditioning} analyzes local placement matrix singularities and formulates the support selection algorithm; Section~\ref{sec:variational_formulation} presents the div-curl regularized weak form and point-based EFG Gauss quadrature; Section~\ref{sec:numerical_results} presents numerical benchmarks and convergence studies against canonical Edge FEM; and Section~\ref{sec:conclusion} concludes the paper with future research perspectives.
 
 % --- SEÇÃO 2: FORMULAÇÃO MATEMÁTICA ---
 \section{Mathematical Formulations of the 2D VNMM}
@@ -964,133 +960,15 @@ M_{ij} &= \int_{\Omega} \epsilon_r \, \vec{N}_i \cdot \vec{N}_j \, d\Omega \labe
 Homogeneous PEC boundary conditions ($\hat{n} \times \vec{E} = \mathbf{0}$) are enforced directly by setting $c_k = 0$ for all boundary nodes whose unit directors $\vec{t}_k$ align tangent to $\partial\Omega$ ($\vec{t}_k \parallel \partial\Omega$), reducing the system size to $M_{\mathrm{red}}$ active internal degrees of freedom \cite{ortiz2021nodal, goncalves2025tese}. While the unregularized Maxwell stiffness operator is symmetric positive-semidefinite due to the static gradient nullspace, the inclusion of the divergence penalty ($s_{\mathrm{div}} > 0$) combined with essential PEC boundary constraints renders $\mathbf{K}_{\mathrm{red}}$ strictly positive-definite on the discrete physical subspace, while the mass matrix $\mathbf{M}_{\mathrm{red}}$ is natively positive-definite. This ensures that the discrete generalized eigenvalue problem involves well-behaved, sparse symmetric positive-definite (SPD) reduced matrices, allowing efficient and stable computation of the physical spectrum using Krylov-subspace shift-and-invert Arnoldi methods \cite{saad2011numerical, lehoucq1998arpack}, as implemented via the ARPACK solver in SciPy \cite{virtanen2020scipy}.
 
 % =========================================================
-% SECTION 5: MASTER-SLAVE CONFORMING HYBRID FEM-VNMM COUPLING
-% =========================================================
-\section{Master-Slave Conforming Hybrid FEM-VNMM Coupling}
-\label{sec:hybrid_coupling}
-
-To combine the localized geometric modeling flexibility and exact topological boundary conformity of the lowest-order Edge Finite Element Method (EFEM) \cite{nedelec1980mixed, monk2003finite} with the mesh generation freedom  of the Vector Nodal Meshless Method (VNMM 2D), we establish a master-slave conforming hybrid domain decomposition strategy \cite{tsukerman1992overlapping, elkadmiri2022hybrid}. The computational domain $\Omega \subset \mathbb{R}^2$ is partitioned into two non-overlapping subdomains, $\Omega = \Omega_{\mathrm{FEM}} \cup \Omega_{\mathrm{VNMM}}$, joined along a common continuous interface $\Gamma_{\mathrm{int}} = \overline{\Omega}_{\mathrm{FEM}} \cap \overline{\Omega}_{\mathrm{VNMM}}$.
-
-\subsection{Geometric Interface Alignment and Orientation Matching}
-\label{subsec:geometric_interface}
-
-Geometric conformity across the domain interface $\Gamma_{\mathrm{int}}$ is enforced by placing VNMM interface vector nodes $P_k$ at the exact physical midpoints of the adjacent boundary edges $E_k \subset \Gamma_{\mathrm{int}}$ belonging to the FEM triangular mesh $\Omega_{\mathrm{FEM}}$. Furthermore, the physical unit vector director $\vec{t}_k = [t_{kx}, t_{ky}]^T$ assigned to each VNMM interface node is aligned strictly parallel to the oriented unit tangent vector of the corresponding FEM edge $E_k$:
-\begin{equation}
-\vec{t}_k = \frac{\mathbf{x}_{k,2} - \mathbf{x}_{k,1}}{l_k}
-\label{eq:interface_director_alignment}
-\end{equation}
-where $\mathbf{x}_{k,1}$ and $\mathbf{x}_{k,2}$ denote the ordered end-node coordinates of FEM edge $E_k$, and $l_k = \|\mathbf{x}_{k,2} - \mathbf{x}_{k,1}\|$ is its physical edge length.
-
-\subsection{Nodal-Circulatory Scale Mapping and Transformation Matrix}
-\label{subsec:scale_mapping}
-
-In EFEM, the degree of freedom associated with edge $E_k$ represents the circulation integral $e_{\mathrm{fem}, k} = \int_{E_k} \vec{E} \cdot d\boldsymbol{\ell}$ [Volts] \cite{nedelec1980mixed, monk2003finite}. In the VNMM 2D, the degree of freedom at midpoint node $P_k$ represents the pointwise directional field projection $e_{\mathrm{vnmm}, k} = \vec{E}(P_k) \cdot \vec{t}_k$ [Volts/meter] \cite{ortiz2021nodal, ortiz2023tese}.
-
-By the Dual Equivalence Theorem proved in Section~\ref{subsubsec:formal_proof_dual_whitney}, the directional field projection of a first-order affine vector field along a straight line segment is invariant along its length and equals its mean circulation density. Consequently, the circulatory master DoF $e_{\mathrm{fem}, k}$ relates to the vector nodal slave DoF $e_{\mathrm{vnmm}, k}$ via the exact dimensional scaling transformation:
-\begin{equation}
-e_{\mathrm{fem}, k} = l_k \cdot e_{\mathrm{vnmm}, k} \quad \Longleftrightarrow \quad e_{\mathrm{vnmm}, k} = \frac{e_{\mathrm{fem}, k}}{l_k}
-\label{eq:scale_transformation_entry}
-\end{equation}
-
-Collecting all $N_\gamma$ interface degrees of freedom, we define the linear interface transformation matrix $\mathbf{T} \in \mathbb{R}^{N_\gamma \times N_\gamma}$ as a real diagonal scaling operator with entries $T_{kk} = 1/l_k$. The vector of slave interface nodal projections $\mathbf{e}_{\gamma, \mathrm{vnmm}}$ is thus mapped directly from the master interface circulation vector $\mathbf{e}_{\gamma, \mathrm{fem}}$ as:
-\begin{equation}
-\mathbf{e}_{\gamma, \mathrm{vnmm}} = \mathbf{T} \mathbf{e}_{\gamma, \mathrm{fem}}
-\label{eq:matrix_scale_mapping}
-\end{equation}
-
-
-\subsection{Coupled Global System Assembly and Variational Structure}
-\label{subsec:spd_global_system}
-
-By expressing the interface nodal DoFs $\mathbf{e}_{\gamma, \mathrm{vnmm}}$ in terms of the master interface edge DoFs $\mathbf{e}_{\gamma, \mathrm{fem}}$ via Eq.~\eqref{eq:matrix_scale_mapping}, all interface meshless unknowns are eliminated prior to global assembly without introducing auxiliary Lagrange multipliers or expanding the global system dimension \cite{elkadmiri2022hybrid}.
-
-\subsubsection{Global Unknowns Partitioning}
-The global master vector of unknowns $\mathbf{u}$ is partitioned into three disjoint sets:
-\begin{equation}
-\mathbf{u} = \begin{bmatrix} \mathbf{e}_{\mathrm{fem}, i} \\[4pt] \mathbf{e}_{\gamma, \mathrm{fem}} \\[4pt] \mathbf{e}_{\mathrm{vnmm}, v} \end{bmatrix} \in \mathbb{R}^{(N_{\mathrm{fem}, i} + N_\gamma + N_{\mathrm{vnmm}, v})}
-\label{eq:master_unknowns_vector}
-\end{equation}
-where $\mathbf{e}_{\mathrm{fem}, i} \in \mathbb{R}^{N_{\mathrm{fem}, i}}$ represents internal FEM edge circulations [V], $\mathbf{e}_{\gamma, \mathrm{fem}} \in \mathbb{R}^{N_\gamma}$ represents master interface edge circulations [V], and $\mathbf{e}_{\mathrm{vnmm}, v} \in \mathbb{R}^{N_{\mathrm{vnmm}, v}}$ represents internal VNMM vector nodal projections [V/m].
-
-\subsubsection{Coupled Global Matrix Assembly}
-Applying the Ritz-Galerkin variational formulation across subdomains $\Omega_{\mathrm{fem}}$ and $\Omega_{\mathrm{vnmm}}$ and substituting Eq.~\eqref{eq:matrix_scale_mapping} into the interface bilinear forms yields the coupled global stiffness matrix $\mathbf{K}_{\mathrm{hybrid}}$ and mass matrix $\mathbf{M}_{\mathrm{hybrid}}$:
-\begin{align}
-\mathbf{K}_{\mathrm{hybrid}} &= \begin{bmatrix} 
-\mathbf{K}_{\mathrm{fem}, ii} & \mathbf{K}_{\mathrm{fem}, i\gamma} & \mathbf{0} \\[4pt]
-\mathbf{K}_{\mathrm{fem}, \gamma i} & \mathbf{K}_{\mathrm{fem}, \gamma\gamma} + \mathbf{T}^T \mathbf{K}_{\mathrm{vnmm}, \gamma\gamma} \mathbf{T} & \mathbf{T}^T \mathbf{K}_{\mathrm{vnmm}, \gamma v} \\[4pt]
-\mathbf{0} & \mathbf{K}_{\mathrm{vnmm}, v\gamma} \mathbf{T} & \mathbf{K}_{\mathrm{vnmm}, vv}
-\end{bmatrix} \label{eq:k_hybrid_matrix} \\[6pt]
-\mathbf{M}_{\mathrm{hybrid}} &= \begin{bmatrix} 
-\mathbf{M}_{\mathrm{fem}, ii} & \mathbf{M}_{\mathrm{fem}, i\gamma} & \mathbf{0} \\[4pt]
-\mathbf{M}_{\mathrm{fem}, \gamma i} & \mathbf{M}_{\mathrm{fem}, \gamma\gamma} + \mathbf{T}^T \mathbf{M}_{\mathrm{vnmm}, \gamma\gamma} \mathbf{T} & \mathbf{T}^T \mathbf{M}_{\mathrm{vnmm}, \gamma v} \\[4pt]
-\mathbf{0} & \mathbf{M}_{\mathrm{vnmm}, v\gamma} \mathbf{T} & \mathbf{M}_{\mathrm{vnmm}, vv}
-\end{bmatrix} \label{eq:m_hybrid_matrix}
-\end{align}
-
-In the coupled global system, the bilinear forms defined in Eq.~\eqref{eq:stiffness_matrix_entry} for the stiffness matrix entries and Eq.~\eqref{eq:mass_matrix_entry} for the mass matrix entries apply to both the Edge Finite Element Method ($\Omega_{\mathrm{fem}}$) and the Vector Nodal Meshless Method ($\Omega_{\mathrm{vnmm}}$). Crucially, however, the divergence regularization term $s_{\mathrm{div}} (\nabla \cdot \vec{E}_i)(\nabla \cdot \vec{E}_j)$ present in Eq.~\eqref{eq:stiffness_matrix_entry} is evaluated exclusively within $\Omega_{\mathrm{vnmm}}$. Because Whitney 1-form edge elements in EFEM inherently provide curl-conformity with weakly zero divergence in their kernel, no divergence regularization is applied within $\Omega_{\mathrm{fem}}$ ($s_{\mathrm{div}} = 0$).
-
-\subsubsection{Symmetry, Definiteness, and Spectral Stability}
-The global coupled system possesses three critical algebraic and physical properties:
-\begin{enumerate}
-    \item \textbf{Exact Symmetry:} Because the underlying submatrices in both subdomains are individually symmetric and $\mathbf{T}$ is a real diagonal scaling matrix ($\mathbf{T} = \mathbf{T}^T$), matrix congruence transformations such as $\mathbf{T}^T \mathbf{K}_{\mathrm{vnmm}, \gamma\gamma} \mathbf{T}$ preserve exact global symmetry for both $\mathbf{K}_{\mathrm{hybrid}}$ and $\mathbf{M}_{\mathrm{hybrid}}$.
-    \item \textbf{Definiteness and Elimination of Saddle-Point Indefiniteness:} In contrast to Lagrange multiplier (Mortar) formulations that introduce zero diagonal blocks and indefinite saddle-point blocks of the form $\begin{bmatrix} \mathbf{K} & \mathbf{C}^T \\ \mathbf{C} & \mathbf{0} \end{bmatrix}$, the direct master-slave reduction operates as an algebraic congruence transformation on the coupled system. The global mass matrix $\mathbf{M}_{\mathrm{hybrid}}$ is strictly Symmetric Positive-Definite (SPD). The coupled stiffness matrix $\mathbf{K}_{\mathrm{hybrid}}$ is symmetric positive-semidefinite (SPSD) prior to boundary constraints due to the curl-curl nullspace; upon enforcing essential PEC boundary conditions and applying divergence regularization ($s_{\mathrm{div}} > 0$ within $\Omega_{\mathrm{vnmm}}$), $\mathbf{K}_{\mathrm{hybrid}}$ becomes strictly positive-definite on the discrete physical subspace. This avoids zero-mass singular blocks and ensures that all computed physical eigenvalues remain real and positive.
-    \item \textbf{Spectral Purity:} By preserving tangential field continuity $\vec{E}_{\mathrm{fem}} \cdot \vec{t} = \vec{E}_{\mathrm{vnmm}} \cdot \vec{t}$ continuously along $\Gamma_{\mathrm{int}}$ through edge-tangent collocation, the interface transformation operator suppresses non-physical spurious infinite eigenvalues ($\lambda = \infty$) that traditionally contaminate mixed saddle-point formulations.
-\end{enumerate}
-
-\subsection{Comparative Analysis of Interface Coupling Strategies}
-\label{subsec:coupling_comparison}
-
-To contextualize the proposed master-slave direct coupling strategy within the broader domain decomposition literature \cite{quarteroni1999domain, smith1996domain, toselli2005domain, tsukerman1992overlapping, elkadmiri2022hybrid}, four distinct interface coupling paradigms were evaluated, as summarized in Table~\ref{tab:hybrid_coupling_comparison}:
-
-\begin{table}[!htbp]
-\centering
-\small
-\setlength{\tabcolsep}{6pt}
-\caption{Comparative synthesis of domain interface coupling paradigms for hybrid FEM-Meshless formulations.}
-\label{tab:hybrid_coupling_comparison}
-\begin{tabularx}{\linewidth}{@{}
->{\raggedright\arraybackslash}X
->{\centering\arraybackslash}p{0.13\linewidth}
->{\centering\arraybackslash}p{0.22\linewidth}
->{\centering\arraybackslash}p{0.15\linewidth}
->{\centering\arraybackslash}p{0.10\linewidth}
-@{}}
-\toprule
-\textbf{Coupling Strategy} & 
-\textbf{Interface Mesh} & 
-\textbf{Matrix Structure} & 
-\textbf{Spurious Modes} & 
-\textbf{Complexity} \\
-\midrule
-\textbf{1. Direct Master-Slave (Proposed)} & Conforming & Symmetric / Definite\textsuperscript{*} & None & Low \\
-\textbf{2. Nitsche's Method \cite{nitsche1971uber, fernandez2004imposing}} & Non-conforming & Symmetric / Definite\textsuperscript{*} & None & Medium \\
-\textbf{3. Lagrange Multipliers (Mortar) \cite{brezzi1974existence, bernardi1994mortar, buffa2001mortar}} & Non-conforming & Indefinite (Saddle-Point) & Present ($\lambda=\infty$) & High \\
-\textbf{4. Partition of Unity (Blending) \cite{melenk1996partition, krongauz1996enforcement}} & Overlapping & Symmetric / Definite\textsuperscript{*} & None & Medium \\
-\bottomrule
-\end{tabularx}
-\vspace{2pt}
-\flushleft{\footnotesize{\textsuperscript{*}Symmetric positive-definite on the discrete physical subspace after essential boundary enforcement and div-curl regularization; unregularized curl-curl stiffness is positive-semidefinite.}}
-\end{table}
-
-\begin{itemize}
-    \item \textbf{Direct Master-Slave Coupling (Proposed):} Extending the direct domain decomposition principles of \cite{tsukerman1992overlapping, elkadmiri2022hybrid}, geometric conformity is enforced by placing VNMM interface nodes at the midpoints of adjacent FEM boundary edges. The proposed scaling operator $T_{kk} = 1/l_k$ achieves strict tangential field continuity $\vec{E}_{\mathrm{fem}} \cdot \vec{t} = \vec{E}_{\mathrm{vnmm}} \cdot \vec{t}$ while avoiding saddle-point indefiniteness, preserving symmetric positive-definite properties on the regularized constrained subspace, and maintaining spectral purity with low computational overhead.
-    \item \textbf{Nitsche's Variational Method \cite{nitsche1971uber, fernandez2004imposing}:} Accommodates non-conforming interfaces by adding symmetric boundary flux integrals and a penalty parameter $\gamma / h_{\mathrm{int}}$ to the weak form \cite{hansbo2002unfitted}. While avoiding saddle-point blocks, it requires problem-dependent tuning of $\gamma$ to maintain coercivity and prevent numerical locking \cite{fernandez2004imposing}.
-    \item \textbf{Mortar Lagrange Multipliers \cite{bernardi1994mortar, benbelgacem1999mortar}:} Introduces continuous interface traction unknowns $\boldsymbol{\lambda}(s)$ representing surface magnetic currents \cite{buffa2001mortar}. Although accommodating non-matching grids, it expands the global system with zero diagonal blocks, yielding indefinite saddle-point systems governed by Brezzi's inf-sup condition \cite{brezzi1974existence} and contaminated by spurious infinite eigenvalues ($\lambda = \infty$).
-    \item \textbf{Partition-of-Unity Blending Zones \cite{melenk1996partition, babuska1997partition}:} Employs a smooth ramp function $\alpha(\mathbf{x}) \in [0, 1]$ across an overlapping transition zone $\Omega_{\mathrm{trans}}$ to bridge FEM and meshless approximants \cite{belytschko1995coupled, krongauz1996enforcement}. While avoiding saddle-point indefiniteness, evaluating overlapping integrals increases assembly time and quadrature complexity \cite{krongauz1996enforcement}.
-\end{itemize}
-
-Therefore, the direct master-slave formulation offers a highly favorable compromise between mathematical simplicity, computational efficiency, and spectral accuracy for hybrid electromagnetic analysis.
-
-% =========================================================
-% SECTION 6: NUMERICAL RESULTS AND DISCUSSION
+% SECTION 5: NUMERICAL RESULTS AND DISCUSSION
 % =========================================================
 \section{Numerical Verification and Validation}
 \label{sec:numerical_results}
 
 This section assesses the numerical performance of the proposed Vector Nodal Meshless Method (VNMM 2D). Following established guidelines in computational mechanics and electromagnetics, the numerical campaign is systematically organized into three complementary stages:
 \begin{enumerate}
-    \item \textbf{Numerical Verification (Sections~\ref{subsec:conforming_dual_equivalence}--\ref{subsec:stochastic_perturbations}):} Focused on the mathematical properties of the discretized operators, including exact dual isomorphism against Whitney 1-form finite elements, restoration of asymptotic curl convergence via the complete linear vector basis $\mathcal{P}^1$, and local algebraic placement matrix conditioning under stochastic spatial-directional jitter.
-    \item \textbf{Physical Validation (Sections~\ref{subsec:cavity_eigenvalues}--\ref{subsec:convergence_comparison}):} Focused on practical electromagnetic boundary-value problems, including Transverse Electric ($TE_z$) resonant cavity eigenvalue spectra under div-curl Ritz-Galerkin penalty regularization, and conforming master-slave hybrid EFEM-VNMM domain decomposition.
+    \item \textbf{Numerical Verification (Sections~\ref{subsec:conforming_dual_equivalence}--\ref{subsec:stochastic_perturbations}):} Focused on the mathematical properties of the discretized operators, including exact dual isomorphism against Whitney 1-form finite elements on a single simplex, restoration of asymptotic curl convergence via the complete linear vector basis $\mathcal{P}^1$, and local algebraic placement matrix conditioning under stochastic spatial-directional jitter.
+    \item \textbf{Physical Validation (Sections~\ref{subsec:cavity_eigenvalues}--\ref{subsec:convergence_comparison}):} Focused on practical electromagnetic boundary-value problems, including Transverse Electric ($TE_z$) resonant cavity eigenvalue spectra under div-curl Ritz-Galerkin penalty regularization, and asymptotic convergence benchmarking against canonical Edge FEM across six mesh refinement levels.
     \item \textbf{Limitations and Scope of Applicability (Section~\ref{subsec:limitations_scope}):} Focused on establishing honest methodological boundaries, discussing background quadrature dependencies, extreme point-cloud anisotropy, penalty parameter sensitivity, and high-frequency dispersion.
 \end{enumerate}
 
@@ -1114,7 +992,7 @@ The geometric arrangement of the conforming dual topology is illustrated in Fig.
     \item \textbf{VNMM 2D ($\mathcal{L}^1$):} The meshless vector nodal distribution places vector nodes precisely at the edge midpoints $M_k$, assigning unit directional vectors $\vec{t}_k$ aligned along the triangle edges, yielding pointwise DoFs $e_{\mathrm{vnmm}, k} = \vec{E}(M_k) \cdot \vec{t}_k$ [Volts/meter], as depicted in Fig.~\ref{fig:malha_conforme_vnmm_L1}.
 \end{enumerate}
 
-Following the discrete scaling formulation introduced in Section~\ref{subsec:scale_mapping}, the edge length $L_k$ maps the circulatory DoFs of EFEM to the directional field projections of VNMM 2D ($e_{\mathrm{fem}, k}= L_k e_{\mathrm{vnmm}, k}$).
+Following the discrete scaling relation proven in Section~\ref{subsubsec:formal_proof_dual_whitney} (Eq.~\eqref{eq:dual_equivalence_scaling}), the edge length $L_k$ maps the circulatory DoFs of EFEM to the directional field projections of VNMM 2D ($e_{\mathrm{fem}, k}= L_k e_{\mathrm{vnmm}, k}$).
 
 \begin{figure}[!htbp]
     \centering
@@ -1350,16 +1228,15 @@ $TE_{03}$ & $9.00$ & $3.000$ & $9.3409$ & $3.056$ & $3.79\%$ & $\mathbf{1.88\%}$
 The regularized VNMM 2D achieves a global mean cutoff wavenumber error of $1.00\%$ (with a maximum error of $1.88\%$ for the $TE_{03}$ mode), strictly matching analytical degeneracies ($TE_{10}/TE_{01}$, $TE_{20}/TE_{02}$, $TE_{21}/TE_{12}$, $TE_{30}/TE_{03}$) without spurious mode infiltration. Importantly, parametric sensitivity evaluations confirm that this spectral purification is highly robust across a wide penalty window $s_{\mathrm{div}} \in [4.0, 10.0]$, verifying that the formulation does not require delicate, problem-dependent parameter tuning.
 
 % ---------------------------------------------------------
-% SUBSECTION 6.4: COMPARATIVE CONVERGENCE: VNMM 2D VS. MASTER-SLAVE HYBRID VS. EDGE FEM
+% SUBSECTION 5.5: COMPARATIVE CONVERGENCE: PURE VNMM 2D VS. EDGE FEM
 % ---------------------------------------------------------
-\subsection{Comparative Convergence: Pure VNMM 2D vs. Master-Slave Hybrid vs. Edge FEM}
+\subsection{Comparative Convergence: Pure VNMM 2D vs. Edge FEM}
 \label{subsec:convergence_comparison}
 
-This section presents a comparative benchmark across three distinct numerical formulations for Transverse Electric ($TE_z$) cavity resonance over $\Omega = [0, \pi]^2$:
+To validate the asymptotic convergence of the proposed Vector Nodal Meshless Method against the canonical standard in computational electromagnetics, this section evaluates the resonant frequencies of the Transverse Electric ($TE_z$) cavity across six successive discretization levels over $\Omega = [0, \pi]^2$:
 \begin{enumerate}
     \item \textbf{Pure Edge FEM (Whitney 1-Forms):} Canonical conforming finite element solver on structured triangular meshes \cite{monk2003finite}, associating exactly one tangential circuital degree of freedom with each interior triangle edge ($N_{\mathrm{DoF}} = N_{\mathrm{edges, int}}$).
-    \item \textbf{Balanced Master-Slave Hybrid (FEM-VNMM):} The proposed hybrid partitioning of $\Omega$ into a master finite-element subregion $\Omega_{\mathrm{fem}} = [0, \pi/2] \times [0, \pi]$ and a slave meshless subregion $\Omega_{\mathrm{vnmm}} = [\pi/2, \pi] \times [0, \pi]$, coupled along the internal interface $\Gamma_I$ via non-conforming directional projection. The nodal spacing in $\Omega_{\mathrm{vnmm}}$ is selected to balance edge and nodal densities across the interface.
-    \item \textbf{Pure VNMM 2D ($\mathcal{P}^1$ Complete Basis):} Full meshless point-collocation solver over $\Omega$ using the 6-node linear polynomial basis with director regularization parameter $s_{\mathrm{div}} = 6.0$. Each active internal node supports exactly one scalar component degree of freedom ($N_{\mathrm{DoF}} = (N_v - 2)^2$).
+    \item \textbf{Pure VNMM 2D ($\mathcal{P}^1$ Complete Basis):} Full meshless point-collocation solver over $\Omega$ using the 6-node linear polynomial basis with div-curl regularization parameter $s_{\mathrm{div}} = 6.0$. Each active internal node supports exactly one scalar directional projection degree of freedom ($N_{\mathrm{DoF}} = (N_v - 2)^2$).
 \end{enumerate}
 
 \subsubsection{Resolution Metric and Degree-of-Freedom Equivalence}
@@ -1377,7 +1254,7 @@ To establish a physically and computationally fair benchmark, we define an edge-
     N_v = \operatorname{round}\bigl(\sqrt{3}\,(N - 1)\bigr) + 1.
     \label{eq:edge_equivalent_nv}
 \end{equation}
-Furthermore, to eliminate geometric grid-topology bias across all three methods, convergence is tracked as a function of the characteristic degree-of-freedom spacing:
+Furthermore, to eliminate geometric grid-topology bias across both methods, convergence is tracked as a function of the characteristic degree-of-freedom spacing:
 \begin{equation}
     h_{\mathrm{DoF}} = \sqrt{\frac{|\Omega|}{N_{\mathrm{DoF}}}}.
     \label{eq:h_dof_definition}
@@ -1385,47 +1262,41 @@ Furthermore, to eliminate geometric grid-topology bias across all three methods,
 
 \begin{figure*}[!t]
 \centering
-\includegraphics[width=0.98\textwidth]{figura_convergencia_hibrido_vs_vnmm_vs_fem.pdf}
-\caption{Comparative convergence study across 6 refinement levels ($N \in \{9$, $13$, $17$, $21$, $25$, $29\}$): (a) Mean relative spectral error in cutoff wavenumber $k_c$ (\%) as a function of total active degrees of freedom $N_{\mathrm{DoF}}$; (b) Asymptotic convergence rate as a function of characteristic DoF spacing $h_{\mathrm{DoF}} = \sqrt{|\Omega|/N_{\mathrm{DoF}}}$. Pure Edge FEM converges at $\mathcal{O}(h_{\mathrm{DoF}}^{1.93})$, while Balanced Hybrid and Pure VNMM exhibit asymptotic convergence rates of $\mathcal{O}(h_{\mathrm{DoF}}^{2.52})$ and $\mathcal{O}(h_{\mathrm{DoF}}^{2.80})$, respectively.}
-\label{fig:convergence_hybrid_vnmm_fem}
+\includegraphics[width=0.98\textwidth]{figura_convergencia_vnmm_vs_fem.pdf}
+\caption{Comparative convergence study across 6 refinement levels ($N \in \{9$, $13$, $17$, $21$, $25$, $29\}$): (a) Mean relative spectral error in cutoff wavenumber $k_c$ (\%) as a function of total active degrees of freedom $N_{\mathrm{DoF}}$; (b) Asymptotic convergence rate as a function of characteristic DoF spacing $h_{\mathrm{DoF}} = \sqrt{|\Omega|/N_{\mathrm{DoF}}}$. Pure Edge FEM converges at $\mathcal{O}(h_{\mathrm{DoF}}^{1.93})$, while Pure VNMM exhibits an asymptotic convergence rate of $\mathcal{O}(h_{\mathrm{DoF}}^{2.80})$, demonstrating rapid error reduction without mesh connectivity.}
+\label{fig:convergence_vnmm_fem}
 \end{figure*}
 
 \subsubsection{Convergence and Efficiency Analysis}
-Table~\ref{tab:convergence_6_meshes} and Fig.~\ref{fig:convergence_hybrid_vnmm_fem} report the convergence history across 6 successive mesh levels ($N \in \{9$, $13$, $17$, $21$, $25$, $29\}$).
+Table~\ref{tab:convergence_6_meshes} and Fig.~\ref{fig:convergence_vnmm_fem} report the convergence history across 6 successive mesh levels ($N \in \{9$, $13$, $17$, $21$, $25$, $29\}$).
 
 \begin{table}[!htbp]
 \centering
-\footnotesize
-\setlength{\tabcolsep}{2pt}
-\caption{Comparative convergence of resonant wavenumber $k_c$ for $TE_z$ modes in a 2D PEC cavity over 6 mesh refinement levels.}
+\small
+\caption{Comparative convergence of resonant wavenumber $k_c$ for $TE_z$ modes in a 2D PEC cavity over 6 mesh refinement levels between Edge FEM (Whitney 1st-kind) and Pure VNMM 2D ($\mathcal{P}^1$ complete basis).}
 \label{tab:convergence_6_meshes}
-\begin{tabularx}{\linewidth}{@{} c *{3}{>{\centering\arraybackslash}X >{\centering\arraybackslash}X >{\centering\arraybackslash}X} @{}}
+\begin{tabular}{@{} c *{3}{c} *{3}{c} @{}}
 \toprule
-\textbf{Mesh} & \multicolumn{3}{c}{\textbf{Edge FEM}} & \multicolumn{3}{c}{\textbf{Hybrid FEM-VNMM}} & \multicolumn{3}{c}{\textbf{Pure VNMM 2D}} \\
-\textbf{Level} & \multicolumn{3}{c}{\textbf{(N\'ed\'elec 1st-kind)}} & \multicolumn{3}{c}{\textbf{(Master-Slave)}} & \multicolumn{3}{c}{\textbf{($\mathcal{P}^1$ Complete Base)}} \\
-\cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-10}
-$N$ & $N_{\mathrm{DoF}}$ & $h_{\mathrm{DoF}}$ & Error & $N_{\mathrm{DoF}}$ & $h_{\mathrm{DoF}}$ & Error & $N_{\mathrm{DoF}}$ & $h_{\mathrm{DoF}}$ & Error \\
--- & -- & [m] & (\%) & -- & [m] & (\%) & -- & [m] & (\%) \\
+\textbf{Mesh} & \multicolumn{3}{c}{\textbf{Edge FEM (N\'ed\'elec 1st-kind)}} & \multicolumn{3}{c}{\textbf{Pure VNMM 2D ($\mathcal{P}^1$ Complete Basis)}} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7}
+$N$ & $N_{\mathrm{DoF}}$ & $h_{\mathrm{DoF}}$ [m] & Error (\%) & $N_{\mathrm{DoF}}$ & $h_{\mathrm{DoF}}$ [m] & Error (\%) \\
 \midrule
-9  & 176  & 0.2368 & 0.810 & 170  & 0.2409 & 3.144 & 169  & 0.2417 & 10.233 \\
-13 & 408  & 0.1555 & 0.367 & 390  & 0.1591 & 0.888 & 400  & 0.1571 & 3.667 \\
-17 & 736  & 0.1158 & 0.208 & 727  & 0.1165 & 0.636 & 729  & 0.1164 & 1.645 \\
-21 & 1160 & 0.0922 & 0.133 & 1134 & 0.0933 & 0.359 & 1156 & 0.0924 & 0.839 \\
-25 & 1680 & 0.0766 & 0.093 & 1672 & 0.0768 & 0.173 & 1681 & 0.0766 & 0.493 \\
-29 & 2296 & 0.0656 & 0.068 & 2243 & 0.0663 & 0.101 & 2209 & 0.0668 & 0.259 \\
+9  & 176  & 0.2368 & 0.810 & 169  & 0.2417 & 10.233 \\
+13 & 408  & 0.1555 & 0.367 & 400  & 0.1571 & 3.667 \\
+17 & 736  & 0.1158 & 0.208 & 729  & 0.1164 & 1.645 \\
+21 & 1160 & 0.0922 & 0.133 & 1156 & 0.0924 & 0.839 \\
+25 & 1680 & 0.0766 & 0.093 & 1681 & 0.0766 & 0.493 \\
+29 & 2296 & 0.0656 & 0.068 & 2209 & 0.0668 & 0.259 \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}
 
 Inspection of the benchmark results reveals several noteworthy numerical properties:
 \begin{itemize}
-    \item \textbf{Strict Monotonicity:} With the elimination of the artificial determinant tolerance floor ($\mathrm{Tol}_{\mathrm{floor}}$, Eq.~\eqref{eq:scale_dependent_determinant_floor}), the local collocation determinant scales naturally as $\det(\mathbf{A}) \sim \mathcal{O}(h^4)$, allowing nearest-neighbor stencils to be preserved without unphysical support dilation. Consequently, all three formulations converge strictly monotonically.
-    \item \textbf{Theoretical Error Ordering:} Throughout all 6 refinement levels, the accuracy satisfies the hierarchy:
-    \begin{equation}
-        \mathrm{Error}_{\mathrm{FEM}} < \mathrm{Error}_{\mathrm{Hybrid}} < \mathrm{Error}_{\mathrm{VNMM}}.
-    \end{equation}
-    \item \textbf{Asymptotic Convergence Rate and Pre-asymptotic Spectral Stiffening:} While Edge FEM exhibits the canonical second-order rate ($\mathcal{O}(h_{\mathrm{DoF}}^{1.93})$), the Balanced Hybrid and Pure VNMM solvers exhibit steeper asymptotic slopes of $2.52$ and $2.80$, respectively. This enhanced descent rate reflects the higher polynomial completeness of the local $\mathcal{P}^1$ vector space, coupled with the selective spectral stiffening exerted by the Ritz-Galerkin div-curl penalty on coarser grids, which dissipates as $h \to 0$ and enables the meshless and hybrid formulations to rapidly close the accuracy gap with FEM.
-    \item \textbf{Practical Advantages of the Hybrid Formulation:} While pure Edge FEM delivers slightly lower errors for an identical DoF count on simple regular geometries ($0.068\%$ vs $0.101\%$ on the finest mesh), the Balanced Master-Slave Hybrid formulation offers distinct practical advantages for complex engineering problems. By confining the finite element triangulation strictly to boundary-conforming layers where tangential PEC conditions require high circulatory fidelity, the hybrid approach allows the interior domain $\Omega_{\mathrm{vnmm}}$ to be discretized via unconstrained meshless point clouds. This substantially mitigates the computational bottleneck and quality degradation of volumetric mesh generation in moving-part, multi-scale, or topologically evolving electromagnetic devices without sacrificing interface flux continuity.
+    \item \textbf{Strict Monotonicity:} With the elimination of the artificial determinant tolerance floor ($\mathrm{Tol}_{\mathrm{floor}}$, Eq.~\eqref{eq:scale_dependent_determinant_floor}) on regular grids, the local collocation determinant scales naturally as $\det(\mathbf{A}) \sim \mathcal{O}(h^4)$, allowing nearest-neighbor stencils to be preserved without unphysical support dilation. Consequently, both formulations converge strictly monotonically.
+    \item \textbf{Theoretical Error Hierarchy:} Throughout all 6 refinement levels, Edge FEM delivers lower absolute errors on coarser grids ($0.81\%$ vs $10.23\%$ at $N=9$) due to exact closed-contour circulation cancellation via Stokes' theorem along element boundaries \cite{nedelec1980mixed, monk2003finite}.
+    \item \textbf{Asymptotic Convergence Rate and Gap Reduction:} While Edge FEM exhibits the canonical second-order rate ($\mathcal{O}(h_{\mathrm{DoF}}^{1.93})$), the Pure VNMM solver exhibits a significantly steeper asymptotic slope of $\mathcal{O}(h_{\mathrm{DoF}}^{2.80})$. This enhanced descent rate reflects the higher polynomial completeness of the local $\mathcal{P}^1$ vector space, coupled with the selective spectral stiffening exerted by the Ritz-Galerkin div-curl penalty on coarser grids, which dissipates as $h \to 0$ and enables the meshless formulation to rapidly close the accuracy gap with FEM, reaching $0.259\%$ error on the finest grid.
+    \item \textbf{Mesh-Free Discretization Advantage:} While pure Edge FEM delivers slightly lower errors for an identical DoF count on simple regular geometries, the VNMM formulation operates entirely without triangular mesh generation. This eliminates mesh quality degradation, element inversion, and remeshing bottlenecks in geometrically complex or topologically evolving electromagnetic domains.
 \end{itemize}
 
 It is important to emphasize the methodological synergy between the support selection strategies: while the absolute tolerance floor ($\mathrm{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$) is indispensable to protect stencils against pathological degeneracies in stochastically perturbed or unconstrained point clouds (Section~\ref{subsec:stochastic_perturbations}), smooth asymptotic refinement on regular grids benefits from allowing the determinant to scale naturally as $\mathcal{O}(h^4)$ to maintain compact nearest-neighbor supports. Combined with the div-curl penalty regularization ($s_{\mathrm{div}} = 6.0$) established in Section~\ref{subsec:cavity_eigenvalues}, the global stiffness matrix $\mathbf{K}$ remains strictly well-conditioned and free of spurious spectral modes across both structured and unstructured discretization regimes.
@@ -1455,11 +1326,11 @@ While the numerical experiments in Sections~\ref{subsec:conforming_dual_equivale
     The eigenvalue benchmarks presented in Section~\ref{subsec:cavity_eigenvalues} validate the spectral behavior across the lower cavity resonant modes ($\lambda \le 20$). In high-frequency, short-wavelength regimes ($kh \gg 1$), all discrete wave solvers suffer from numerical dispersion and phase lag (the pollution effect) \cite{jin2014finite, monk2003finite}. For the VNMM, maintaining phase accuracy requires satisfying the standard spatial sampling criterion ($h \le \lambda_{\mathrm{EM}} / 10$). Furthermore, for electrically large domains, the penalty parameter $s_{\mathrm{div}}$ may require frequency-dependent scaling to ensure consistent spectral separation between physical and non-physical modes.
 
     \item \textbf{Dimensional Scope (2D Formulation) and Non-Linear Media:} 
-    The mathematical formulation and numerical experiments in this work are developed for two-dimensional electromagnetic vector fields ($xy$-plane, $TE_z$ polarization). Extending the complete vector basis to three dimensions requires a 12-dimensional polynomial space $\mathcal{P}_1 \times \mathcal{P}_1 \times \mathcal{P}_1$ ($M_{\mathrm{supp}} = 12$ support nodes per stencil) \cite{goncalves2023vector}, which substantially expands the combinatorial candidate pool $\binom{K}{12}$ and introduces 3D surface-integral boundary representations. Additionally, extending the regularized VNMM and hybrid FEM-VNMM frameworks to non-linear eddy-current problems with ferromagnetic saturation ($B\text{--}H$ curves) necessitates iterative Newton-Raphson linearizations and time-stepping schemes \cite{tsukerman1992overlapping, coppoli2012induction}.
+    The mathematical formulation and numerical experiments in this work are developed for two-dimensional electromagnetic vector fields ($xy$-plane, $TE_z$ polarization). Extending the complete vector basis to three dimensions requires a 12-dimensional polynomial space $\mathcal{P}_1 \times \mathcal{P}_1 \times \mathcal{P}_1$ ($M_{\mathrm{supp}} = 12$ support nodes per stencil) \cite{goncalves2023vector}, which substantially expands the combinatorial candidate pool $\binom{K}{12}$ and introduces 3D surface-integral boundary representations. Additionally, extending the regularized VNMM framework to non-linear eddy-current problems with ferromagnetic saturation ($B\text{--}H$ curves) necessitates iterative Newton-Raphson linearizations and time-stepping schemes \cite{tsukerman1992overlapping, coppoli2012induction}.
 \end{enumerate}
 
 % =========================================================
-% SECTION 7: CONCLUSION AND FUTURE WORKS
+% SECTION 6: CONCLUSION AND FUTURE WORKS
 % =========================================================
 \section{Conclusion and Future Works}
 \label{sec:conclusion}
@@ -1485,11 +1356,8 @@ The primary theoretical and numerical achievements of this research are summariz
     \item \textbf{Algebraic Stabilization via Absolute Determinant Floor:} 
     Evaluating the scale-dependent placement determinant $|\det(\mathbf{A}_{6 \times 6})|$ serves as a single, unified algebraic filter against all placement matrix failure modes. Enforcing an absolute tolerance floor ($\operatorname{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$) in the candidate search provides robust matrix conditioning ($\kappa_2(\mathbf{A}) \le 73$, reaching $\approx 64$ for the optimal threshold), maintaining monotonic error reduction across the tested refinement sequence under $25\%$ stochastic spatial displacement and random director orientations.
 
-    \item \textbf{Spectral Purification via Div-Curl Regularization:} 
-    Because point-collocated meshless shape functions do not form an exact discrete de Rham complex at background quadrature points, unregularized formulations suffer from discrete gradient nullspace leakage ($\nabla \times (\nabla \phi) \neq \mathbf{0}$) \cite{monk2003finite, bossavit1990spurious}. Incorporating a Ritz-Galerkin div-curl penalty term ($s_{\mathrm{div}} = 6.0$) shifts non-physical gradient modes to high frequencies ($\lambda > 50$), achieving spurious-free spectral pairing across the investigated $TE_z$ operational bandwidth and restricting the mean cutoff wavenumber error to $1.00\%$.
-
-    \item \textbf{Conforming Master-Slave Hybrid Coupling Without Saddle-Point Indefiniteness:} 
-    By placing VNMM interface nodes at the midpoints of adjacent Whitney edge finite elements and establishing the exact dimensional scale transformation $c_k = e_k / l_k$, the conforming master-slave hybrid solver eliminates interface unknowns without auxiliary Lagrange multipliers. This avoids zero-mass saddle-point indefiniteness, preserves symmetric positive-definite (SPD) system properties under regularized boundary constraints, and prevents spurious infinite eigenvalues ($\lambda = \infty$), delivering high resonance accuracy ($0.101\%$ error on the finest mesh) with a lightweight DoF footprint.
+    \item \textbf{Spectral Purification via Div-Curl Regularization and Asymptotic Accuracy:} 
+    Because point-collocated meshless shape functions do not form an exact discrete de Rham complex at background quadrature points, unregularized formulations suffer from discrete gradient nullspace leakage ($\nabla \times (\nabla \phi) \neq \mathbf{0}$) \cite{monk2003finite, bossavit1990spurious}. Incorporating a Ritz-Galerkin div-curl penalty term ($s_{\mathrm{div}} = 6.0$) shifts non-physical gradient modes to high frequencies ($\lambda > 50$), achieving spurious-free spectral pairing across the investigated $TE_z$ operational bandwidth and restricting the mean cutoff wavenumber error to $1.00\%$. Furthermore, the asymptotic convergence rate $\mathcal{O}(h_{\mathrm{DoF}}^{2.80})$ demonstrates rapid error reduction that systematically closes the gap with canonical Edge FEM as $h \to 0$ without mesh connectivity.
 \end{enumerate}
 
 \subsection{Promising Directions for Future Research}
@@ -1501,7 +1369,10 @@ Building upon the established 2D vector meshless foundation, several promising a
     \item \textbf{Extension to 3D Vector Nodal Meshless Formulations (3D VNMM):} 
     Extending the complete polynomial space concept to three-dimensional vector domains ($\mathcal{P}^1$ in 3D, requiring $M_{\mathrm{supp}} = 12$ support nodes) to solve complex 3D high-frequency waveguiding and radiation problems \cite{goncalves2023vector}.
 
-    \item \textbf{Non-Linear Electromagnetic Applications and Motion Modeling:} Extending the regularized VNMM 2D and hybrid FEM-VNMM solvers to transient non-linear eddy-current problems, incorporating $B\text{--}H$ iron core saturation, field-circuit coupling, and electrical machine rotor movement modeling without remeshing \cite{tsukerman1992overlapping, coppoli2012induction}.
+    \item \textbf{Conforming Hybrid FEM-VNMM Domain Decomposition:} 
+    Establishing direct master-slave hybrid coupling between boundary-conforming Whitney edge finite elements and interior VNMM unconstrained point clouds through exact dimensional scale mapping, combining boundary geometric fidelity with mesh-free volume discretization.
+
+    \item \textbf{Non-Linear Electromagnetic Applications and Motion Modeling:} Extending the regularized VNMM 2D solvers to transient non-linear eddy-current problems, incorporating $B\text{--}H$ iron core saturation, field-circuit coupling, and electrical machine rotor movement modeling without remeshing \cite{tsukerman1992overlapping, coppoli2012induction}.
 
     \item \textbf{Adaptive Meshless Refinement ($h$- and $p$-Adaptivity):} 
     Developing a posteriori local residual error estimators based on the placement determinant $|\det(\mathbf{A})|$ and local curl jump indicators to drive automatic node insertion ($h$-adaptivity) and local polynomial order elevation ($p$-adaptivity) around re-entrant corners and material interfaces.
