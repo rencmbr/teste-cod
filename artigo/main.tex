@@ -479,6 +479,36 @@ Consequently, under point-collocated projection on unstructured node clouds, unr
 \end{equation}
 \end{proposition}
 
+\begin{proof}
+Let any discrete vector field $\vec{E}^h \in \mathcal{L}^1$ be expanded in terms of the solenoidal basis:
+\begin{equation}
+\vec{E}^h(x, y) = a \begin{bmatrix} 1 \\ 0 \end{bmatrix} + b \begin{bmatrix} 0 \\ 1 \end{bmatrix} + c \begin{bmatrix} -y \\ x \end{bmatrix}, \quad a, b, c \in \mathbb{R}.
+\label{eq:proof_L1_expansion}
+\end{equation}
+Direct differentiation with respect to spatial coordinates yields the discrete Jacobian tensor:
+\begin{equation}
+\mathbf{J}^h = \begin{bmatrix} 
+\partial_x E_x^h & \partial_y E_x^h \\ 
+\partial_x E_y^h & \partial_y E_y^h 
+\end{bmatrix} = \begin{bmatrix} 
+0 & -c \\ 
+c & 0 
+\end{bmatrix}.
+\label{eq:proof_discrete_jacobian}
+\end{equation}
+Inspecting Eq.~\eqref{eq:proof_discrete_jacobian} establishes that $\partial_x E_x^h \equiv 0$, $\partial_y E_y^h \equiv 0$, and $\partial_y E_x^h + \partial_x E_y^h = -c + c \equiv 0$, identically satisfying the linear constraints in Eq.~\eqref{eq:L1_derivative_constraints}.
+
+Now consider a general smooth physical field $\vec{E} \in [C^2(\Omega)]^2$. Its Taylor expansion centered at evaluation point $P$ is $\vec{E}(\mathbf{x}) = \vec{E}(P) + \mathbf{J}(P) \Delta\mathbf{x} + \mathcal{O}(h^2)$, where $\mathbf{J}(P)$ has non-zero diagonal entries ($\partial_x E_x \neq 0$ or $\partial_y E_y \neq 0$). Collocating $\vec{E}^h$ at support nodes $\mathbf{x}_k$ ($k=1,2,3$) along unit directors $\vec{t}_k$ defines the linear placement system $\mathbf{A} [a, b, c]^T = \mathbf{e}$, where $e_k = \vec{E}(\mathbf{x}_k) \cdot \vec{t}_k$.
+
+Subtracting the projection of the unrepresented linear components $(\mathbf{J}(P) - \mathbf{J}^h) \Delta\mathbf{x}_k \cdot \vec{t}_k$ yields a nodal projection residual $\mathbf{r} \in \mathbb{R}^3$ with asymptotic magnitude $\|\mathbf{r}\| \sim \mathcal{O}(h)$. In the $3 \times 3$ moment placement matrix $\mathbf{A}$ (Eq.~\eqref{eq:matrix_A_L1}), translation columns 1--2 scale as $\mathcal{O}(1)$, while the rotational moment column 3 scales as $(\Delta y_k t_{kx} - \Delta x_k t_{ky}) \sim \mathcal{O}(h)$. Consequently, by Cramer's rule or Neumann inversion, the third row of $\mathbf{A}^{-1}$ (which maps nodal data to the rotational DoF $c = -\frac{1}{2}(\nabla \times \vec{E}^h)_z$) scales strictly as $\|\operatorname{Row}_3(\mathbf{A}^{-1})\| \sim \mathcal{O}(h^{-1})$.
+
+The numerical error in the reconstructed curl is therefore governed by the propagation of the projection remainder:
+\begin{equation}
+|(\nabla \times \vec{E})_z - (\nabla \times \vec{E}^h)_z| = 2 |c_{\mathrm{exact}} - c| \sim \|\operatorname{Row}_3(\mathbf{A}^{-1})\| \|\mathbf{r}\| = \mathcal{O}(h^{-1}) \cdot \mathcal{O}(h) = \mathcal{O}(1),
+\end{equation}
+which is independent of $h$ and generates the irreducible $\mathcal{O}(1)$ stagnation plateau, completing the proof.
+\end{proof}
+
 \begin{table}[!htbp]
 \centering
 \small
@@ -494,9 +524,7 @@ $\mathcal{P}^1 = \mathcal{P}_1 \times \mathcal{P}_1$ (Complete linear) & 6 & \ch
 \end{tabular*}
 \end{table}
 
-In Edge Finite Element Methods (EFEM), this lack of explicit normal derivative representation is compensated for at the element level by continuous line circulation integrals along boundary edges, which enforce closed-contour flux cancellation via Stokes' theorem \cite{nedelec1980mixed, monk2003finite}. In the VNMM, however, continuous line integrals are replaced by discrete pointwise projections \cite{goncalves2025tese}.
-
-When the exact physical electric field exhibits non-zero longitudinal gradients ($\partial E_x/\partial x \neq 0$ or $\partial E_y/\partial y \neq 0$), the unrepresented normal derivative components generate the Taylor truncation residual $\mathbf{r} \sim \mathcal{O}(h)$ in the nodal projection data \cite{li2007meshfree, liu2009mesh}. When solving the local placement system~\eqref{eq:linear_placement_system}, this residual is multiplied by the rotational row of $\mathbf{A}^{-1}$, which scales dimensionally as $\mathcal{O}(h^{-1})$. This persistent $\mathcal{O}(1)$ contamination leaks directly into the field curl calculation, polluting $(\nabla \times \vec{E}^h)_z = -2 \sum_{i=1}^3 \beta_{3i} e_i$ with a background noise floor that cannot be eliminated by spatial mesh refinement $h \to 0$. To overcome this fundamental limitation and restore asymptotic derivative convergence, Section~\ref{subsec:complete_P1_basis} introduces the complete linear polynomial vector space $\mathcal{P}^1$.
+In Edge Finite Element Methods (EFEM), this lack of explicit normal derivative representation does not cause stagnation because continuous line circulation integrals along element edges enforce closed-contour flux cancellation via Stokes' theorem \cite{nedelec1980mixed, monk2003finite}. In the VNMM, however, continuous line integrals are replaced by discrete pointwise projections \cite{goncalves2025tese}. Consequently, the $\mathcal{O}(1)$ derivative noise floor established in Proposition~1 cannot be eliminated by spatial mesh refinement ($h \to 0$), making the complete linear polynomial vector space $\mathcal{P}^1$ mathematically indispensable for unconstrained point clouds, as formulated in Section~\ref{subsec:complete_P1_basis}.
 
 
 % ---------------------------------------------------------
