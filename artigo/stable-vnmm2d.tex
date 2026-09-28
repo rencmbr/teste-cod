@@ -1,4 +1,4 @@
-% !TeX root = main.tex
+% !TeX root = stable-vnmm2d.tex
 %% 
 %% Copyright 2007-2025 Elsevier Ltd
 %% 
@@ -129,15 +129,15 @@
 
 %% Abstract
 \begin{abstract}
-The Vector Nodal Meshless Method (VNMM) provides an attractive meshfree alternative to the Edge Finite Element Method (EFEM) by defining vector approximations directly within $H(\mathrm{curl})$ Sobolev spaces through point-collocated nodes assigned unit vector directors. However, conventional formulations based on N\'ed\'elec's incomplete solenoidal polynomial space ($\mathcal{L}^1$) suffer from a severe mathematical limitation when operating on arbitrary point clouds: numerical approximation of the curl operator $(\nabla \times \vec{E})$ fails to converge, stagnating at an irreducible $\mathcal{O}(1)$ relative error plateau.
+The Vector Nodal Meshless Method (VNMM) provides an alternative to the Edge Finite Element Method (EFEM) by defining vector approximations within $H(\mathrm{curl})$ Sobolev spaces through point-collocated nodes assigned unit vector directors. However, standard formulations based on N\'ed\'elec's incomplete solenoidal polynomial space ($\mathcal{L}^1$) exhibit a notable limitation when applied to unstructured point distributions: the numerical approximation of the curl operator $(\nabla \times \vec{E})$ tends to stagnate at an $\mathcal{O}(1)$ relative error plateau.
 
-This paper presents a stabilized, mathematically rigorous 2D VNMM framework that addresses this limitation and provides a general vector approximation formulation for mesh-independent point distributions. First, we introduce the complete linear polynomial vector space $\mathcal{P}^1 = \mathcal{P}_1 \times \mathcal{P}_1$ ($6$ support nodes per evaluation point), which resolves all four spatial components of the local Taylor Jacobian tensor. This removes the derivative modal aliasing mechanism, breaking the $\mathcal{O}(1)$ stagnation plateau, restoring first-order asymptotic convergence $\mathcal{O}(h^{1})$ for the curl operator, and yielding an observed approximately quadratic convergence rate $\mathcal{O}(h^{2})$ for electric field interpolation.
+This paper investigates a stabilized 2D VNMM framework designed to address this limitation and improve vector approximations on mesh-independent point clouds. First, we adopt the complete linear polynomial vector space $\mathcal{P}^1 = \mathcal{P}_1 \times \mathcal{P}_1$ ($6$ support nodes per evaluation point), which resolves all four components of the local Jacobian tensor. This formulation mitigates derivative modal aliasing, overcomes the curl error plateau, recovers first-order asymptotic convergence $\mathcal{O}(h^{1})$ for the curl operator, and achieves approximately quadratic convergence $\mathcal{O}(h^{2})$ for electric field interpolation.
 
-Second, to ensure algebraic stability across arbitrary node clouds, we develop a 4-phase automated support selection algorithm combining $k$-d tree spatial queries with scale-dependent placement matrix determinant thresholding. Enforcing an absolute tolerance floor provides a unified algebraic criterion for rejecting ill-conditioned local placement configurations, maintaining bounded condition numbers ($\kappa_2(\mathbf{A}) \le 73$, reaching $\approx 64$ at the optimal threshold) and restoring monotonic error reduction under a representative $25\%$ stochastic spatial jitter with random unit director orientations.
+Second, to enhance algebraic stability on irregular node distributions, we introduce an automated support selection procedure combining $k$-d tree spatial queries with scale-dependent placement matrix determinant thresholding. Applying an absolute tolerance floor provides a consistent criterion to filter ill-conditioned local stencils, maintaining bounded condition numbers ($\kappa_2(\mathbf{A}) \le 73$, reaching $\approx 64$ at the selected threshold) and improving robustness under a representative $25\%$ stochastic spatial perturbation with random unit directors.
 
-Third, to mitigate non-physical spurious modes caused by discrete gradient nullspace leakage ($\nabla \times (\nabla \phi) \neq \mathbf{0}$ at quadrature points), we implement a Ritz-Galerkin weak formulation with div-curl penalty regularization and point-based Element-Free Galerkin (EFG) Gauss integration. This shifts non-physical gradient states outside the operational frequency window, yielding spurious-free modal pairing for the investigated transverse electric cavity resonances ($TE_z$) with a $1.00\%$ mean wavenumber error across the tested band.
+Third, to control non-physical spurious modes associated with discrete gradient nullspace leakage, we employ a Ritz-Galerkin weak form incorporating div-curl penalty regularization and background cell integration. This regularization shifts non-physical gradient states outside the operational frequency band of interest, yielding clean modal pairing for the investigated transverse electric ($TE_z$) cavity resonances with a $1.00\%$ mean wavenumber error.
 
-Finally, we validate the asymptotic convergence of the regularized pure VNMM 2D against canonical Edge FEM over six successive mesh refinement levels. The VNMM achieves a steeper asymptotic convergence rate ($\mathcal{O}(h_{\mathrm{DoF}}^{2.80})$ vs $\mathcal{O}(h_{\mathrm{DoF}}^{1.93})$), rapidly closing the error gap with finite elements as $h \to 0$ without requiring volumetric mesh connectivity. Crucially, the proposed formulation liberates the VNMM from the topological constraints of prior literature, eliminating the requirement for auxiliary planar subdivisions or Delaunay triangulations and enabling robust electromagnetic analysis on unstructured vector node distributions.
+Finally, we assess the asymptotic convergence of the regularized VNMM against canonical Edge FEM across six successive refinement levels. In this benchmark, the VNMM exhibits a higher asymptotic convergence rate ($\mathcal{O}(h_{\mathrm{DoF}}^{2.80})$ vs $\mathcal{O}(h_{\mathrm{DoF}}^{1.93})$), closing the accuracy gap with edge elements on finer point distributions. These findings demonstrate that the stabilized VNMM can perform electromagnetic modal analysis on irregular point clouds without requiring auxiliary surface meshes or Delaunay triangulations for stencil construction.
 \end{abstract}
 
 %%Graphical abstract
@@ -147,8 +147,8 @@ Finally, we validate the asymptotic convergence of the regularized pure VNMM 2D 
 
 %%Research highlights
 \begin{highlights}
-\item Complete linear basis $\mathcal{P}^1$ removes derivative modal aliasing in 2D VNMM.
-\item Breaks the $\mathcal{O}(1)$ curl stagnation, restoring $\mathcal{O}(h)$ asymptotic convergence.
+\item Complete linear basis $\mathcal{P}^1$ mitigates derivative modal aliasing in 2D VNMM.
+\item Overcomes the $\mathcal{O}(1)$ curl error plateau, recovering $\mathcal{O}(h)$ convergence.
 \item Scale-dependent determinant thresholding stabilizes stencils under 25\% jitter.
 \item Div-curl Ritz-Galerkin penalty shifts spurious gradient modes outside spectrum.
 \item Asymptotic convergence benchmark against Edge FEM validates mesh-free accuracy.
