@@ -52,6 +52,7 @@
 % --- Pacotes e Definição do Ambiente de Teoremas ---
 \usepackage{amsthm}
 \newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
 \usepackage{graphicx}                 % Para inclusão de figuras
 \usepackage{tabularx}
 \usepackage{booktabs}                 % Para tabelas elegantes no padrão IEEE/Elsevier
@@ -463,17 +464,39 @@ where $\delta_{\mathrm{norm}} = \frac{1}{2}(\partial E_x/\partial x - \partial E
 
 In the incomplete $\mathcal{L}^1$ basis, local shape functions provide only 3 degrees of freedom. As a result, normal field derivatives are artificially forced to vanish identically ($\partial E_x^h/\partial x \equiv 0$ and $\partial E_y^h/\partial y \equiv 0$), imposing $\nabla \cdot \vec{E}^h \equiv 0$ and $\delta_{\mathrm{norm}} \equiv 0$ simultaneously.
 
+This fundamental limitation is formalized in the following proposition:
+
+\begin{proposition}[Jacobian Incompleteness and Derivative Modal Aliasing]
+Let $\vec{E} \in [C^2(\Omega)]^2$ be an arbitrary twice continuously differentiable 2D vector field. The incomplete solenoidal space $\mathcal{L}^1 = \operatorname{span}\{[1, 0]^T, [0, 1]^T, [-y, x]^T\} \subset \mathcal{P}_1 \times \mathcal{P}_1$ cannot reproduce the complete first-order Taylor expansion of $\vec{E}$. Specifically, while the complete space $\mathcal{P}^1 = \mathcal{P}_1 \times \mathcal{P}_1$ possesses $\dim(\mathcal{P}^1) = 6$ degrees of freedom to reconstruct the 2 translation components and all 4 independent entries of the Jacobian tensor $\mathbf{J} = \nabla\vec{E}$, $\mathcal{L}^1$ possesses only $\dim(\mathcal{L}^1) = 3$ degrees of freedom, enforcing the artificial linear constraints:
+\begin{equation}
+\frac{\partial E_x^h}{\partial x} = 0, \quad \frac{\partial E_y^h}{\partial y} = 0, \quad \text{and} \quad \frac{\partial E_x^h}{\partial y} + \frac{\partial E_y^h}{\partial x} = 0.
+\label{eq:L1_derivative_constraints}
+\end{equation}
+Consequently, under point-collocated projection on unstructured node clouds, unrepresented normal gradients ($\partial E_x/\partial x, \partial E_y/\partial y \neq 0$) generate a projection remainder $\mathbf{r} \sim \mathcal{O}(h)$ that couples into the rotational coefficient through the inverted moment placement matrix $\mathbf{A}^{-1} \sim \mathcal{O}(h^{-1})$, inducing an irreducible $\mathcal{O}(1)$ derivative aliasing error in the discrete curl operator:
+\begin{equation}
+\|(\nabla \times \vec{E})_z - (\nabla \times \vec{E}^h)_z\|_{L^2(\Omega)} \sim \|\mathbf{A}^{-1} \mathbf{r}\| = \mathcal{O}(h^{-1}) \cdot \mathcal{O}(h) = \mathcal{O}(1).
+\label{eq:aliasing_order_proof}
+\end{equation}
+\end{proposition}
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption{Comparison of polynomial completeness, dimensionality, and derivative reproduction capabilities between the incomplete solenoidal space $\mathcal{L}^1$ and the complete linear vector polynomial space $\mathcal{P}^1$.}
+\label{tab:basis_completeness_comparison}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}} l c c c c c c @{}}
+\toprule
+\textbf{Vector Space} & $\dim$ & $E_x, E_y$ & $\partial_x E_x$ & $\partial_y E_x$ & $\partial_x E_y$ & $\partial_y E_y$ \\
+\midrule
+$\mathcal{L}^1$ (Incomplete solenoidal) & 3 & \checkmark & \texttimes & \checkmark & \checkmark & \texttimes \\
+$\mathcal{P}^1 = \mathcal{P}_1 \times \mathcal{P}_1$ (Complete linear) & 6 & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
 In Edge Finite Element Methods (EFEM), this lack of explicit normal derivative representation is compensated for at the element level by continuous line circulation integrals along boundary edges, which enforce closed-contour flux cancellation via Stokes' theorem \cite{nedelec1980mixed, monk2003finite}. In the VNMM, however, continuous line integrals are replaced by discrete pointwise projections \cite{goncalves2025tese}.
 
-When the exact physical electric field exhibits non-zero longitudinal gradients ($\partial E_x/\partial x \neq 0$ or $\partial E_y/\partial y \neq 0$), the unrepresented normal derivative components generate a Taylor truncation residual $\mathbf{r} \sim \mathcal{O}(h)$ in the nodal projection data \cite{li2007meshfree, liu2009mesh}. When solving the local placement system~\eqref{eq:linear_placement_system}, this residual is multiplied by the third row of $\mathbf{A^{-1}}$, which scales dimensionally as $\mathcal{O}(h^{-1})$. 
-
-This product produces an irreducible constant numerical error in the rotational coefficient $\beta_{3i}$:
-\begin{equation}
-\text{Aliasing Contamination in } (\nabla \times \vec{E}^h)_z \sim \mathcal{O}(h^{-1}) \times \mathcal{O}(h) = \mathcal{O}(1)
-\label{eq:aliasing_error_scaling_L1}
-\end{equation}
-
-This persistent $\mathcal{O}(1)$ contamination leaks directly into the field curl calculation, polluting $(\nabla \times \vec{E}^h)_z = -2 \sum_{i=1}^3 \beta_{3i} e_i$ with a background noise floor that cannot be eliminated by spatial mesh refinement $h \to 0$. To overcome this fundamental limitation and achieve strict derivative convergence, Section~\ref{subsec:complete_P1_basis} introduces the complete linear polynomial vector space $\mathcal{P}^1$.
+When the exact physical electric field exhibits non-zero longitudinal gradients ($\partial E_x/\partial x \neq 0$ or $\partial E_y/\partial y \neq 0$), the unrepresented normal derivative components generate the Taylor truncation residual $\mathbf{r} \sim \mathcal{O}(h)$ in the nodal projection data \cite{li2007meshfree, liu2009mesh}. When solving the local placement system~\eqref{eq:linear_placement_system}, this residual is multiplied by the rotational row of $\mathbf{A}^{-1}$, which scales dimensionally as $\mathcal{O}(h^{-1})$. This persistent $\mathcal{O}(1)$ contamination leaks directly into the field curl calculation, polluting $(\nabla \times \vec{E}^h)_z = -2 \sum_{i=1}^3 \beta_{3i} e_i$ with a background noise floor that cannot be eliminated by spatial mesh refinement $h \to 0$. To overcome this fundamental limitation and restore asymptotic derivative convergence, Section~\ref{subsec:complete_P1_basis} introduces the complete linear polynomial vector space $\mathcal{P}^1$.
 
 
 % ---------------------------------------------------------
@@ -667,23 +690,35 @@ In contrast, evaluating the magnitude of the determinant $|\det(\mathbf{A}_{6\ti
 % ---------------------------------------------------------
 % SUBSECTION 3.3.1: SCALE-DEPENDENT SCALING LAW AND ABSOLUTE TOLERANCE FLOOR
 % ---------------------------------------------------------
-\subsubsection{Scale-Dependent Scaling Law and Absolute Tolerance Floor}
+\subsubsection{Scale-Dependent Scaling Law, Dimensional Analysis, and Absolute Tolerance Floor}
 \label{subsec:scale_dependent_floor}
 
-In local translated coordinates centered at the evaluation point $P(x_P, y_P)$, the determinant of the $6 \times 6$ placement matrix scales dimensionally as $\det(\mathbf{A}_{6\times6}) \sim \mathcal{O}(h^4)$, where $h$ denotes the local characteristic nodal spacing. Under spatial refinement ($h \to 0$), enforcing a purely proportional scaling law:
+In local translated coordinates centered at the evaluation point $P(x_P, y_P)$, the first two columns of $\mathbf{A} \in \mathbb{R}^{6 \times 6}$ consist of dimensionless unit director components $t_{kx}, t_{ky} \sim \mathcal{O}(1)$, while columns 3--6 contain products of coordinates and directors, $\Delta x_k t_{kx}, \Delta y_k t_{kx}, \Delta x_k t_{ky}, \Delta y_k t_{ky} \sim \mathcal{O}(h)$ [m], where $h$ denotes the local characteristic nodal spacing. Consequently, the local placement matrix is dimensional, and its determinant scales dimensionally as $[\det(\mathbf{A}_{6\times6})] = [L]^4$:
+\begin{equation}
+\det(\mathbf{A}_{6\times6}) \sim \mathcal{O}(h^4).
+\label{eq:det_quartic_scaling}
+\end{equation}
+To interpret the determinant threshold independently of physical unit choices, one may consider the normalized, dimensionless local coordinates $\hat{x}_k = \Delta x_k / h$ and $\hat{y}_k = \Delta y_k / h$. The resulting dimensionless placement matrix $\widehat{\mathbf{A}}$ satisfies $\mathbf{A} = \widehat{\mathbf{A}} \, \operatorname{diag}(1, 1, h, h, h, h)$, directly establishing:
+\begin{equation}
+\det(\mathbf{A}) = h^4 \det(\widehat{\mathbf{A}}).
+\label{eq:dimensionless_det_relation}
+\end{equation}
+Thus, a scale-invariant algebraic qualification criterion is equivalent to bounding the dimensionless determinant $|\det(\widehat{\mathbf{A}})| \ge \widehat{\mathrm{Tol}} > 0$.
+
+Under spatial refinement ($h \to 0$), enforcing a purely proportional scaling law based on a fixed reference grid ($h_{\mathrm{ref}}$):
 \begin{equation}
 \mathrm{Tol}_{\mathrm{det}}^{\mathrm{pure}}(h) = \mathrm{Tol}_{\mathrm{ref}} \cdot \left( \frac{h}{h_{\mathrm{ref}}} \right)^4
 \label{eq:pure_quartic_law}
 \end{equation}
-produces an excessively permissive threshold in dense point clouds (e.g., $\mathrm{Tol}_{\mathrm{det}} \approx 1.2 \times 10^{-6}$ for $h = 0.0654$\,m over $[0, \pi]^2$). As demonstrated through the parametric numerical experiments in Section~\ref{subsubsec:quartic_law_failure}, such unconstrained low thresholds cause the early-stopping selection mechanism to prematurely accept candidate sextets exhibiting poor angular diversity. This elevates the matrix condition number to $\kappa(\mathbf{A}) > 170$, inducing local derivative degradation and stagnation in the curl approximation.
+produces an excessively permissive threshold in dense point clouds (e.g., $\mathrm{Tol}_{\mathrm{det}} \approx 1.2 \times 10^{-6}$ for $h = 0.0654$\,m over $[0, \pi]^2$). As demonstrated through the parametric numerical experiments in Section~\ref{subsubsec:quartic_law_failure}, such unconstrained low thresholds cause the early-stopping selection mechanism to prematurely accept candidate sextets exhibiting poor angular diversity. In terms of the dimensionless matrix, this allows $|\det(\widehat{\mathbf{A}})|$ to approach zero, which elevates the condition number $\kappa_2(\mathbf{A}) > 170$ and induces local derivative degradation and stagnation in the curl approximation.
 
 To preserve robust matrix conditioning $\kappa_2(\mathbf{A}) \sim \mathcal{O}(1)$ across all spatial discretization scales, the proposed framework enforces a scale-dependent determinant thresholding law bounded below by an absolute tolerance floor $\mathrm{Tol}_{\mathrm{floor}}$:
 \begin{equation}
-\mathrm{Tol}_{\mathrm{det}}(h) = \max \left( \mathrm{Tol}_{\mathrm{ref}} \cdot \left( \frac{h}{h_{\mathrm{ref}}} \right)^4, \; \mathrm{Tol}_{\mathrm{floor}} \right)
+\mathrm{Tol}_{\mathrm{det}}(h) = \max \left( \mathrm{Tol}_{\mathrm{ref}} \cdot \left( \frac{h}{h_{\mathrm{ref}}} \right)^4, \; \mathrm{Tol}_{\mathrm{floor}} \right).
 \label{eq:scale_dependent_determinant_floor}
 \end{equation}
 
-By setting $\mathrm{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$, the selection pipeline is forced to dynamically expand its candidate neighborhood search whenever spatial or directional alignment degrades in dense or perturbed clouds. As quantitatively validated in Section~\ref{subsubsec:restoration_via_floor}, this floor enables the identification of an Admissible Robust Support, yielding stable local configurations and restoring monotonic convergence in the tested refinement sequences without a significant increase in computational cost.
+By setting $\mathrm{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$ for the domain $\Omega = [0, \pi]^2$, the selection pipeline is forced to dynamically expand its candidate neighborhood search whenever spatial or directional alignment degrades in dense or perturbed clouds. Dimensionally, on a general domain with characteristic dimension $L_{\mathrm{domain}}$, the floor scales as $\mathrm{Tol}_{\mathrm{floor}} \propto (L_{\mathrm{domain}})^4 \widehat{\mathrm{Tol}}_{\mathrm{floor}}$. As quantitatively validated in Section~\ref{subsubsec:restoration_via_floor}, this floor enables the identification of an Admissible Robust Support, yielding stable local configurations and restoring monotonic error reduction in the tested refinement sequences without a significant increase in computational cost.
 
 \subsubsection{The 4-Phase Selection Pipeline}
 \label{subsec:4phase_pipeline}
