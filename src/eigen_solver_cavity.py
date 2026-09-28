@@ -109,7 +109,7 @@ def resolver_autovalores_cavidade(
     s_div=4.0,
     pontos_por_dir=3,
     tolerancia_det=None,
-    tol_piso=1e-4,
+    tol_piso=None,
     modo_suporte="ponto_gauss",
     seed=42
 ):

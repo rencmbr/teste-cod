@@ -29,7 +29,7 @@ def montar_matrizes_vnmm_2d(
     mu_r=1.0, 
     epsilon_r=1.0,
     s_div=4.0,
-    tol_piso=1e-4,
+    tol_piso=None,
     Ncx=None,
     Ncy=None,
     Lx=np.pi,

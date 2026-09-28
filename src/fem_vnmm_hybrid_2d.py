@@ -253,7 +253,7 @@ def montar_matrizes_hibridas_fem_vnmm(
     Ncy_vnmm=None, 
     pontos_por_dir=3, 
     s_div_vnmm=4.0, 
-    tol_piso_vnmm=1e-4,
+    tol_piso_vnmm=None,
     tolerancia_det_vnmm=None,
     mu_r=1.0, 
     epsilon_r=1.0
@@ -452,7 +452,7 @@ def resolver_autovalores_hibrido_fem_vnmm(
     Ncy_vnmm=None, 
     pontos_por_dir=3,
     s_div_vnmm=4.0, 
-    tol_piso_vnmm=1e-4,
+    tol_piso_vnmm=None,
     tolerancia_det_vnmm=None,
     num_autovalores=10, 
     tol_zero=0.1,
