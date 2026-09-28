@@ -994,12 +994,14 @@ Therefore, the direct master-slave formulation offers a highly favorable comprom
 % =========================================================
 % SECTION 6: NUMERICAL RESULTS AND DISCUSSION
 % =========================================================
-\section{Numerical Results and Validation}
+\section{Numerical Verification and Validation}
 \label{sec:numerical_results}
 
-This section presents a comprehensive numerical validation of the Vector Nodal Meshless Method (VNMM 2D), evaluating its interpolation accuracy, spectral purity, convergence rates, and hybrid coupling performance against analytical benchmark solutions and classical Edge Finite Element Method (EFEM) formulations. 
-
-First, the mathematical link between the VNMM 2D and EFEM is validated by proving their exact point-by-point numerical equivalence under conforming mesh topologies where VNMM nodes coincide with edge midpoints. Subsequently, the formulation is extended to unconstrained, arbitrary meshless point clouds, demonstrating how the complete polynomial vector space $\mathcal{P}^1$ and div-curl variational regularization overcome the derivative stagnation inherent to incomplete bases. Finally, the performance of the regularized VNMM 2D is assessed across two-dimensional electromagnetic cavity eigenvalue problems, stochastic boundary perturbations, and hybrid domain decomposition scenarios.
+This section assesses the numerical performance of the proposed Vector Nodal Meshless Method (VNMM 2D). Following established guidelines in computational mechanics and electromagnetics, the numerical campaign is systematically organized into two complementary stages:
+\begin{enumerate}
+    \item \textbf{Numerical Verification (Sections~\ref{subsec:conforming_dual_equivalence}--\ref{subsec:stochastic_perturbations}):} Focused on the mathematical properties of the discretized operators, including exact dual isomorphism against Whitney 1-form finite elements, restoration of asymptotic curl convergence via the complete linear vector basis $\mathcal{P}^1$, and local algebraic placement matrix conditioning under stochastic spatial-directional jitter.
+    \item \textbf{Physical Validation (Sections~\ref{subsec:cavity_eigenvalues}--\ref{subsec:convergence_comparison}):} Focused on practical electromagnetic boundary-value problems, including Transverse Electric ($TE_z$) resonant cavity eigenvalue spectra under div-curl Ritz-Galerkin penalty regularization, and conforming master-slave hybrid EFEM-VNMM domain decomposition.
+\end{enumerate}
 
 \subsection{Conforming Dual Equivalence: VNMM $\mathcal{L}^1$ vs. Whitney EFEM}
 \label{subsec:conforming_dual_equivalence}
@@ -1105,18 +1107,18 @@ $N_{\mathrm{total}}$ & $h_{\mathrm{avg}}$ [m] & \multicolumn{3}{c}{\textbf{Elect
 % ---------------------------------------------------------
 % SUBSECTION 6.3: NUMERICAL STABILITY UNDER STOCHASTIC PERTURBATIONS
 % ---------------------------------------------------------
-\subsection{Numerical Stability Under Stochastic Nodal Perturbations}
+\subsection{Numerical Robustness Under Stochastic Spatial-Directional Perturbations}
 \label{subsec:stochastic_perturbations}
 
 While Section~\ref{subsec:arbitrary_meshless_interpolation} established the mathematical necessity of the complete $\mathcal{P}^1$ space to eliminate derivative modal aliasing, practical meshless computing on arbitrary unstructured point clouds demands evaluating the algebraic stability of the support qualification algorithm itself \cite{slak2018refined}. In unconstrained clouds, arbitrary spatial arrangements and director orientations can induce pathological local configurations—such as near-parallel directors ($\ge 4$ parallel nodes) or near-collinear nodes ($\ge 5$ collinear nodes)—that degrade the conditioning of the local placement matrix $\mathbf{A} \in \mathbb{R}^{6 \times 6}$ (Section~\ref{subsec:singularities_P1}).
 
-This experiment evaluates the algebraic stabilization mechanism provided by the scale-dependent determinant thresholding law with an absolute floor (Eq.~\eqref{eq:scale_dependent_determinant_floor}, Section~\ref{sec:support_selection_algorithm}) within the complete $\mathcal{P}^1$ basis over $\Omega = [0, \pi] \times [0, \pi]$. The point clouds are subjected to simultaneous severe stochastic spatial-directional distortions:
+To evaluate the stabilization mechanism provided by the scale-dependent determinant thresholding law with an absolute floor (Eq.~\eqref{eq:scale_dependent_determinant_floor}, Section~\ref{sec:support_selection_algorithm}) within the complete $\mathcal{P}^1$ basis over $\Omega = [0, \pi] \times [0, \pi]$, we subject the point cloud sequence to a representative benchmark scenario combining simultaneous severe stochastic spatial-directional distortions:
 \begin{enumerate}
-    \item \textbf{Stochastic Spatial Jitter:} Interior node coordinates are perturbed as $\mathbf{x}_k \leftarrow \mathbf{x}_k + \delta\mathbf{x}_k$, with independent random displacements $\delta x_k$, $\delta y_k \sim \mathcal{U}(-0.25\,\Delta x, 0.25\,\Delta x)$, introducing a $25\%$ random spatial distortion.
-    \item \textbf{Random Unit Director Orientations:} Unit vector directors assigned to interior nodes receive fully random angles $\theta_k \sim \mathcal{U}(0, 2\pi)$, defining $\vec{t}_k = [\cos\theta_k, \sin\theta_k]^T$, completely destroying directional alignment symmetry.
+    \item \textbf{Stochastic Spatial Jitter:} Interior node coordinates are perturbed as $\mathbf{x}_k \leftarrow \mathbf{x}_k + \delta\mathbf{x}_k$, with independent random displacements $\delta x_k$, $\delta y_k \sim \mathcal{U}(-0.25\,\Delta x, 0.25\,\Delta x)$, introducing a $25\%$ random spatial jitter relative to the base lattice spacing.
+    \item \textbf{Random Unit Director Orientations:} Unit vector directors assigned to interior nodes receive fully random angles $\theta_k \sim \mathcal{U}(0, 2\pi)$, defining $\vec{t}_k = [\cos\theta_k, \sin\theta_k]^T$, completely removing directional alignment symmetry.
 \end{enumerate}
 
-Figure~\ref{fig:robustez_perturbacao_estocastica} illustrates the convergence behavior and sensitivity analysis comparing the unconstrained pure quartic scaling law against the stabilized formulation with an absolute determinant floor.
+This benchmark realization serves as a stringent test bed for the automated qualification pipeline, assessing whether the scale-dependent determinant threshold can dynamically detect and bypass localized pathological candidate sextets without prior manual intervention. Figure~\ref{fig:robustez_perturbacao_estocastica} illustrates the resulting convergence behavior and parametric sensitivity analysis comparing the unconstrained pure quartic scaling law against the stabilized formulation with an absolute determinant floor.
 
 \begin{figure*}[!t]
 \centering
@@ -1158,13 +1160,13 @@ To determine the optimal stabilization threshold on $\Omega = [0, \pi]^2$, a sys
 \toprule
 \textbf{Threshold} & \textbf{Success} & \textbf{Neighbors} & \multicolumn{2}{c}{\textbf{RMS Error}} & \textbf{Conditioning} \\
 \cmidrule(lr){4-5}
-$\mathrm{Tol}_{\mathrm{det}}$ & \textbf{Rate} & $K_{\mathrm{avg}}$ & $\vec{E}^h$ & $(\nabla\times\vec{E}^h)_z$ & $\kappa(\mathbf{A})$ \\
+$\mathrm{Tol}_{\mathrm{det}}$ & \textbf{Rate} & $K_{\mathrm{avg}}$ & $\vec{E}^h$ & $(\nabla\times\vec{E}^h)_z$ & $\kappa_2(\mathbf{A})$ \\
 \midrule
 \begin{tabular}[c]{@{}c@{}} $1.0 \times 10^{-6}$ \\ \scriptsize(Permissive) \end{tabular} & 100\% & 6.3 & $2.21 \times 10^{-3}$ & $6.86 \times 10^{-2}$ & \begin{tabular}[c]{@{}c@{}} $> 180$ \\ \scriptsize(Sub-cond.) \end{tabular} \\
 $3.0 \times 10^{-6}$ & 100\% & 7.0 & $1.34 \times 10^{-3}$ & $4.09 \times 10^{-2}$ & $\approx 141$ \\
 $8.0 \times 10^{-6}$ & 100\% & 8.8 & $1.15 \times 10^{-3}$ & $3.27 \times 10^{-2}$ & $\approx 99$ \\
 \begin{tabular}[c]{@{}c@{}} $\mathbf{1.5 \times 10^{-5}}$ \\ \scriptsize\textbf{(Floor)} \end{tabular} & 100\% & \textbf{10.3} & $\mathbf{1.21 \times 10^{-3}}$ & $\mathbf{3.20 \times 10^{-2}}$ & \begin{tabular}[c]{@{}c@{}} $\mathbf{\approx 73}$ \\ \scriptsize\textbf{(Stable)} \end{tabular} \\
-\begin{tabular}[c]{@{}c@{}} $\mathbf{3.0 \times 10^{-5}}$ \\ \scriptsize\textbf{(Optimal)} \end{tabular} & 100\% & \textbf{11.3} & $\mathbf{1.41 \times 10^{-3}}$ & $\mathbf{3.33 \times 10^{-2}}$ & \begin{tabular}[c]{@{}c@{}} $\mathbf{\approx 64}$ \\ \scriptsize\textbf{(Optimal)} \end{tabular} \\
+\begin{tabular}[c]{@{}c@{}} $\mathbf{3.0 \times 10^{-5}}$ \\ \scriptsize\textbf{(Robust)} \end{tabular} & 100\% & \textbf{11.3} & $\mathbf{1.41 \times 10^{-3}}$ & $\mathbf{3.33 \times 10^{-2}}$ & \begin{tabular}[c]{@{}c@{}} $\mathbf{\approx 64}$ \\ \scriptsize\textbf{(Robust)} \end{tabular} \\
 $6.0 \times 10^{-5}$ & 100\% & 11.9 & $1.80 \times 10^{-3}$ & $3.33 \times 10^{-2}$ & $\approx 61$ \\
 $1.0 \times 10^{-4}$ & 100\% & 13.5 & $2.09 \times 10^{-3}$ & $3.46 \times 10^{-2}$ & $\approx 58$ \\
 \bottomrule
@@ -1174,9 +1176,11 @@ $1.0 \times 10^{-4}$ & 100\% & 13.5 & $2.09 \times 10^{-3}$ & $3.46 \times 10^{-
 
 As illustrated in Fig.~\ref{fig:robustez_perturbacao_estocastica}b:
 \begin{enumerate}
-    \item \textbf{Stabilization Zone ($\mathrm{Tol}_{\mathrm{floor}} \ge 1.5 \times 10^{-5}$):} Increasing $\mathrm{Tol}_{\mathrm{det}}$ from $1.0 \times 10^{-6}$ to $1.5 \times 10^{-5}$ produces a sharp, monotonic reduction in curl interpolation error (a $2.1\times$ precision gain from $6.86 \times 10^{-2}$ down to $3.20 \times 10^{-2}$), while preserving optimal matrix conditioning ($\kappa(\mathbf{A}) \le 73$, reaching $\approx 64$ at $\mathrm{Tol}_{\mathrm{det}} = 3.0 \times 10^{-5}$).
-    \item \textbf{Compact Support Locality Invariance ($K_{\mathrm{avg}} \le 11.3$):} This precision gain requires expanding the candidate search neighborhood from $K_{\mathrm{avg}} = 6.3$ to only $K_{\mathrm{avg}} = 10.3 - 11.3$ nodes. Crucially, this value matches the average neighborhood size observed on unperturbed clouds ($K_{\mathrm{avg}} \approx 11.0$, Table~\ref{tab:interpolacao_L1_vs_P1}), demonstrating that the absolute tolerance floor effectively suppresses directional collinearities without unphysical support dilation, thereby strictly preserving $\mathcal{O}(\log N)$ $k$-d tree computational efficiency.
+    \item \textbf{Stabilization Zone ($\mathrm{Tol}_{\mathrm{floor}} \ge 1.5 \times 10^{-5}$):} Increasing $\mathrm{Tol}_{\mathrm{det}}$ from $1.0 \times 10^{-6}$ to $1.5 \times 10^{-5}$ produces a sharp, monotonic reduction in curl interpolation error (a $2.1\times$ precision gain from $6.86 \times 10^{-2}$ down to $3.20 \times 10^{-2}$), while maintaining bounded matrix conditioning ($\kappa_2(\mathbf{A}) \le 73$, reaching $\approx 64$ at $\mathrm{Tol}_{\mathrm{det}} = 3.0 \times 10^{-5}$).
+    \item \textbf{Compact Support Locality Invariance ($K_{\mathrm{avg}} \le 11.3$):} This precision gain requires expanding the candidate search neighborhood from $K_{\mathrm{avg}} = 6.3$ to only $K_{\mathrm{avg}} = 10.3 - 11.3$ nodes. Crucially, this value matches the average neighborhood size observed on unperturbed clouds ($K_{\mathrm{avg}} \approx 11.0$, Table~\ref{tab:interpolacao_L1_vs_P1}), demonstrating that the absolute tolerance floor effectively suppresses directional collinearities without unphysical support dilation, thereby preserving $\mathcal{O}(\log N)$ $k$-d tree computational efficiency.
 \end{enumerate}
+
+While this benchmark demonstrates the mechanical action of the determinant floor across an individual perturbed refinement sequence, a full Monte Carlo characterization involving ensembles of tens of stochastic realizations per refinement level constitutes an important avenue for future statistical validation of generalized unstructured cloud generators.
 
 
 % ---------------------------------------------------------
