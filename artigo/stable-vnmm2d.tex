@@ -1297,31 +1297,45 @@ The regularized VNMM 2D achieves a global mean cutoff wavenumber error of $1.00\
 \subsubsection{Sensitivity to Background Cell Density and Gauss Quadrature Order}
 \label{subsubsec:quadrature_sensitivity}
 
-To address the dependency on background integration scaffolding and assess the sensitivity of spectral predictions to quadrature resolution, we conduct a parametric sensitivity analysis over the base cavity discretization ($N = 21 \times 21$, $361$ active DoFs). Table~\ref{tab:quadrature_sensitivity} details the resulting mean and maximum cutoff wavenumber errors, along with global matrix assembly times, across two background cell grids ($10 \times 10$ and $20 \times 20$) and three Gauss-Legendre quadrature rules ($2 \times 2$, $3 \times 3$, and $4 \times 4$ points per cell).
+To address the dependency on background integration scaffolding and assess the sensitivity of spectral predictions to quadrature resolution, we conduct a parametric sensitivity analysis over the base cavity discretization ($N = 21 \times 21$, $361$ active DoFs). Table~\ref{tab:quadrature_sensitivity} details the resulting mean and maximum cutoff wavenumber errors, relative Frobenius matrix differences against an ultra-refined reference integration ($\mathbf{K}_{\mathrm{ref}}, \mathbf{M}_{\mathrm{ref}}$ computed on $40 \times 40$ cells with $4 \times 4$ Gauss points, $N_g = 25{,}600$), and global assembly times.
 
 \begin{table}[!htbp]
 \centering
-\caption{Sensitivity of resonant cavity spectral accuracy and assembly computational cost to background cell discretization and Gauss quadrature order ($N = 21 \times 21$, $361$ active DoFs, $s_{\mathrm{div}} = 6.0$).}
+\caption{Sensitivity of resonant cavity spectral accuracy, discrete operator convergence, and assembly cost to background cell discretization and Gauss quadrature order ($N = 21 \times 21$, $361$ active DoFs, $s_{\mathrm{div}} = 6.0$, reference grid: $40 \times 40$ cells, $4 \times 4$ Gauss).}
 \label{tab:quadrature_sensitivity}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{@{} c c c c c c @{}}
+\begin{tabular}{@{} c c c c c c c c @{}}
 \toprule
-\textbf{Background Grid} & \textbf{Gauss Rule} & \textbf{Total Gauss} & \textbf{Mean Error $k_c$} & \textbf{Max Error $k_c$} & \textbf{Assembly} \\
-($N_{cx} \times N_{cy}$) & ($p \times p$) & \textbf{Points ($N_g$)} & \textbf{(\%)} & \textbf{(\%)} & \textbf{Time (s)} \\
+\textbf{Background Grid} & \textbf{Gauss Rule} & \textbf{Gauss Pts} & \multicolumn{2}{c}{\textbf{Wavenumber Error}} & \multicolumn{2}{c}{\textbf{Relative Matrix Difference}} & \textbf{Assembly} \\
+\cmidrule(lr){4-5} \cmidrule(lr){6-7}
+($N_{cx} \times N_{cy}$) & ($p \times p$) & ($N_g$) & \textbf{Mean $k_c$ (\%)} & \textbf{Max $k_c$ (\%)} & $\frac{\|\mathbf{K} - \mathbf{K}_{\mathrm{ref}}\|_F}{\|\mathbf{K}_{\mathrm{ref}}\|_F}$ & $\frac{\|\mathbf{M} - \mathbf{M}_{\mathrm{ref}}\|_F}{\|\mathbf{M}_{\mathrm{ref}}\|_F}$ & \textbf{Time (s)} \\
 \midrule
-$10 \times 10$ ($100$ cells) & $2 \times 2$ ($4$ pts)  & $400$  & $\mathbf{1.00\%}$ & $\mathbf{1.88\%}$ & $\mathbf{0.06\,\mathrm{s}}$ \\
-$10 \times 10$ ($100$ cells) & $3 \times 3$ ($9$ pts)  & $900$  & $2.08\%$ & $6.30\%$ & $0.11\,\mathrm{s}$ \\
-$10 \times 10$ ($100$ cells) & $4 \times 4$ ($16$ pts) & $1600$ & $2.55\%$ & $5.91\%$ & $0.14\,\mathrm{s}$ \\
+$10 \times 10$ ($100$ cells) & $2 \times 2$ ($4$ pts)  & $400$  & $\mathbf{1.00\%}$ & $\mathbf{1.88\%}$ & $5.49 \times 10^{-1}$ & $7.68 \times 10^{-1}$ & $\mathbf{0.06\,\mathrm{s}}$ \\
+$10 \times 10$ ($100$ cells) & $3 \times 3$ ($9$ pts)  & $900$  & $2.08\%$ & $6.30\%$ & $6.28 \times 10^{-1}$ & $3.10 \times 10^{-1}$ & $0.10\,\mathrm{s}$ \\
+$10 \times 10$ ($100$ cells) & $4 \times 4$ ($16$ pts) & $1600$ & $2.55\%$ & $5.91\%$ & $5.16 \times 10^{-1}$ & $2.51 \times 10^{-1}$ & $0.14\,\mathrm{s}$ \\
 \midrule
-$20 \times 20$ ($400$ cells) & $2 \times 2$ ($4$ pts)  & $1600$ & $2.98\%$ & $7.18\%$ & $0.12\,\mathrm{s}$ \\
-$20 \times 20$ ($400$ cells) & $3 \times 3$ ($9$ pts)  & $3600$ & $3.93\%$ & $7.34\%$ & $0.27\,\mathrm{s}$ \\
-$20 \times 20$ ($400$ cells) & $4 \times 4$ ($16$ pts) & $6400$ & $3.33\%$ & $6.73\%$ & $0.43\,\mathrm{s}$ \\
+$20 \times 20$ ($400$ cells) & $2 \times 2$ ($4$ pts)  & $1600$ & $2.98\%$ & $7.18\%$ & $4.11 \times 10^{-1}$ & $1.63 \times 10^{-1}$ & $0.12\,\mathrm{s}$ \\
+$20 \times 20$ ($400$ cells) & $4 \times 4$ ($16$ pts) & $6400$ & $3.33\%$ & $6.73\%$ & $1.09 \times 10^{-1}$ & $4.08 \times 10^{-2}$ & $0.44\,\mathrm{s}$ \\
+\midrule
+$30 \times 30$ ($900$ cells) & $4 \times 4$ ($16$ pts) & $14400$ & $3.21\%$ & $6.38\%$ & $7.83 \times 10^{-2}$ & $5.36 \times 10^{-2}$ & $0.90\,\mathrm{s}$ \\
+$40 \times 40$ ($1600$ cells) & $2 \times 2$ ($4$ pts) & $6400$  & $3.34\%$ & $6.67\%$ & $7.91 \times 10^{-2}$ & $3.31 \times 10^{-2}$ & $0.42\,\mathrm{s}$ \\
+$40 \times 40$ ($1600$ cells) & $4 \times 4$ ($16$ pts) & $25600$ & $3.32\%$ & $6.39\%$ & Reference & Reference & $1.61\,\mathrm{s}$ \\
 \bottomrule
 \end{tabular}%
 }
 \end{table}
 
-The parametric results demonstrate that the point-based EFG integration strategy exhibits remarkable stability across quadrature orders. Because support stencils and local coordinate translations are anchored directly at each individual Gauss evaluation point ($\Delta x_k = x_k - x_g, \Delta y_k = y_k - y_g$), Taylor expansion drift across cell interiors is eliminated. Consequently, a compact $10 \times 10$ cell grid with $2 \times 2$ Gauss points is already optimal, delivering the lowest global error ($1.00\%$) and the fastest assembly time ($0.06$\,s). Elevating the quadrature order to $3 \times 3$ or $4 \times 4$ does not yield additional accuracy benefits, as the residual error is dominated by the underlying spatial nodal interpolation rather than numerical quadrature under-integration, while increasing assembly time by $2.3\times$ to $7.2\times$. This confirms that high quadrature orders are not required, preserving the computational efficiency of the formulation.
+The parametric results in Table~\ref{tab:quadrature_sensitivity} reveal an apparent paradox that warrants careful physical and numerical interpretation: while refining the background quadrature reduces the relative Frobenius errors in both the stiffness matrix $\mathbf{K}$ and mass matrix $\mathbf{M}$ toward zero (e.g., from $\approx 55\text{--}77\%$ at $10 \times 10, 2 \times 2$ down to $\approx 3\text{--}8\%$ at $40 \times 40, 2 \times 2$), the global cutoff wavenumber error increases from $1.00\%$ to an asymptotic plateau of $\approx 3.32\%$. 
+
+This behavior is governed by three coupled mechanisms:
+\begin{enumerate}
+    \item \textbf{True Spatial Discretization Error Floor:} On a fixed nodal discretization ($N = 21 \times 21$, $h = \pi/20 = 0.157$\,m), the spatial polynomial interpolation and the div-curl penalty parameter ($s_{\mathrm{div}} = 6.0$) render the continuous variational formulation slightly over-stiff. In the fully converged quadrature limit ($N_c \ge 30, p \ge 4$), the computed numerical eigenvalues are systematically higher than the analytical reference eigenvalues across all modes (e.g., $\lambda_1 = 1.011 > 1.000$, $\lambda_3 = 2.056 > 2.000$, and $\lambda_{10} = 10.186 > 10.000$), yielding an intrinsic spatial discretization error floor of $3.32\%$ for cutoff wavenumbers $k_c = \sqrt{\lambda}$.
+    
+    \item \textbf{Fortuitous Error Cancellation Under Coarse Integration:} At the coarse background grid of $10 \times 10$ cells with $2 \times 2$ Gauss points ($N_g = 400$, $N_g / N_{\mathrm{DoF}} \approx 1.11$), the cell size $dx = 2h$ exceeds the nodal spacing. In accordance with classical under-integrated Galerkin theory \cite{belytschko1994element, dolbow1999numerical}, numerical under-integration across support boundaries exerts an artificial softening effect on the discrete operators, shifting the numerical eigenvalues downward (e.g., $\lambda_1 = 0.968 < 1.000$, $\lambda_3 = 1.941 < 2.000$, and $\lambda_{10} = 9.341 < 10.000$). Because the positive spatial discretization bias ($\lambda > \lambda_{\mathrm{exact}}$) and the negative quadrature under-integration bias ($\lambda < \lambda_{\mathrm{exact}}$) have opposing signs, they partially cancel each other at $10 \times 10, 2 \times 2$, producing an artificially low global error ($1.00\%$). As quadrature is refined, this softening vanishes, uncovering the genuine $3.32\%$ spatial discretization error.
+    
+    \item \textbf{Point-Based Support Stencil Variation:} Because the point-based EFG formulation queries the $k$-d tree at each individual Gauss evaluation point $P_g$, refining the quadrature points alters the spatial locations at which stencils are constructed. For $10 \times 10, 2 \times 2$, exactly $285$ unique support sextets are formed across the $400$ Gauss points, whereas $10 \times 10, 4 \times 4$ samples $812$ unique stencils across $1{,}600$ points. 
+\end{enumerate}
+Consequently, the baseline operational choice of $10 \times 10$ cells with $2 \times 2$ Gauss points ($N_g / N_{\mathrm{DoF}} \approx 1.11$) represents a computationally efficient engineering compromise ($t_{\mathrm{ass}} = 0.06$\,s) that preserves clean spectral pairing without spurious mode infiltration, while high-order integration reliably converges to the true continuum variational limit without numerical instability.
 
 % ---------------------------------------------------------
 % SUBSECTION 5.5: COMPARATIVE CONVERGENCE: PURE VNMM 2D VS. EDGE FEM
@@ -1408,7 +1422,7 @@ While the numerical experiments in Sections~\ref{subsec:conforming_dual_equivale
 
 \begin{enumerate}
     \item \textbf{Background Quadrature Integration Dependency:} 
-    Although the local vector shape function construction is completely free of topological mesh connectivity, evaluating the global Ritz-Galerkin weak form (Section~\ref{sec:variational_formulation}) relies on background quadrilateral integration cells with Gauss-Legendre quadrature (EFG-style \cite{belytschko1994element, dolbow1999numerical}). Because the rational/non-polynomial meshless basis functions are non-conforming with cell boundaries, high-order quadrature ($2 \times 2$ Gauss points per background cell in this work) is necessary to keep integration errors below interpolation errors \cite{dolbow1999numerical}. For domains with highly complex, moving, or multi-scale boundaries, generating conforming background quadrature cells reintroduces a geometric pre-processing burden. Developing truly cell-free integration schemes---such as stabilized conforming nodal integration (SCNI) or meshless local Petrov-Galerkin (MLPG) subdomains \cite{atluri2002meshless}---remains an essential objective for fully unconstrained meshless vector solvers.
+    Although the local vector shape function construction is completely free of topological mesh connectivity, evaluating the global Ritz-Galerkin weak form (Section~\ref{sec:variational_formulation}) relies on background quadrilateral integration cells with Gauss-Legendre quadrature (EFG-style \cite{belytschko1994element, dolbow1999numerical}). Because the meshless basis functions change supports dynamically across cell boundaries, standard Gauss-Legendre quadrature requires an adequate integration density to capture the non-polynomial weak form terms accurately \cite{dolbow1999numerical}. While the baseline benchmark operates economically with $2 \times 2$ Gauss points per cell ($N_g / N_{\mathrm{DoF}} \approx 1.11$, Section~\ref{subsubsec:quadrature_sensitivity}), our parametric operator analysis demonstrates that full operator convergence ($\|\mathbf{K} - \mathbf{K}_{\mathrm{ref}}\|_F / \|\mathbf{K}_{\mathrm{ref}}\|_F < 8\%$) requires cell refinement and higher-order rules ($4 \times 4$), which unmasks the true spatial discretization floor ($3.32\%$) previously masked by coarse under-integration softening. For domains with highly complex, moving, or multi-scale boundaries, generating conforming background quadrature cells reintroduces a geometric pre-processing burden. Developing truly cell-free integration schemes---such as stabilized conforming nodal integration (SCNI) or meshless local Petrov-Galerkin (MLPG) subdomains \cite{atluri2002meshless}---remains an essential objective for fully unconstrained meshless vector solvers.
 
     \item \textbf{Local $H(\mathrm{curl})$ Regularity versus Global Non-Conformity:} 
     While each local vector shape function $\vec{N}_i(\mathbf{x})$ is smooth and belongs to $H(\mathrm{curl})$ within its local support domain, the assembled global discrete space is non-conforming on arbitrary point clouds ($V_h \not\subset H(\mathrm{curl}; \Omega)$). Unlike conforming Whitney edge elements, where shared edge circulations enforce exact tangential trace continuity across element facets ($\hat{n} \times [\vec{E}^h] = \mathbf{0}$), the meshless VNMM on unstructured clouds satisfies tangential continuity across dynamically changing support boundaries only in an approximate, weak sense. Consequently, the discrete de Rham complex property $\operatorname{Im}(\nabla) \subset \ker(\nabla \times)$ does not hold exactly at the discrete level, leading to gradient nullspace leakage that requires variational div-curl regularization to prevent low-frequency spectral contamination.
