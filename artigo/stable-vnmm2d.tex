@@ -1451,39 +1451,40 @@ While the numerical experiments in Sections~\ref{subsec:conforming_dual_equivale
 \section{Conclusion and Future Works}
 \label{sec:conclusion}
 
-This paper has presented a comprehensive mathematical, algebraic, and variational framework for the Vector Nodal Meshless Method (VNMM 2D) applied to electromagnetic vector field problems and resonant cavity analysis. By addressing key mathematical limitations of early solenoidal vector meshless formulations, this work provides a stabilized and accurate computational framework for vector approximation on arbitrary point clouds without mesh connectivity.
+This paper has presented an investigation into the mathematical, algebraic, and variational aspects of the Vector Nodal Meshless Method (VNMM 2D) applied to electromagnetic vector field interpolation and resonant cavity eigenvalue analysis. By identifying the origin of curl stagnation in early solenoidal vector meshless formulations and addressing stencil ill-conditioning, this work establishes a stabilized framework for vector approximation on unstructured point clouds without mesh connectivity.
 
 \subsection{Summary of Core Contributions and Key Findings}
 \label{subsec:summary_contributions}
 
-A pivotal advancement established in this work lies in overcoming the topological constraints of earlier VNMM literature \cite{ortiz2023tese, goncalves2025tese}. In foundational studies by Ortiz \cite{ortiz2023tese} and Gonçalves \cite{goncalves2025tese}, support node selection relied strictly on background geometric structures, such as planar subdivisions or Delaunay triangulations, to prevent algebraic singularities and enforce interface field continuity. While effective in structured scenarios, this requirement restricted the method's flexibility and preserved a partial dependence on mesh generation tools. 
-
-The present work addresses this topological bottleneck, demonstrating that the VNMM can operate robustly on \textbf{unstructured node distributions and arbitrary vector director orientations} without requiring auxiliary planar subdivisions or background mesh connectivity for approximation.
+A central objective of this work was to overcome the topological mesh dependence present in early VNMM studies \cite{ortiz2023tese, goncalves2025tese}. In foundational formulations, candidate support selection relied on background geometric scaffolding, such as planar subdivisions or Delaunay triangulations, to prevent algebraic placement degeneracies. The present work addresses this dependency, demonstrating that the VNMM can be formulated directly on \textbf{unstructured node distributions and arbitrary vector director orientations} within the tested configurations without requiring auxiliary planar subdivisions or background mesh connectivity for local shape function construction.
 
 The primary methodological contributions and validation findings of this research are summarized as follows:
 
 \textbf{Primary Methodological Contributions:}
 \begin{enumerate}
-    \item \textbf{Elimination of Modal Aliasing via Complete $\mathcal{P}^1$ Vector Basis:} 
-    Transitioning from the incomplete 3-term solenoidal space $\mathcal{L}^1$ to the complete linear polynomial vector space $\mathcal{P}^1 = \mathcal{P}_1 \times \mathcal{P}_1$ ($M_{\mathrm{supp}} = 6$ nodes) resolves all four independent spatial components of the local Jacobian tensor $\{\partial E_x/\partial x$, $\partial E_x/\partial y$, $\partial E_y/\partial x$, $\partial E_y/\partial y\}$. This removes the derivative aliasing mechanism identified for the incomplete $\mathcal{L}^1$ basis, breaking the $\mathcal{O}(1)$ curl stagnation plateau of $\mathcal{L}^1$ and restoring first-order convergence $\mathcal{O}(h^{0.97})$ for the curl operator $(\nabla \times \vec{E}^h)_z$, alongside an observed superconvergent rate of $\mathcal{O}(h^{2.17})$ for the electric field $\vec{E}^h$ on the evaluated $TE_{11}$ benchmark ($19.8\times$ precision gain and $25.9\times$ curl error reduction on the finest grid).
+    \item \textbf{Exact Local Dual Equivalence to Whitney Edge Elements:} 
+    We proved and verified numerically down to machine precision ($\approx 10^{-16}$) that on conforming simplicial elements, the 3-node VNMM $\mathcal{L}^1$ is constructively isomorphic to canonical Whitney 1-form edge elements. This establishes that the $\mathcal{O}(1)$ curl stagnation observed in earlier meshless implementations is not an intrinsic defect of the solenoidal space $\mathcal{L}^1$ itself, but rather arises from deploying an incomplete polynomial basis within a pointwise collocation framework devoid of closed-contour line integrals.
+
+    \item \textbf{Resolution of Modal Aliasing via Complete $\mathcal{P}^1$ Vector Basis:} 
+    Transitioning from the incomplete solenoidal space $\mathcal{L}^1$ to the complete affine polynomial vector space $\mathcal{P}^1 = \mathcal{P}_1 \times \mathcal{P}_1$ ($M_{\mathrm{supp}} = 6$ nodes) restores the full 4-component local Jacobian representation $\{\partial E_x/\partial x$, $\partial E_x/\partial y$, $\partial E_y/\partial x$, $\partial E_y/\partial y\}$. In the tested point-cloud collocation setting, this eliminates the derivative aliasing mechanism of $\mathcal{L}^1$, overcoming the observed $\mathcal{O}(1)$ curl stagnation plateau and achieving first-order curl convergence ($\mathcal{O}(h^{0.97})$) alongside an observed empirical superconvergence of $\mathcal{O}(h^{2.17})$ for electric field interpolation on the evaluated analytical $TE_{11}$ cavity benchmark.
 
     \item \textbf{Automated Support Selection and Algebraic Stabilization on Irregular Clouds:} 
-    By replacing pre-defined spatial subdivisions with a 4-phase selection algorithm combining $k$-d tree spatial queries with scale-dependent determinant thresholding ($[\det(\mathbf{A}_{6\times6})] = [L]^4$), the solver automatically identifies well-conditioned support sextets across unstructured node distributions. Enforcing an absolute tolerance floor ($\operatorname{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$) provides a unified algebraic filter against ill-conditioned stencils, yielding bounded condition numbers in the tested configurations ($\kappa_2(\mathbf{A}) \le 73$ at the operational baseline floor $\operatorname{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$, decreasing to $\approx 64$ at the compromise threshold $3.0 \times 10^{-5}$) and ensuring monotonic convergence across the evaluated sequence under $25\%$ stochastic spatial jitter and random director orientations.
+    By replacing pre-defined geometric subdivisions with an automated selection algorithm coupling $k$-d tree spatial queries with scale-dependent determinant thresholding ($[\det(\mathbf{A}_{6\times6})] = [L]^4$), the approach identifies admissible, well-conditioned support sextets across irregular node distributions. Incorporating an absolute tolerance floor ($\operatorname{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$) filters out near-singular stencils in the tested configurations, bounding condition numbers ($\kappa_2(\mathbf{A}) \le 73$ at the baseline floor, decreasing to $\approx 64$ at the compromise threshold $3.0 \times 10^{-5}$) and preserving monotonic convergence under $25\%$ stochastic spatial jitter and random director orientations in the evaluated realization.
 \end{enumerate}
 
 \textbf{Spectral Validation and Benchmark Findings:}
 \begin{enumerate}
-    \item \textbf{Spectral Purity in Resonant Cavity Benchmarks:} 
-    To control discrete gradient nullspace leakage ($\nabla \times (\nabla \phi) \neq \mathbf{0}$ at quadrature points), the stabilized VNMM was coupled to a Ritz-Galerkin weak formulation with div-curl penalty regularization ($s_{\mathrm{div}} = 6.0$). In transverse electric ($TE_z$) resonant cavity calculations with $s_{\mathrm{div}} = 6.0$, this shifts non-physical gradient states outside the operational frequency window of the tested setup ($\lambda > 50$), yielding clean modal pairing and restricting the mean cutoff wavenumber error to $1.00\%$.
+    \item \textbf{Spectral Behavior in Resonant Cavity Benchmarks:} 
+    In the tested transverse electric ($TE_z$) resonant cavity setup, discrete gradient nullspace leakage ($\nabla \times (\nabla \phi) \neq \mathbf{0}$ at quadrature points) is controlled through a Ritz-Galerkin weak formulation with div-curl penalty regularization. Selecting $s_{\mathrm{div}} = 6.0$ as a representative value within the stable penalty range shifts non-physical gradient states beyond the tested operational frequency window ($\lambda > 50$), producing clean modal pairing and restricting the mean cutoff wavenumber error to approximately $1.00\%$ on the baseline benchmark grid.
 
-    \item \textbf{Convergence Validation against Canonical Edge FEM:} 
-    A systematic benchmark across six refinement levels confirmed that the stabilized VNMM displays an observed fitted slope of $\mathcal{O}(h_{\mathrm{DoF}}^{2.80})$ over the tested refinement interval (compared to the canonical $\mathcal{O}(h_{\mathrm{DoF}}^{1.93})$ for Whitney 1-form edge elements), rapidly closing the coarse-grid accuracy gap with finite elements as $h \to 0$ without requiring conformal mesh connectivity.
+    \item \textbf{Convergence Trend Relative to Canonical Edge FEM:} 
+    A comparative benchmark across six refinement levels confirmed that the stabilized VNMM displays an observed empirical fitted slope of $\mathcal{O}(h_{\mathrm{DoF}}^{2.80})$ over the tested refinement interval (compared to $\mathcal{O}(h_{\mathrm{DoF}}^{1.93})$ for Whitney 1-form edge elements). While Edge FEM retains superior absolute precision per degree of freedom on regular geometries, the meshless formulation progressively reduces the coarse-grid gap as $h \to 0$ while operating without conforming mesh connectivity.
 \end{enumerate}
 
 \subsection{Promising Directions for Future Research}
 \label{subsec:future_works}
 
-Building upon the established 2D vector meshless foundation, several promising avenues for future research are identified:
+Building upon the 2D vector meshless formulation developed and validated in this work, several important open questions and extensions remain for future research:
 
 \begin{enumerate}
     \item \textbf{Extension to 3D Vector Nodal Meshless Formulations (3D VNMM):} 
