@@ -59,7 +59,21 @@
 \usepackage{bm}                       % Para notação de vetores em negrito
 \usepackage{microtype}                % Melhora o espaçamento de palavras
 \usepackage{float}                    % Controle preciso de posicionamento de figuras e tabelas [H], [!htbp]
-\usepackage{hyperref}                 % Cria links ativos para equações e referências
+\usepackage[pdfpagelabels=false]{hyperref} % Cria links ativos para equações e referências
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+    pdfencoding=auto,
+    hypertexnames=false
+}
+\pdfstringdefDisableCommands{%
+  \def\corref#1{}%
+  \def\cnotenum#1{}%
+}
+\setlength{\emergencystretch}{2em}
+\hbadness=3000
 
 \journal{Engineering Analysis with Boundary Elements}
 
@@ -214,8 +228,8 @@ To synthesize these fundamental distinctions and contextualize the VNMM within t
 
 \begin{table}[!htbp]
 \centering
-\small
-\setlength{\tabcolsep}{4pt}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
 \caption{Conceptual comparison of spatial discretization paradigms in computational electromagnetics.}
 \label{tab:meshless_comparison}
 \begin{tabularx}{\linewidth}{@{}
@@ -372,7 +386,7 @@ Similarly, at material interfaces $\Gamma_{\text{int}}$ separating subdomains wi
 \paragraph{Local Regularity versus Global $H(\mathrm{curl})$ Conformity}
 It is essential to clarify the mathematical distinction between local vector regularity and global conformity in the meshless context \cite{monk2003finite, belytschko1994element}. Within any given local support domain (the virtual macro-simplex associated with a fixed node sextet), the vector shape functions $\vec{N}_i$ are smooth polynomials and thus belong strictly to $H(\mathrm{curl})$ locally. On conforming simplicial meshes where supports coincide with cell triangles, the global assembled space is indeed $H(\mathrm{curl})$-conforming (as proven in Section~\ref{subsubsec:formal_proof_dual_whitney}). However, on arbitrary, unconstrained point clouds, the active support is determined dynamically for each evaluation point. Across the boundaries where the active support changes, the tangential trace $[\hat{n} \times \vec{E}^h]$ generally exhibits small numerical discontinuities. Consequently, the assembled global discrete space is \emph{not} globally $H(\mathrm{curl})$-conforming ($V_h \not\subset H(\mathrm{curl}; \Omega)$); rather, it is a non-conforming approximation built from local $H(\mathrm{curl})$-regular vector fields. This distinction is central to understanding both the behavior of the discrete curl operator and the necessity of variational regularization.
 
-\subsection{The Incomplete $\mathcal{L}^1$ Basis (3 Support Nodes)}
+\subsection{The Incomplete \texorpdfstring{$\mathcal{L}^1$}{L1} Basis (3 Support Nodes)}
 \label{subsec:incomplete_l1_basis}
 The construction of vector shape functions in the 2D VNMM directly inherits the mathematical foundations of $H(\mathbf{curl})$-conforming edge-based meshless approximations \cite{lima2017edge, silva2018new}. The incomplete 3-term solenoidal polynomial space 
 \begin{equation}
@@ -586,24 +600,28 @@ Subtracting the projection of the unrepresented linear components $(\mathbf{J}(P
 
 The numerical error in the reconstructed curl is therefore governed by the propagation of the projection remainder:
 \begin{equation}
-|(\nabla \times \vec{E})_z - (\nabla \times \vec{E}^h)_z| = 2 |c_{\mathrm{exact}} - c| \sim \|\operatorname{Row}_3(\mathbf{A}^{-1})\| \|\mathbf{r}\| = \mathcal{O}(h^{-1}) \cdot \mathcal{O}(h) = \mathcal{O}(1),
+\begin{aligned}
+|(\nabla \times \vec{E})_z - (\nabla \times \vec{E}^h)_z| &= 2 |c_{\mathrm{exact}} - c| \\
+&\sim \|\operatorname{Row}_3(\mathbf{A}^{-1})\| \|\mathbf{r}\| = \mathcal{O}(h^{-1}) \cdot \mathcal{O}(h) = \mathcal{O}(1),
+\end{aligned}
 \end{equation}
 which is independent of $h$ and generates the irreducible $\mathcal{O}(1)$ stagnation plateau, completing the proof.
 \end{proof}
 
 \begin{table}[!htbp]
 \centering
-\small
 \caption{Comparison of polynomial completeness, dimensionality, and derivative reproduction capabilities between the incomplete solenoidal space $\mathcal{L}^1$ and the complete linear vector polynomial space $\mathcal{P}^1$.}
 \label{tab:basis_completeness_comparison}
-\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}} l c c c c c c @{}}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{} l c c c c c c @{}}
 \toprule
 \textbf{Vector Space} & $\dim$ & $E_x, E_y$ & $\partial E_x/\partial x$ & $\partial E_x/\partial y$ & $\partial E_y/\partial x$ & $\partial E_y/\partial y$ \\
 \midrule
 $\mathcal{L}^1$ (Incomplete solenoidal) & 3 & \checkmark & \texttimes & \checkmark & \checkmark & \texttimes \\
 $\mathcal{P}^1 = \mathcal{P}_1 \times \mathcal{P}_1$ (Complete linear) & 6 & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
 \bottomrule
-\end{tabular*}
+\end{tabular}%
+}
 \end{table}
 
 In Edge Finite Element Methods (EFEM), this lack of explicit normal derivative representation does not cause stagnation because continuous line circulation integrals along element edges enforce closed-contour flux cancellation via Stokes' theorem \cite{nedelec1980mixed, monk2003finite}. In the VNMM, however, continuous line integrals are replaced by discrete pointwise projections \cite{goncalves2025tese}. Consequently, the $\mathcal{O}(1)$ derivative noise floor established in Proposition~1 cannot be eliminated by spatial mesh refinement alone ($h \to 0$). Adopting the complete linear polynomial vector space $\mathcal{P}^1 = \mathcal{P}_1 \times \mathcal{P}_1$, as formulated in Section~\ref{subsec:complete_P1_basis}, provides a direct and sufficient remedy by resolving the complete local Jacobian and eliminating this specific derivative-aliasing mechanism on unconstrained point clouds.
@@ -612,7 +630,7 @@ In Edge Finite Element Methods (EFEM), this lack of explicit normal derivative r
 % ---------------------------------------------------------
 % SUBSECTION 2.3: THE COMPLETE P1 VECTOR POLYNOMIAL BASIS
 % ---------------------------------------------------------
-\subsection{The Complete $\mathcal{P}^1$ Vector Polynomial Basis}
+\subsection{The Complete \texorpdfstring{$\mathcal{P}^1$}{P1} Vector Polynomial Basis}
 \label{subsec:complete_P1_basis}
 
 To eliminate the derivative modal aliasing and curl stagnation inherent to the incomplete $\mathcal{L}^1$ space, we reformulate local vector interpolation using the complete linear polynomial vector space $\mathcal{P}^1 = \mathcal{P}_1 \times \mathcal{P}_1$. This transition draws a direct mathematical analogy to Nédélec's second family of mixed finite elements \cite{nedelec1986new}, in which vector field approximations are constructed over complete polynomial spaces $(\mathbb{P}_k)^d$ rather than solenoidal-restricted subspaces.
@@ -715,7 +733,7 @@ Unlike scalar meshless formulations where matrix singularity is dictated purely 
 % ---------------------------------------------------------
 % SUBSECTION 3.1: L1 BASIS SINGULARITIES (3x3 MATRIX)
 % ---------------------------------------------------------
-\subsection{Singularities and Geometric Constraints in the Incomplete $\mathcal{L}^1$ Basis ($3 \times 3$ Matrix)}
+\subsection{Singularities and Geometric Constraints in the Incomplete \texorpdfstring{$\mathcal{L}^1$}{L1} Basis (\texorpdfstring{$3 \times 3$}{3x3} Matrix)}
 \label{subsec:singularities_L1}
 
 To establish a systematic classification of algebraic singularities in the original VNMM 2D formulation \cite{ortiz2021nodal, ortiz2023tese}, we revisit the $3 \times 3$ local moment placement matrix $\mathbf{A}$ generated by the 3-node solenoidal basis $\mathcal{L}^1$. Originally derived in Eq.~\eqref{eq:matrix_A_L1}, $\mathbf{A}$ is restated below to facilitate the singularity analysis:
@@ -756,7 +774,7 @@ In contrast to the pathological or decoupled configurations depicted in Figs.~\r
 % ---------------------------------------------------------
 % SUBSECTION 3.2: SINGULARITY ANALYSIS IN THE COMPLETE P1 BASIS (6x6 MATRIX)
 % ---------------------------------------------------------
-\subsection{Singularity Analysis in the Complete $\mathcal{P}^1$ Vector Basis ($6 \times 6$ Matrix)}
+\subsection{Singularity Analysis in the Complete \texorpdfstring{$\mathcal{P}^1$}{P1} Vector Basis (\texorpdfstring{$6 \times 6$}{6x6} Matrix)}
 \label{subsec:singularities_P1}
 
 To eliminate derivative modal aliasing and achieve strict first-order convergence $\mathcal{O}(h^1)$ for the field curl operator $(\nabla \times \vec{E}^h)_z$, Section~\ref{subsec:complete_P1_basis} introduced the complete linear polynomial vector space $\mathcal{P}^1 = \mathcal{P}_1 \times \mathcal{P}_1$ ($M_{\mathrm{supp}} = 6$ support nodes). Imposing the vector Kronecker delta projection property across a candidate sextet yields a local placement system governed by the $6 \times 6$ local moment placement matrix $\mathbf{A} \in \mathbb{R}^{6 \times 6}$. Evaluated in local translated coordinates centered at the evaluation point $P(x_P, y_P)$ ($\Delta x_k = x_k - x_P, \Delta y_k = y_k - y_P$), matrix $\mathbf{A}$ was derived in Eq.~\eqref{eq:matrix_A_6x6} and is restated below to facilitate the singularity analysis:
@@ -888,10 +906,11 @@ As shown in Table~\ref{tab:support_selection_cost}, the actual number of candida
 Even under $25\%$ stochastic spatial jitter and random director orientations (Section~\ref{subsec:stochastic_perturbations}), early stopping remains highly efficient: $\bar{N}_{\mathrm{tested}}$ averages $1.1\text{--}2.5$ sextets for $N \le 1{,}928$, rising to $\bar{N}_{\mathrm{tested}} \approx 40.7$ (with a peak of $293$ evaluations) only in the ultra-dense perturbed cloud ($N = 4{,}192$), where the absolute floor $\mathrm{Tol}_{\mathrm{floor}}$ forces wider combinatorial sampling to bypass near-parallel directors. Even in that extreme case, total support selection time for $400$ evaluation points is merely $0.10$\,s.
 
 Because $K_{\mathrm{initial}} = 12$ is fixed independently of $N$, the maximum local combinatorial operations per evaluation point are asymptotically bounded by a constant factor $\mathcal{O}(1)$ ($C \le \binom{12}{6} = 924$). Therefore, the overall computational complexity across $N_{\mathrm{eval}}$ evaluation points scales as:
-\begin{equation}
-T_{\mathrm{support}} = \underbrace{\mathcal{O}(N \log N)}_{\text{$k$-d tree construction}} + \sum_{p=1}^{N_{\mathrm{eval}}} \left[ \underbrace{\mathcal{O}(\log N)}_{\text{spatial query}} + \underbrace{\bar{N}_{\mathrm{tested}}^{(p)} \, C_{\det(6 \times 6)}}_{\text{local algebraic qualification}} \right] \approx \mathcal{O}(N_{\mathrm{eval}} \log N).
+\begin{align}
+T_{\mathrm{support}} &= \underbrace{\mathcal{O}(N \log N)}_{\text{$k$-d tree construction}} \nonumber \\
+&\quad + \sum_{p=1}^{N_{\mathrm{eval}}} \left[ \underbrace{\mathcal{O}(\log N)}_{\text{spatial query}} + \underbrace{\bar{N}_{\mathrm{tested}}^{(p)} \, C_{\det(6 \times 6)}}_{\text{local algebraic qualification}} \right] \approx \mathcal{O}(N_{\mathrm{eval}} \log N).
 \label{eq:support_total_complexity}
-\end{equation}
+\end{align}
 Eq.~\eqref{eq:support_total_complexity} establishes that combinatorial candidate generation provides the necessary geometric-directional degrees of freedom to bypass pathological singularities in arbitrary point clouds, while the early-stopping mechanism maintains a small empirical pre-factor ($\bar{N}_{\mathrm{tested}} \sim \mathcal{O}(1)\text{--}\mathcal{O}(10)$), ensuring scalable and predictable computational efficiency.
 
 
@@ -904,7 +923,7 @@ Eq.~\eqref{eq:support_total_complexity} establishes that combinatorial candidate
 
 To evaluate the spectral accuracy and verify the suppression of non-physical spurious modes within the operational bandwidth in the Vector Nodal Meshless Method (VNMM 2D), we formulate the electromagnetic vector eigenvalue problem in a two-dimensional resonant cavity $\Omega = [0, \pi] \times [0, \pi] \subset \mathbb{R}^2$ with perfect electric conductor (PEC) walls $\partial\Omega$ \cite{harrington2001time}.
 
-\subsection{The Transverse Electric ($TE_z$) Vector Eigenvalue Problem}
+\subsection{The Transverse Electric (\texorpdfstring{$TE_z$}{TEz}) Vector Eigenvalue Problem}
 \label{subsec:strong_form}
 
 In a homogeneous, isotropic, and lossless dielectric medium ($\epsilon_r = 1.0, \mu_r = 1.0$), time-harmonic Transverse Electric modes ($TE_z$) are governed by the vector double-curl Helmholtz equation for the transverse electric field $\vec{E}(\mathbf{x}) = [E_x(x,y), E_y(x,y)]^T$ \cite{monk2003finite, ortiz2023tese}:
@@ -933,10 +952,11 @@ Let the Hilbert space of square-integrable vector fields with square-integrable 
 In standard Edge Finite Element Formulations (EFEM), the discrete space is globally $H(\mathrm{curl})$-conforming ($V_h \subset \mathcal{S}$) because shared tangential degrees of freedom across conforming element facets guarantee exact tangential trace continuity ($\hat{n} \times [\vec{E}^h] = \mathbf{0}$) \cite{monk2003finite, bossavit1990spurious}. Under this global conformity, the discrete de Rham complex property $\operatorname{Im}(\nabla) \subset \ker(\nabla \times)$ holds exactly: irrotational gradient fields ($\vec{E} = \nabla \phi$) yield an identically zero curl ($\nabla \times (\nabla \phi) \equiv \mathbf{0}$) and map directly into the zero eigenvalue subspace ($\lambda = 0$), preventing spectrum contamination without auxiliary constraints \cite{monk2003finite, boffi1999computational}.
 
 In contrast, on arbitrary point clouds, the assembled meshless VNMM vector approximation is globally non-conforming ($V_h \not\subset \mathcal{S}$). Although each local vector shape function $\vec{N}_i(\mathbf{x})$ possesses local $H(\mathrm{curl})$ regularity within its local support stencil, the active support changes across the domain, producing minor tangential trace discontinuities across support boundaries. Consequently, the discrete de Rham complex does not hold exactly at background quadrature points, and discrete gradient states produce non-zero numerical curl residues ($\nabla \times (\nabla \phi) \neq \mathbf{0}$). This discrete gradient nullspace leakage causes spurious non-physical modes to infiltrate the low-frequency spectrum. To suppress these spurious modes without introducing saddle-point system indefiniteness or auxiliary Lagrange multipliers, we adopt a \textbf{Ritz-Galerkin weak formulation with div-curl penalty regularization} \cite{monk2003finite, bossavit1998computational}:
-\begin{equation}
-\int_{\Omega} \frac{1}{\mu_r} (\nabla \times \vec{W})_z (\nabla \times \vec{E})_z \, d\Omega + s_{\mathrm{div}} \int_{\Omega} (\nabla \cdot \vec{W}) (\nabla \cdot \vec{E}) \, d\Omega = \lambda \int_{\Omega} \epsilon_r \vec{W} \cdot \vec{E} \, d\Omega, \quad \forall \vec{W} \in \mathcal{S}
+\begin{multline}
+\int_{\Omega} \frac{1}{\mu_r} (\nabla \times \vec{W})_z (\nabla \times \vec{E})_z \, d\Omega + s_{\mathrm{div}} \int_{\Omega} (\nabla \cdot \vec{W}) (\nabla \cdot \vec{E}) \, d\Omega \\
+= \lambda \int_{\Omega} \epsilon_r \vec{W} \cdot \vec{E} \, d\Omega, \quad \forall \vec{W} \in \mathcal{S}
 \label{eq:regularized_weak_form}
-\end{equation}
+\end{multline}
 where $s_{\mathrm{div}} > 0$ is the non-dimensional divergence penalty parameter \cite{monk2003finite}.
 
 Upon discretizing the electric field as $\vec{E}^h(\mathbf{x}) = \sum_{j=1}^{M} c_j \vec{N}_j(\mathbf{x})$ and test functions as $\vec{W}^h(\mathbf{x}) = \sum_{i=1}^{M} d_i \vec{N}_i(\mathbf{x})$, the second bilinear term in Eq.~\eqref{eq:regularized_weak_form} defines the \textbf{divergence penalty matrix} $\mathbf{K}_{\mathrm{div}} \in \mathbb{R}^{M \times M}$, whose entries $K_{\mathrm{div}, ij}$ are explicitly defined by:
@@ -1017,7 +1037,7 @@ This section assesses the numerical performance of the proposed Vector Nodal Mes
     \item \textbf{Limitations and Scope of Applicability (Section~\ref{subsec:limitations_scope}):} Focused on establishing honest methodological boundaries, discussing background quadrature dependencies, extreme point-cloud anisotropy, penalty parameter sensitivity, and high-frequency dispersion.
 \end{enumerate}
 
-\subsection{Conforming Local Dual Equivalence: VNMM $\mathcal{L}^1$ vs. Whitney EFEM}
+\subsection{Conforming Local Dual Equivalence: VNMM \texorpdfstring{$\mathcal{L}^1$}{L1} vs. Whitney EFEM}
 \label{subsec:conforming_dual_equivalence}
 
 To establish a rigorous baseline connecting the proposed vector meshless formulation to established finite element theory, this first experiment evaluates the local vector interpolation capacity of the incomplete 3-node basis $\mathcal{L}^1$ against lowest-order Whitney 1-form edge elements (N\'ed\'elec 1st-kind) \cite{nedelec1980mixed, monk2003finite}.
@@ -1072,7 +1092,7 @@ The interpolation performance is assessed for the analytical $TE_{11}$ cavity mo
 
 To ensure strict statistical consistency, all field and derivative errors are evaluated across a fixed, invariant Cartesian grid of $1{,}600$ internal sampling points ($40 \times 40$) distributed uniformly in $[0.04\pi, 0.96\pi]^2$. The computational domain is discretized over six refinement levels, with node counts $N \in \{84$, $186$, $416$, $884$, $1{,}928$, $4{,}192\}$ and average nodal spacings ranging from $h_{\mathrm{avg}} = 0.5236$~m down to $0.0654$~m ($h_{\mathrm{avg}} \in \{0.52$, $0.35$, $0.22$, $0.15$, $0.10$, $0.07\}$~m).
 
-\subsubsection{Empirical Validation of Curl Stagnation in $\mathcal{L}^1$}
+\subsubsection{Empirical Validation of Curl Stagnation in \texorpdfstring{$\mathcal{L}^1$}{L1}}
 When evaluated on unconstrained meshless clouds, the 3-node solenoidal basis $\mathcal{L}^1$ exhibits the fundamental breakdown in derivative convergence predicted theoretically in Section~\ref{subsec:L1_aliasing_analysis}. As illustrated by the log-log curves in Fig.~\ref{fig:convergencia_interpolacao_L1_vs_P1}a, the electric field RMS error $\|\vec{E} - \vec{E}^h\|_{\mathrm{RMS}}$ under $\mathcal{L}^1$ decreases monotonically at a first-order rate of $\mathcal{O}(h^{0.97})$, dropping from $1.91 \times 10^{-1}$ ($h = 0.5236$~m) down to $2.46 \times 10^{-2}$ ($h = 0.0654$~m).
 
 However, as revealed in Fig.~\ref{fig:convergencia_interpolacao_L1_vs_P1}b, the RMS error of the curl operator $\|(\nabla \times \vec{E})_z - (\nabla \times \vec{E}^h)_z\|_{\mathrm{RMS}}$ \textbf{stagnates at an $\mathcal{O}(1)$ error plateau} ($\approx 0.85$, varying between $8.33 \times 10^{-1}$ and $8.88 \times 10^{-1}$, asymptotic rate $\mathcal{O}(h^{-0.01}) \approx \mathcal{O}(1)$), failing to converge under spatial refinement ($N = 4{,}192$). This persistent noise floor confirms the modal aliasing mechanism derived in Section~\ref{subsec:L1_aliasing_analysis}, wherein unrepresented normal field derivatives leak into the rotational coefficient via the inverted placement matrix $\mathbf{A}^{-1}$.
@@ -1083,7 +1103,7 @@ However, as revealed in Fig.~\ref{fig:convergencia_interpolacao_L1_vs_P1}b, the 
     \label{fig:convergencia_interpolacao_L1_vs_P1}
 \end{figure}
 
-\subsubsection{Restoration of Asymptotic Convergence via Complete $\mathcal{P}^1$ Basis}
+\subsubsection{Restoration of Asymptotic Convergence via Complete \texorpdfstring{$\mathcal{P}^1$}{P1} Basis}
 Expanding the local approximation space to the complete linear polynomial vector space $\mathcal{P}^1$ introduced in Section~\ref{subsec:complete_P1_basis} provides six independent degrees of freedom, capturing all four components of the local Jacobian tensor $\nabla\vec{E}^h$. Local support domains (averaging $K_{\mathrm{avg}} \approx 11.0$ neighbors, ranging from $10.7$ to $11.2$) are selected via $k$-d tree spatial searches subject to the adaptive quartic determinant threshold developed in Section~\ref{sec:support_selection_algorithm}.
 
 As demonstrated in Fig.~\ref{fig:convergencia_interpolacao_L1_vs_P1}, transitioning to $\mathcal{P}^1$ removes derivative modal aliasing and achieves two major performance gains:
@@ -1141,7 +1161,7 @@ Although extensive Monte Carlo characterization across multi-seed ensembles rema
 \label{fig:robustez_perturbacao_estocastica}
 \end{figure*}
 
-\subsubsection{Failure of the Pure Quartic Scaling Law in Dense Perturbed Clouds (Fig.~\ref{fig:robustez_perturbacao_estocastica}a)}
+\subsubsection{Failure of the Pure Quartic Scaling Law in Dense Perturbed Clouds}
 \label{subsubsec:quartic_law_failure}
 
 As established in Section~\ref{subsec:singularities_P1}, placement matrix columns 3--6 in the complete $\mathcal{P}^1$ basis scale linearly with local node spacing as $\mathcal{O}(h)$, causing the local placement determinant to scale quartically as $\det(\mathbf{A}_{6 \times 6}) \sim \mathcal{O}(h^4)$. When employing a pure unconstrained scaling law $\mathrm{Tol}_{\mathrm{det}}^{\mathrm{pure}}(h) \propto h^4$, the determinant acceptance threshold drops precipitously in dense grids, reaching $\mathrm{Tol}_{\mathrm{det}} \approx 1.2 \times 10^{-6}$ at $h = 0.0654$\,m ($N = 4{,}192$).
@@ -1153,14 +1173,14 @@ Under stochastic spatial-directional noise, this unconstrained drop causes numer
     \item Because spatial derivatives scale dimensionally as $\mathcal{O}(h^{-1})$, the ill-conditioned inverted matrix $\mathbf{A}^{-1}$ amplifies local interpolation errors. As shown by the dashed crimson curve in Fig.~\ref{fig:robustez_perturbacao_estocastica}a, this causes the curl operator RMS error to flatten and stagnate as $h \to 0.0654$~m, remaining elevated at an RMS error of $\approx 6.01 \times 10^{-2}$ to $8.66 \times 10^{-2}$ for $(\nabla \times \vec{E}^h)_z$.
 \end{itemize}
 
-\subsubsection{Restoration of Monotonicity via Absolute Tolerance Floor (Fig.~\ref{fig:robustez_perturbacao_estocastica}a)}
+\subsubsection{Restoration of Monotonicity via Absolute Tolerance Floor}
 \label{subsubsec:restoration_via_floor}
 
 Enforcing the absolute lower bound $\mathrm{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$ in the scale-dependent law (Eq.~\eqref{eq:scale_dependent_determinant_floor}, Section~\ref{sec:support_selection_algorithm}) mitigates this derivative instability.
 
 As demonstrated by the solid teal curves in Fig.~\ref{fig:robustez_perturbacao_estocastica}a, when $h \to 0.0654$\,m, the lower bound $\mathrm{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$ overrides the decaying quartic threshold. This forces the $k$-d tree candidate search to expand its local sampling radius moderately ($K_{\mathrm{avg}}$ expands from $6.3$ to $10.3$), automatically skipping near-collinear or near-parallel neighbor combinations that violate the determinant floor. By dynamically identifying an Admissible Robust Support via the 4-phase selection algorithm (Section~\ref{subsec:4phase_pipeline}), the method restores monotonic error reduction across the tested refinement range for both field $\vec{E}^h$ and curl $(\nabla \times \vec{E}^h)_z$, reducing curl error to $3.20 \times 10^{-2}$ on the finest mesh ($N = 4{,}192$).
 
-\subsubsection{Parametric Neighborhood Trade-off and Stabilization Threshold (Fig.~\ref{fig:robustez_perturbacao_estocastica}b)}
+\subsubsection{Parametric Neighborhood Trade-off and Stabilization Threshold}
 \label{subsubsec:parametric_tradeoff}
 
 To identify the best-performing compromise between conditioning, curl error, and neighborhood size on $\Omega = [0, \pi]^2$, a systematic parametric sweep was conducted on the stochastically perturbed fine grid ($N = 4{,}192, h = 0.0654$\,m) across determinant thresholds ranging from $\mathrm{Tol}_{\mathrm{det}} = 1.0 \times 10^{-6}$ up to $1.0 \times 10^{-4}$. The quantitative results are summarized in Table~\ref{tab:stochastic_sensitivity_ultradense}.
@@ -1215,14 +1235,14 @@ Figure~\ref{fig:espectro_cavidade_regularizacao} presents the discrete eigenvalu
 
 Numerical evaluations are conducted on the base-case regular discretization with $N_x = 21, N_y = 21$ ($N_{\mathrm{total}} = 441$ nodes, yielding $M_{\mathrm{active}} = 361$ internal degrees of freedom after enforcing homogeneous tangential PEC boundary conditions $c_k = 0$ on $\partial\Omega$). The weak form integrals are computed over a background grid of $10 \times 10$ quadrilateral cells ($N_c = 100$) using $2 \times 2$ Gauss-Legendre quadrature (400 Gauss points), maintaining a suitable quadrature-to-DoF ratio ($N_g / N_{\mathrm{DoF}} \approx 1.11$) \cite{belytschko1994element, liu2005introduction, liu2009mesh}.
 
-\subsubsection{Spectral Contamination in the Unregularized Curl-Curl Formulation ($s_{\mathrm{div}} = 0.0$)}
+\subsubsection{Spectral Contamination in the Unregularized Curl-Curl Formulation (\texorpdfstring{$s_{\mathrm{div}} = 0.0$}{s_div = 0.0})}
 \label{subsubsec:unregularized_formulation}
 
 As analyzed theoretically in Section~\ref{subsec:weak_form_regularization}, point-collocated meshless vector shape functions fail to form an exact discrete de Rham complex at background quadrature points. Unlike Edge Finite Element Methods (EFEM) that achieve closed-contour circulation cancellation, discrete gradient fields in unregularized meshless formulations generate non-zero numerical curl residues ($\nabla \times (\nabla \phi) \neq \mathbf{0}$ at Gauss points).
 
 The empirical impact of this nullspace leakage is clearly observed in Fig.~\ref{fig:espectro_cavidade_regularizacao}a. Setting $s_{\mathrm{div}} = 0.0$ transforms analytical zero-eigenvalues belonging to $\ker(\nabla \times)$ into small, positive non-zero states ($0.8 < \lambda < 5.0$). These non-physical spurious gradient modes infiltrate the physical $TE_z$ sequence, corrupting modal ordering and elevating the mean relative cutoff wavenumber error to unacceptable levels ($19.75\%$ to $90.0\%$).
 
-\subsubsection{Spectral Purification via Div-Curl Penalty Regularization ($s_{\mathrm{div}} = 6.0$)}
+\subsubsection{Spectral Purification via Div-Curl Penalty Regularization (\texorpdfstring{$s_{\mathrm{div}} = 6.0$}{s_div = 6.0})}
 \label{subsubsec:regularized_formulation}
 
 To eliminate the non-physical spurious gradient modes identified in Section~\ref{subsubsec:unregularized_formulation} without introducing auxiliary Lagrange multipliers or expanding the system matrix, the div-curl variational penalty parameter is activated with $s_{\mathrm{div}} = 6.0$ in Eq.~\eqref{eq:regularized_weak_form}.
@@ -1236,21 +1256,12 @@ The experimental confirmation of this selective purification is demonstrated in 
 
 The numerical performance of the regularized VNMM 2D ($\mathcal{P}^1$, $s_{\mathrm{div}} = 6.0$) for the first 10 physical $TE_{nm}$ cavity modes is detailed in Table~\ref{tab:cavity_eigenvalues_base_case}.
 
-\begin{table}[!ht]
+\begin{table}[!htbp]
 \centering
-\footnotesize
-\setlength{\tabcolsep}{3pt}
 \caption{Comparison of the first 10 physical $TE_{nm}$ resonant modes in the square PEC cavity $\Omega = [0, \pi]^2$ between analytical reference values and the proposed regularized VNMM 2D formulation ($\mathcal{P}^1$, $s_{\mathrm{div}} = 6.0$, $361$ active DoFs).}
 \label{tab:cavity_eigenvalues_base_case}
-\begin{tabularx}{\linewidth}{@{}
->{\centering\arraybackslash}p{0.16\linewidth}
->{\centering\arraybackslash}p{0.14\linewidth}
->{\centering\arraybackslash}p{0.14\linewidth}
->{\centering\arraybackslash}p{0.14\linewidth}
->{\centering\arraybackslash}p{0.12\linewidth}
->{\centering\arraybackslash}p{0.14\linewidth}
->{\centering\arraybackslash}X
-@{}}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{} c c c c c c c @{}}
 \toprule
 \textbf{Mode ($TE_{nm}$)} & $\lambda_{\mathrm{analytical}}$ & $k_{c, \mathrm{analytical}}$ & $\lambda_{\mathrm{VNMM}}$ & $k_{c, \mathrm{VNMM}}$ & \textbf{Error $\lambda$ (\%)} & \textbf{Error $k_c$ (\%)} \\
 \midrule
@@ -1267,7 +1278,8 @@ $TE_{03}$ & $9.00$ & $3.000$ & $9.3409$ & $3.056$ & $3.79\%$ & $\mathbf{1.88\%}$
 \midrule
 \textbf{Global Mean} & --- & --- & --- & --- & $\mathbf{2.01\%}$ & $\mathbf{1.00\%}$ \\
 \bottomrule
-\end{tabularx}
+\end{tabular}%
+}
 \end{table}
 
 The regularized VNMM 2D achieves a global mean cutoff wavenumber error of $1.00\%$ (with a maximum error of $1.88\%$ for the $TE_{03}$ mode), strictly matching analytical degeneracies ($TE_{10}/TE_{01}$, $TE_{20}/TE_{02}$, $TE_{21}/TE_{12}$, $TE_{30}/TE_{03}$) without spurious mode infiltration. Importantly, parametric sensitivity evaluations confirm that this spectral purification is highly robust across a wide penalty window $s_{\mathrm{div}} \in [4.0, 10.0]$, verifying that the formulation does not require delicate, problem-dependent parameter tuning.
@@ -1346,9 +1358,9 @@ Table~\ref{tab:convergence_6_meshes} and Fig.~\ref{fig:convergence_vnmm_fem} rep
 
 \begin{table}[!htbp]
 \centering
-\small
 \caption{Comparative convergence of resonant wavenumber $k_c$ for $TE_z$ modes in a 2D PEC cavity over 6 mesh refinement levels between Edge FEM (Whitney 1st-kind) and Pure VNMM 2D ($\mathcal{P}^1$ complete basis).}
 \label{tab:convergence_6_meshes}
+\resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{} c *{3}{c} *{3}{c} @{}}
 \toprule
 \textbf{Mesh} & \multicolumn{3}{c}{\textbf{Edge FEM (N\'ed\'elec 1st-kind)}} & \multicolumn{3}{c}{\textbf{Pure VNMM 2D ($\mathcal{P}^1$ Complete Basis)}} \\
@@ -1362,7 +1374,8 @@ $N$ & $N_{\mathrm{DoF}}$ & $h_{\mathrm{DoF}}$ [m] & Error (\%) & $N_{\mathrm{DoF
 25 & 1680 & 0.0766 & 0.093 & 1681 & 0.0766 & 0.493 \\
 29 & 2296 & 0.0656 & 0.068 & 2209 & 0.0668 & 0.259 \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 Inspection of the benchmark results reveals several noteworthy numerical properties:
