@@ -301,9 +301,9 @@ Consistent $\mathcal{O}(h^1)$ via full Jacobian space \\
 
 Despite the mathematical elegance of the original Vector Nodal Meshless Method (VNMM 2D) \cite{ortiz2021nodal, ortiz2023tese}, early formulations were fundamentally tied to structured support selection strategies. In foundational studies \cite{ortiz2021nodal, ortiz2023tese, goncalves2023vector}, candidate support triads $\{P_k, \vec{t}_k\}_{k=1}^3$ were constructed by referencing background spatial structures, such as macro-element planar subdivisions or Delaunay triangulations. While effective for canonical geometries, relying on underlying meshes contradicts the core ``meshless'' promise of unconstrained point-cloud discretization \cite{liu2009mesh, goncalves2025tese}.
 
-When attempting to liberate the VNMM from spatial meshes by performing automated nearest-neighbor searches (e.g., $k$-d tree queries) over arbitrary unstructured point clouds, a severe mathematical limitation emerges: \textbf{the numerical approximation of the curl operator $(\nabla \times \vec{E}^h)_z$ fails to converge, exhibiting an asymptotic $\mathcal{O}(1)$ relative error plateau regardless of spatial grid refinement $h \to 0$} \cite{goncalves2025tese}.
+When attempting to liberate the VNMM from spatial meshes by performing automated nearest-neighbor searches (e.g., $k$-d tree queries) over arbitrary unstructured point clouds, a severe mathematical limitation emerges: \textbf{for the arbitrary point-cloud collocation setting investigated here, the numerical approximation of the curl operator $(\nabla \times \vec{E}^h)_z$ fails to converge, exhibiting an $\mathcal{O}(1)$ relative error plateau under spatial grid refinement} \cite{goncalves2025tese}.
 
-Unlike Edge Finite Element Methods (EFEM), where boundary line circulation integrals enforce closed-contour flux cancellation via Stokes' theorem \cite{nedelec1980mixed, monk2003finite}, point-collocated meshless schemes rely on discrete pointwise projections \cite{goncalves2025tese}. In the classical 3-node solenoidal basis $\mathcal{L}^1$, polynomial incompleteness prevents local shape functions from resolving diagonal (dilatational) gradient components ($\partial E_x/\partial x$, $\partial E_y/\partial y$). Under pointwise collocation, unrepresented gradient components generate truncation residuals that interact with the inverted local moment placement matrix, leaking directly into the field curl calculation as an irreducible modal aliasing noise floor \cite{li2007meshfree, liu2009mesh}.
+Unlike Edge Finite Element Methods (EFEM), where boundary line circulation integrals enforce closed-contour flux cancellation via Stokes' theorem \cite{nedelec1980mixed, monk2003finite}, point-collocated meshless schemes rely on discrete pointwise projections \cite{goncalves2025tese}. In the classical 3-node solenoidal basis $\mathcal{L}^1$, polynomial incompleteness prevents local shape functions from resolving diagonal (dilatational) gradient components ($\partial E_x/\partial x$, $\partial E_y/\partial y$). Under pointwise collocation on unstructured node distributions, unrepresented gradient components generate truncation residuals that interact with the inverted local moment placement matrix, leaking directly into the field curl calculation as an $\mathcal{O}(1)$ modal aliasing noise floor under refinement \cite{li2007meshfree, liu2009mesh}.
 
 A complete, step-by-step mathematical derivation of this modal aliasing mechanism---including the local Taylor series Jacobian decomposition and remainder error scaling---is presented in detail in Section~\ref{subsec:L1_aliasing_analysis}.
 
@@ -535,7 +535,7 @@ Under the regular-support assumptions considered here, guaranteeing that the loc
 \subsubsection{Mathematical Origin of Modal Aliasing and Curl Stagnation}
 \label{subsec:L1_aliasing_analysis}
 
-Despite its solenoidal identity and local dual equivalence to Whitney edge elements on conforming simplices, the incomplete $\mathcal{L}^1$ basis suffers from a fundamental mathematical limitation when applied to point-collocated meshless approximations on arbitrary point clouds. Specifically, the numerical approximation of the curl operator $(\nabla \times \vec{E}^h)_z$ fails to achieve asymptotic convergence, stagnating at an irreducible $\mathcal{O}(1)$ relative error plateau regardless of spatial grid refinement $h \to 0$ \cite{goncalves2025tese}.
+Despite its solenoidal identity and exact local dual equivalence to Whitney edge elements on conforming simplices, the incomplete $\mathcal{L}^1$ basis exhibits a critical limitation when transitioned to meshless point clouds. For the arbitrary point-cloud collocation setting investigated here, the $\mathcal{L}^1$ curl approximation fails to achieve asymptotic convergence under refinement, stagnating at an $\mathcal{O}(1)$ relative error plateau \cite{goncalves2025tese}. Crucially, this limitation does not imply an intrinsic defect in $\mathcal{L}^1$ as a vector space in general---as evidenced by its optimal convergence in conforming Whitney edge elements where closed-contour circulations enforce Stokes' cancellation---but rather stems from deploying an incomplete polynomial basis within a meshless pointwise collocation framework devoid of closed boundary integrals.
 
 The mathematical origin of this derivative stagnation lies in the local Taylor series expansion of the exact electric field $\vec{E}$ centered at the evaluation point $P(x_P, y_P)$ \cite{li2007meshfree, liu2009mesh}:
 \begin{equation}
@@ -568,7 +568,7 @@ Let $\vec{E} \in [C^2(\Omega)]^2$ be an arbitrary twice continuously differentia
 \frac{\partial E_x^h}{\partial x} = 0, \quad \frac{\partial E_y^h}{\partial y} = 0, \quad \text{and} \quad \frac{\partial E_x^h}{\partial y} + \frac{\partial E_y^h}{\partial x} = 0.
 \label{eq:L1_derivative_constraints}
 \end{equation}
-Consequently, under point-collocated projection on unstructured node clouds, unrepresented normal gradients ($\partial E_x/\partial x, \partial E_y/\partial y \neq 0$) generate a projection remainder $\mathbf{r} \sim \mathcal{O}(h)$ that couples into the rotational coefficient through the inverted moment placement matrix $\mathbf{A}^{-1} \sim \mathcal{O}(h^{-1})$, inducing an irreducible $\mathcal{O}(1)$ derivative aliasing error in the discrete curl operator:
+Consequently, under point-collocated projection on unstructured node clouds, unrepresented normal gradients ($\partial E_x/\partial x, \partial E_y/\partial y \neq 0$) generate a projection remainder $\mathbf{r} \sim \mathcal{O}(h)$ that couples into the rotational coefficient through the inverted moment placement matrix $\mathbf{A}^{-1} \sim \mathcal{O}(h^{-1})$, inducing an $\mathcal{O}(1)$ derivative aliasing error in the discrete curl operator under refinement in the collocated setting:
 \begin{equation}
 \|(\nabla \times \vec{E})_z - (\nabla \times \vec{E}^h)_z\|_{L^2(\Omega)} \sim \|\mathbf{A}^{-1} \mathbf{r}\| = \mathcal{O}(h^{-1}) \cdot \mathcal{O}(h) = \mathcal{O}(1).
 \label{eq:aliasing_order_proof}
@@ -605,7 +605,7 @@ The numerical error in the reconstructed curl is therefore governed by the propa
 &\sim \|\operatorname{Row}_3(\mathbf{A}^{-1})\| \|\mathbf{r}\| = \mathcal{O}(h^{-1}) \cdot \mathcal{O}(h) = \mathcal{O}(1),
 \end{aligned}
 \end{equation}
-which is independent of $h$ and generates the irreducible $\mathcal{O}(1)$ stagnation plateau, completing the proof.
+which is independent of $h$ and generates the $\mathcal{O}(1)$ stagnation plateau in the tested collocated setting, completing the proof.
 \end{proof}
 
 \begin{table}[!htbp]
