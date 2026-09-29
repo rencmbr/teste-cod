@@ -287,7 +287,7 @@ $\mathcal{O}(1)$ stagnation on arbitrary clouds \\
 None (Arbitrary point clouds) & 
 Pointwise projection $c_k = \vec{E}(P_k) \cdot \vec{t}_k$ & 
 Natural tangential director alignment & 
-Div-curl Ritz-Galerkin penalty ($s_{\mathrm{div}} = 6.0$) & 
+Div-curl Ritz-Galerkin penalty ($s_{\mathrm{div}} \in [4.0, 10.0]$) & 
 Consistent $\mathcal{O}(h^1)$ via full Jacobian space \\
 \bottomrule
 \end{tabularx}
@@ -312,14 +312,14 @@ A complete, step-by-step mathematical derivation of this modal aliasing mechanis
 % ---------------------------------------------------------
 \subsection{Scope and Main Contributions of the Paper}
 \label{subsec:scope_contributions}
-This paper presents a stabilized Vector Nodal Meshless Method (VNMM 2D) designed for robust and accurate vector field approximations on arbitrary point clouds without mesh connectivity. The core methodological contributions of this work are threefold:
+This paper presents a stabilized Vector Nodal Meshless Method (VNMM 2D) designed for stable and accurate vector field approximations on unconstrained point clouds without mesh connectivity. The core methodological contributions of this work are threefold:
 
 \begin{enumerate}
     \item \textbf{Elimination of Modal Aliasing via Complete $\mathcal{P}^1$ Vector Basis:} 
     Transitioning from the incomplete 3-term solenoidal space $\mathcal{L}^1$ to the complete linear polynomial vector space $\mathcal{P}^1 = \mathcal{P}_1 \times \mathcal{P}_1$ ($M_{\mathrm{supp}} = 6$) resolves all four independent spatial components of the local Taylor Jacobian tensor $\mathbf{J}^h = \nabla \vec{E}^h$. As formulated in Section~\ref{subsec:complete_P1_basis} following the aliasing diagnosis in Section~\ref{subsec:L1_aliasing_analysis}, this complete representation eliminates the derivative truncation mechanism that causes the $\mathcal{O}(1)$ curl stagnation plateau in point-collocated meshless stencils.
 
     \item \textbf{Scale-Dependent Support Selection with Absolute Determinant Floor:} 
-    To enable robust, mesh-free operation on unstructured node distributions, we establish a geometric singularity classification in $\mathbb{R}^{6\times6}$ (Sections~\ref{subsec:singularities_L1} and \ref{subsec:singularities_P1}) and propose an automated 4-phase support selection algorithm combining $k$-d tree spatial queries with scale-dependent determinant thresholding ($[\det(\mathbf{A}_{6\times6})] = [L]^4$) and an absolute tolerance floor ($\operatorname{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$) (Section~\ref{sec:conditioning}), filtering ill-conditioned stencils without background triangulation.
+    To enable stable, mesh-free operation on unstructured node distributions, we establish a geometric singularity classification in $\mathbb{R}^{6\times6}$ (Sections~\ref{subsec:singularities_L1} and \ref{subsec:singularities_P1}) and propose an automated 4-phase support selection algorithm combining $k$-d tree spatial queries with scale-dependent determinant thresholding ($[\det(\mathbf{A}_{6\times6})] = [L]^4$) and an absolute tolerance floor ($\operatorname{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$) (Section~\ref{sec:conditioning}), filtering ill-conditioned stencils without background triangulation.
 
     \item \textbf{Rigorous Local Dual Equivalence Proof:} 
     We establish the Local Dual Equivalence Theorem (Section~\ref{subsubsec:formal_proof_dual_whitney}), proving that under conforming simplicial midpoints and edge directors, the local VNMM shape functions are algebraically and topologically isomorphic to lowest-order Whitney 1-forms, providing a rigorous mathematical bridge connecting nodal meshless formulations to classical Edge FEM.
@@ -530,7 +530,7 @@ This local dual Whitney equivalence resolves a longstanding misconception regard
 
 However, because the VNMM vector basis reproduces the complete polynomial space of Whitney edge elements over the virtual macro-triangle $\Omega_{x}$ defined by the intersecting dotted lines of action of vector directors $\vec{t}_k$ (Fig.~\ref{fig:whitney_vnmm_dual_equivalence}c), the valid domain for local $H(\mathrm{curl})$ field approximation and constant curl representation is not geographically restricted to the small physical convex hull of $\mathbf{x}_k$ \cite{nedelec1980mixed, monk2003finite}. Instead, as proven by the dual scaling law~\eqref{eq:dual_equivalence_scaling}, it extends throughout the entire interior bounding region of the virtual macro-triangle. 
 
-Under the regular-support assumptions considered here, guaranteeing that the local placement matrix $\mathbf{A}$ remains well-conditioned and that intersection vertices remain bounded and non-degenerate, field evaluations at any point $P \in \Omega_{x}$ preserve local $H(\mathrm{curl})$ regularity. In this setting, the complete $\mathcal{P}^1$ vector basis provides the polynomial reproduction required for first-order derivative consistency, while the corresponding asymptotic convergence rates are subsequently verified numerically in Section~\ref{sec:numerical_results}.
+Under the regular-support assumptions considered here, which require that the local placement matrix $\mathbf{A}$ remains well-conditioned and that intersection vertices remain bounded and non-degenerate, field evaluations at any point $P \in \Omega_{x}$ preserve local $H(\mathrm{curl})$ regularity. In this setting, the complete $\mathcal{P}^1$ vector basis provides the polynomial reproduction required for first-order derivative consistency, while the corresponding asymptotic convergence rates are subsequently verified numerically in Section~\ref{sec:numerical_results}.
 
 \subsubsection{Mathematical Origin of Modal Aliasing and Curl Stagnation}
 \label{subsec:L1_aliasing_analysis}
@@ -1149,7 +1149,7 @@ $N_{\mathrm{total}}$ & $h_{\mathrm{avg}}$ [m] & \multicolumn{3}{c}{\textbf{Elect
 \end{table}
 
 % ---------------------------------------------------------
-% SUBSECTION 6.3: NUMERICAL STABILITY UNDER STOCHASTIC PERTURBATIONS
+% SUBSECTION 5.3: NUMERICAL STABILITY UNDER STOCHASTIC PERTURBATIONS
 % ---------------------------------------------------------
 \subsection{Numerical Robustness in the Tested Stochastic Realization Under Spatial-Directional Perturbations}
 \label{subsec:stochastic_perturbations}
@@ -1228,7 +1228,7 @@ While this benchmark demonstrates the mechanical action of the determinant floor
 
 
 % ---------------------------------------------------------
-% SUBSECTION 6.3: RESONANT CAVITY SPECTRAL ANALYSIS AND DIV-CURL REGULARIZATION
+% SUBSECTION 5.4: RESONANT CAVITY SPECTRAL ANALYSIS AND DIV-CURL REGULARIZATION
 % ---------------------------------------------------------
 \subsection{Spectral Validation: Resonant Cavity Analysis and Div-Curl Regularization}
 \label{subsec:cavity_eigenvalues}
@@ -1292,7 +1292,7 @@ $TE_{03}$ & $9.00$ & $3.000$ & $9.3409$ & $3.056$ & $3.79\%$ & $\mathbf{1.88\%}$
 }
 \end{table}
 
-The regularized VNMM 2D achieves a global mean cutoff wavenumber error of $1.00\%$ (with a maximum error of $1.88\%$ for the $TE_{03}$ mode), strictly matching analytical degeneracies ($TE_{10}/TE_{01}$, $TE_{20}/TE_{02}$, $TE_{21}/TE_{12}$, $TE_{30}/TE_{03}$) without spurious mode infiltration. Importantly, parametric sensitivity evaluations confirm that this spectral purification is highly robust across a wide penalty window $s_{\mathrm{div}} \in [4.0, 10.0]$, verifying that the formulation does not require delicate, problem-dependent parameter tuning.
+The regularized VNMM 2D achieves a global mean cutoff wavenumber error of $1.00\%$ (with a maximum error of $1.88\%$ for the $TE_{03}$ mode), strictly matching analytical degeneracies ($TE_{10}/TE_{01}$, $TE_{20}/TE_{02}$, $TE_{21}/TE_{12}$, $TE_{30}/TE_{03}$) without spurious mode infiltration. Importantly, parametric sensitivity evaluations confirm that this spectral purification remains effective across a stable penalty window $s_{\mathrm{div}} \in [4.0, 10.0]$, verifying that the formulation does not require delicate, problem-dependent parameter tuning.
 
 \subsubsection{Sensitivity to Background Cell Density and Gauss Quadrature Order}
 \label{subsubsec:quadrature_sensitivity}
@@ -1412,10 +1412,10 @@ Inspection of the benchmark results reveals several noteworthy numerical propert
     \item \textbf{Mesh-Free Discretization Advantage:} While Edge FEM maintains superior absolute accuracy for an identical DoF count on the evaluated regular geometry, the VNMM operates entirely without triangular mesh generation. This eliminates mesh quality degradation, element inversion, and remeshing bottlenecks in geometrically complex or topologically evolving electromagnetic domains.
 \end{itemize}
 
-It is important to emphasize the methodological synergy between the support selection strategies: while the absolute tolerance floor ($\mathrm{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$) is indispensable to protect stencils against pathological degeneracies in stochastically perturbed or unconstrained point clouds (Section~\ref{subsec:stochastic_perturbations}), smooth asymptotic refinement on regular grids benefits from allowing the determinant to scale naturally as $\mathcal{O}(h^4)$ to maintain compact nearest-neighbor supports. Combined with the div-curl penalty regularization ($s_{\mathrm{div}} = 6.0$) established in Section~\ref{subsec:cavity_eigenvalues}, the global stiffness matrix $\mathbf{K}$ remains strictly well-conditioned and free of spurious spectral modes within the operational bandwidth across both structured and unstructured discretization regimes.
+It is important to emphasize the methodological synergy between the support selection strategies: while the absolute tolerance floor ($\mathrm{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$) is indispensable to protect stencils against pathological degeneracies in stochastically perturbed or unconstrained point clouds (Section~\ref{subsec:stochastic_perturbations}), smooth asymptotic refinement on regular grids benefits from allowing the determinant to scale naturally as $\mathcal{O}(h^4)$ to maintain compact nearest-neighbor supports. Combined with the div-curl penalty regularization ($s_{\mathrm{div}} = 6.0$) investigated in Section~\ref{subsec:cavity_eigenvalues}, spurious gradient nullspace modes are shifted away from the operational spectrum in the tested cavity benchmarks, while the support selection strategy maintains bounded stencil conditioning across both regular grids and perturbed clouds.
 
 % ---------------------------------------------------------
-% SUBSECTION 6.6: LIMITATIONS AND SCOPE OF APPLICABILITY
+% SUBSECTION 5.6: LIMITATIONS AND SCOPE OF APPLICABILITY
 % ---------------------------------------------------------
 \subsection{Limitations and Scope of Applicability}
 \label{subsec:limitations_scope}
