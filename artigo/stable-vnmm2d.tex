@@ -846,14 +846,42 @@ For the baseline initial neighborhood of $K_{\mathrm{initial}} = 12$ nodes emplo
 
 Crucially, however, the proposed selection algorithm does \emph{not} perform an exhaustive sweep. By coupling the progressive proximity-ordered candidate generation (Phase~2) with the \textbf{early-stopping qualification criterion} (Phase~4), the search evaluates candidate sextets sequentially and terminates immediately once an admissible support satisfying $|\det(\mathbf{A}_{6 \times 6})| \ge \mathrm{Tol}_{\mathrm{det}}(h)$ is identified. 
 
-As quantitatively demonstrated by our numerical experiments (Section~\ref{subsec:stochastic_perturbations}, Table~\ref{tab:stochastic_sensitivity_ultradense}), the average effective neighborhood size required to locate a qualified, well-conditioned support sextet remains remarkably small: $K_{\mathrm{avg}} \approx 6.3$ for regular distributions, expanding to only $K_{\mathrm{avg}} \approx 10.3 - 11.3$ under severe $25\%$ random spatial jitter and fully random director orientations. Consequently, the actual number of candidate sextets evaluated in practice ($\bar{N}_{\mathrm{tested}}$) is typically on the order of $\mathcal{O}(1)$ to $\mathcal{O}(10)$, which is orders of magnitude smaller than the combinatorial upper bound of 924.
+Crucially, a mathematical distinction must be made between the \emph{neighborhood query size} ($K_{\mathrm{avg}}$, the physical number of nearest neighbors retrieved from the $k$-d tree) and the \emph{qualification count} ($\bar{N}_{\mathrm{tested}}$, the actual number of candidate sextets evaluated algebraically via $\det(\mathbf{A}_{6\times6})$ before an admissible support is found). A queried neighborhood of $K \approx 11$ nodes contains $\binom{11}{6} = 462$ potential candidate sextets; whether combinatorial bottlenecks occur depends entirely on the effectiveness of the early-stopping qualification.
 
-Therefore, the total computational complexity of the support qualification stage across $N_{\mathrm{eval}}$ evaluation points scales as:
+To establish the computational efficiency of early stopping, Table~\ref{tab:support_selection_cost} reports the empirical performance metrics measured across six refinement levels of the resonant cavity problem ($N_{\mathrm{eval}} = 400$ Gauss integration points).
+
+\begin{table}[!htbp]
+\centering
+\caption{Computational cost of automated support selection across six cavity discretization levels ($N_{\mathrm{eval}} = 400$ Gauss evaluation points, $K_{\mathrm{initial}} = 12$).}
+\label{tab:support_selection_cost}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{} c c c c c c @{}}
+\toprule
+\textbf{Grid Nodes} & \textbf{Mean Neighbors} & \multicolumn{2}{c}{\textbf{Evaluated Sextets ($N_{\mathrm{tested}}$)}} & \textbf{Support Time} & \textbf{Assembly Time} \\
+\cmidrule(lr){3-4}
+$N$ & $K_{\mathrm{avg}}$ & \textbf{Mean} ($\bar{N}_{\mathrm{tested}}$) & \textbf{Maximum} & $t_{\mathrm{sup}}$ [s] & $t_{\mathrm{ass}}$ [s] \\
+\midrule
+$81$ ($9 \times 9$)     & 6.6 & $\mathbf{3.75}$ & 29 & 0.012 & 0.025 \\
+$169$ ($13 \times 13$)  & 6.6 & $\mathbf{3.88}$ & 29 & 0.012 & 0.025 \\
+$289$ ($17 \times 17$)  & 6.6 & $\mathbf{4.64}$ & 29 & 0.014 & 0.027 \\
+$441$ ($21 \times 21$)  & 7.1 & $\mathbf{3.21}$ &  9 & 0.011 & 0.023 \\
+$625$ ($25 \times 25$)  & 6.7 & $\mathbf{2.61}$ &  8 & 0.009 & 0.023 \\
+$841$ ($29 \times 29$)  & 6.6 & $\mathbf{2.77}$ &  8 & 0.010 & 0.022 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+As shown in Table~\ref{tab:support_selection_cost}, the actual number of candidate sextets evaluated per evaluation point remains remarkably small: $\bar{N}_{\mathrm{tested}}$ ranges from $2.61$ to $4.64$ sextets, with the maximum evaluations never exceeding $29$ across all $400$ quadrature points. Support qualification consumes only $0.009\text{--}0.014$\,s, representing approximately $40\%$ of the total global matrix assembly time ($t_{\mathrm{ass}} \approx 0.025$\,s). 
+
+Even under severe stochastic perturbations ($25\%$ spatial jitter and random director orientations, Section~\ref{subsec:stochastic_perturbations}), early stopping remains highly efficient: $\bar{N}_{\mathrm{tested}}$ averages $1.1\text{--}2.5$ sextets for $N \le 1928$, rising to $\bar{N}_{\mathrm{tested}} \approx 40.7$ (with a peak of $293$ evaluations) only in the ultra-dense perturbed cloud ($N = 4192$), where the absolute floor $\mathrm{Tol}_{\mathrm{floor}}$ forces wider combinatorial sampling to bypass near-parallel directors. Even in that extreme case, total support selection time for $400$ evaluation points is merely $0.10$\,s.
+
+Because $K_{\mathrm{initial}} = 12$ is fixed independently of $N$, the maximum local combinatorial operations per evaluation point are asymptotically bounded by a constant factor $\mathcal{O}(1)$ ($C \le \binom{12}{6} = 924$). Therefore, the overall computational complexity across $N_{\mathrm{eval}}$ evaluation points scales as:
 \begin{equation}
 T_{\mathrm{support}} = \underbrace{\mathcal{O}(N \log N)}_{\text{$k$-d tree construction}} + \sum_{p=1}^{N_{\mathrm{eval}}} \left[ \underbrace{\mathcal{O}(\log N)}_{\text{spatial query}} + \underbrace{\bar{N}_{\mathrm{tested}}^{(p)} \, C_{\det(6 \times 6)}}_{\text{local algebraic qualification}} \right] \approx \mathcal{O}(N_{\mathrm{eval}} \log N).
 \label{eq:support_total_complexity}
 \end{equation}
-Eq.~\eqref{eq:support_total_complexity} establishes that while combinatorial candidate generation provides the necessary geometric-directional degrees of freedom to bypass pathological singularities in arbitrary point clouds, the early-stopping mechanism maintains quasi-linear computational scaling, preventing combinatorial bottlenecks.
+Eq.~\eqref{eq:support_total_complexity} establishes that combinatorial candidate generation provides the necessary geometric-directional degrees of freedom to bypass pathological singularities in arbitrary point clouds, while the early-stopping mechanism maintains a small empirical pre-factor ($\bar{N}_{\mathrm{tested}} \sim \mathcal{O}(1)\text{--}\mathcal{O}(10)$), ensuring scalable and predictable computational efficiency.
 
 
 % --- SEÇÃO 4: FORMULAÇÃO DA CAVIDADE ---
