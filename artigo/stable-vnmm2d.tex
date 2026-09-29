@@ -136,7 +136,7 @@ First, we adopt the complete linear polynomial vector space $\mathcal{P}^1 = \ma
 Second, to ensure algebraic stability on irregular node distributions, we develop an automated support selection algorithm combining $k$-d tree spatial queries with scale-dependent placement matrix determinant thresholding and an absolute tolerance floor, filtering ill-conditioned stencils without requiring background mesh connectivity.
 
 To appraise these contributions, we conduct a systematic evaluation divided into numerical verification and physical validation stages.
-In the numerical verification stage, we first verify the exact algebraic and topological dual equivalence between the $\mathcal{L}^1$ VNMM and canonical Whitney 1-form edge elements on simplicial meshes down to machine precision ($\approx 10^{-16}$). We then demonstrate on arbitrary point clouds that the complete $\mathcal{P}^1$ basis recovers first-order asymptotic convergence $\mathcal{O}(h^1)$ for the curl operator, while an observed superconvergent rate of approximately $\mathcal{O}(h^2)$ ($\mathcal{O}(h^{2.17})$) is achieved for electric field interpolation on the tested $TE_{11}$ benchmark. Furthermore, a representative stochastic stress test under $25\%$ spatial jitter and random director orientations demonstrates bounded stencil conditioning ($\kappa_2(\mathbf{A}) \le 73$, reaching $\approx 64$ at optimal thresholding) across the evaluated sequence.
+In the numerical verification stage, we first verify the exact algebraic and topological local dual equivalence between the $\mathcal{L}^1$ VNMM and canonical Whitney 1-form edge elements on simplicial meshes down to machine precision ($\approx 10^{-16}$). We then demonstrate on arbitrary point clouds that the complete $\mathcal{P}^1$ basis recovers first-order asymptotic convergence $\mathcal{O}(h^1)$ for the curl operator, while an observed superconvergent rate of approximately $\mathcal{O}(h^2)$ ($\mathcal{O}(h^{2.17})$) is achieved for electric field interpolation on the tested $TE_{11}$ benchmark. Furthermore, a representative stochastic stress test under $25\%$ spatial jitter and random director orientations demonstrates bounded stencil conditioning ($\kappa_2(\mathbf{A}) \le 73$, reaching $\approx 64$ at optimal thresholding) across the evaluated sequence.
 In the physical validation stage, the stabilized VNMM is applied to two-dimensional transverse electric ($TE_z$) resonant cavity eigenvalue problems. Incorporating a Ritz-Galerkin weak formulation with div-curl penalty regularization controls discrete gradient nullspace leakage, shifting spurious modes away from the operational spectrum and yielding clean modal pairing with a $1.00\%$ mean wavenumber error. Finally, a convergence benchmark against Edge FEM across six successive refinement levels reveals an observed fitted rate of $\mathcal{O}(h_{\mathrm{DoF}}^{2.80})$ over the tested levels (compared to $\mathcal{O}(h_{\mathrm{DoF}}^{1.93})$ for Edge FEM), demonstrating rapid error reduction that progressively closes the coarse-grid accuracy gap with finite elements without requiring volumetric mesh connectivity.
 \end{abstract}
 
@@ -150,7 +150,7 @@ In the physical validation stage, the stabilized VNMM is applied to two-dimensio
 \item Complete linear basis $\mathcal{P}^1$ eliminates derivative modal aliasing in 2D VNMM.
 \item Overcomes the $\mathcal{O}(1)$ curl error plateau, recovering $\mathcal{O}(h)$ asymptotic convergence.
 \item Automated scale-dependent support selection stabilizes stencils on irregular clouds.
-\item Numerical verification confirms Whitney dual equivalence and bounded stencil conditioning.
+\item Numerical verification confirms local Whitney dual equivalence and bounded stencil conditioning.
 \item Physical validation in cavities and Edge FEM benchmark confirms spectral purity and convergence.
 \end{highlights}
 
@@ -309,19 +309,19 @@ This paper presents a stabilized Vector Nodal Meshless Method (VNMM 2D) designed
 To rigorously evaluate these core methodological contributions in computational electromagnetics, the numerical campaign is organized into two complementary stages:
 \begin{itemize}
     \item \textbf{Numerical Verification Campaign (Sections~\ref{subsec:conforming_dual_equivalence}--\ref{subsec:stochastic_perturbations}):} 
-    First, we verify the conforming dual equivalence between the incomplete $\mathcal{L}^1$ VNMM and canonical Whitney 1-form edge finite elements on simplicial meshes, demonstrating exact match of interpolation fields down to machine precision ($\approx 10^{-16}$, Section~\ref{subsec:conforming_dual_equivalence}). Second, we verify on unconstrained point clouds that the complete $\mathcal{P}^1$ basis eliminates derivative modal aliasing, recovering first-order asymptotic convergence $\mathcal{O}(h^1)$ for the curl operator, while an approximately quadratic field-interpolation rate ($\mathcal{O}(h^{2.17})$) is observed for the tested $TE_{11}$ benchmark (Section~\ref{subsec:arbitrary_meshless_interpolation}). Third, we conduct a stochastic stress test of the automated support selection algorithm under $25\%$ spatial jitter and random director orientations, demonstrating that scale-dependent thresholding with an absolute tolerance floor yields bounded condition numbers ($\kappa_2(\mathbf{A}) \le 73$) and restores monotonic error reduction along the evaluated benchmark sequence (Section~\ref{subsec:stochastic_perturbations}).
+    First, we verify the conforming local dual equivalence between the incomplete $\mathcal{L}^1$ VNMM and canonical Whitney 1-form edge finite elements on simplicial meshes, demonstrating exact match of interpolation fields down to machine precision ($\approx 10^{-16}$, Section~\ref{subsec:conforming_dual_equivalence}). Second, we verify on unconstrained point clouds that the complete $\mathcal{P}^1$ basis eliminates derivative modal aliasing, recovering first-order asymptotic convergence $\mathcal{O}(h^1)$ for the curl operator, while an approximately quadratic field-interpolation rate ($\mathcal{O}(h^{2.17})$) is observed for the tested $TE_{11}$ benchmark (Section~\ref{subsec:arbitrary_meshless_interpolation}). Third, we conduct a stochastic stress test of the automated support selection algorithm under $25\%$ spatial jitter and random director orientations, demonstrating that scale-dependent thresholding with an absolute tolerance floor yields bounded condition numbers ($\kappa_2(\mathbf{A}) \le 73$) and restores monotonic error reduction along the evaluated benchmark sequence (Section~\ref{subsec:stochastic_perturbations}).
 
     \item \textbf{Physical Validation Campaign (Sections~\ref{subsec:cavity_eigenvalues}--\ref{subsec:convergence_comparison}):} 
     First, the stabilized VNMM is applied to solve 2D transverse electric ($TE_z$) electromagnetic resonant cavity eigenvalue problems (Section~\ref{subsec:cavity_eigenvalues}). By implementing a Ritz-Galerkin weak formulation with div-curl penalty regularization ($s_{\mathrm{div}} = 6.0$), discrete gradient nullspace leakage is controlled and non-physical spurious modes are shifted outside the operational frequency band ($\lambda > 50$), yielding clean modal pairing with an average wavenumber error of $1.00\%$. Second, a convergence benchmark against canonical Edge FEM across six successive refinement levels (Section~\ref{subsec:convergence_comparison}) reveals an observed fitted rate of $\mathcal{O}(h_{\mathrm{DoF}}^{2.80})$ over the tested levels (compared to $\mathcal{O}(h_{\mathrm{DoF}}^{1.93})$ for Edge FEM), confirming that the stabilized VNMM converges systematically and closes the coarse-grid accuracy gap with edge elements without volumetric mesh connectivity.
 \end{itemize}
 
-The remainder of this paper is organized as follows: Section~\ref{sec:formulations} details the 2D VNMM vector shape function construction for $\mathcal{L}^1$ and $\mathcal{P}^1$ spaces and proves the Dual Equivalence Theorem; Section~\ref{sec:conditioning} analyzes local placement matrix singularities and formulates the support selection algorithm; Section~\ref{sec:variational_formulation} presents the div-curl regularized weak form and point-based EFG Gauss quadrature; Section~\ref{sec:numerical_results} presents the numerical verification (Sections~\ref{subsec:conforming_dual_equivalence}--\ref{subsec:stochastic_perturbations}) and physical validation benchmarks against canonical Edge FEM (Sections~\ref{subsec:cavity_eigenvalues}--\ref{subsec:convergence_comparison}); and Section~\ref{sec:conclusion} concludes the paper with future research perspectives.
+The remainder of this paper is organized as follows: Section~\ref{sec:formulations} details the 2D VNMM vector shape function construction for $\mathcal{L}^1$ and $\mathcal{P}^1$ spaces and proves the Local Dual Equivalence Theorem; Section~\ref{sec:conditioning} analyzes local placement matrix singularities and formulates the support selection algorithm; Section~\ref{sec:variational_formulation} presents the div-curl regularized weak form and point-based EFG Gauss quadrature; Section~\ref{sec:numerical_results} presents the numerical verification (Sections~\ref{subsec:conforming_dual_equivalence}--\ref{subsec:stochastic_perturbations}) and physical validation benchmarks against canonical Edge FEM (Sections~\ref{subsec:cavity_eigenvalues}--\ref{subsec:convergence_comparison}); and Section~\ref{sec:conclusion} concludes the paper with future research perspectives.
 
 % --- SEÇÃO 2: FORMULAÇÃO MATEMÁTICA ---
 \section{Mathematical Formulations of the 2D VNMM}
 \label{sec:formulations}
 
-This section establishes the foundational mathematical and functional framework of the two-dimensional Vector Nodal Meshless Method (VNMM 2D). It details the vector projection properties, field continuity enforcement, and the construction of local vector shape functions. First, the single-degree-of-freedom nodal projection scheme and the exact imposition of physical boundary conditions are defined. Next, the traditional incomplete $\mathcal{L}^1$ solenoidal space is reviewed, proving its exact topological and algebraic dual equivalence with classical Whitney 1-form edge finite elements. Finally, the complete linear polynomial vector space $\mathcal{P}^1$ is introduced to resolve all components of the local Taylor Jacobian tensor and eliminate derivative modal aliasing in unconstrained node clouds.
+This section establishes the foundational mathematical and functional framework of the two-dimensional Vector Nodal Meshless Method (VNMM 2D). It details the vector projection properties, field continuity enforcement, and the construction of local vector shape functions. First, the single-degree-of-freedom nodal projection scheme and the exact imposition of physical boundary conditions are defined. Next, the traditional incomplete $\mathcal{L}^1$ solenoidal space is reviewed, proving its exact topological and algebraic local dual equivalence with classical Whitney 1-form edge finite elements on simplicial cells. Finally, the complete linear polynomial vector space $\mathcal{P}^1$ is introduced to resolve all components of the local Taylor Jacobian tensor and eliminate derivative modal aliasing in unconstrained node clouds.
 
 \subsection{Nodal Projection and Tangential Continuity}
 \label{subsec:nodal_projection}
@@ -420,14 +420,14 @@ Therefore, the approximated $z$-directed scalar curl field $(\nabla \times \vec{
 (\nabla \times \vec{E}^h)_z = -2 \sum_{i=1}^3 \beta_{3i} e_i
 \end{equation}
 
-\subsubsection{Dual Whitney Equivalence and Constructive Isomorphism}
+\subsubsection{Local Dual Whitney Equivalence and Constructive Isomorphism}
 \label{subsubsec:dual_whitney}
 The VNMM 2D was originally conceptualized as the zero-edge-length asymptotic limit of the Edge Meshless Method (EMM) \cite{lima2017edge, ortiz2021nodal}. By examining this heritage, a fundamental mathematical duality and constructive isomorphism between the VNMM point-collocation formulation and classic lowest-order Whitney edge finite elements (N\'ed\'elec 1-forms on triangular simplices \cite{nedelec1980mixed, monk2003finite}) is formally established, as detailed in Fig.~\ref{fig:whitney_vnmm_dual_equivalence}.
 
 \begin{figure*}[!t]
 \centering
 \includegraphics[width=\textwidth]{figura_equivalencia_dual_whitney_vnmm.pdf}
-\caption{Exact topological and algebraic dual equivalence between lowest-order Whitney edge elements (FEM 1-forms) and the VNMM 2D $\mathcal{L}^1$ meshless vector formulation: 
+\caption{Exact topological and algebraic local dual equivalence between lowest-order Whitney edge elements (FEM 1-forms) and the VNMM 2D $\mathcal{L}^1$ meshless vector formulation: 
 (a) Primal triangular cell $\Omega_e$ with vertices $V_1, V_2, V_3$ and oriented edges $e_1, e_2, e_3$; 
 (b) Conceptual dual collapse limit as edge length contracts ($L_k \to 0$), identifying the discrete circulation integral $L_k^{-1} \int_{e_k} \vec{E}\cdot\vec{t}_k\,ds$ directly with the tangential projection at a point, $e_k = \vec{E}(P_k)\cdot\vec{t}_k$; 
 (c) VNMM 2D meshless support stencil with vector nodes $(P_k, \vec{t}_k)$ placed at the edge midpoints and compact support $\Omega_x$; 
@@ -440,11 +440,11 @@ Both fields are algebraically identical over $\Omega_e$, satisfying $\|\vec{w}_1
 
 In conventional FEM (Fig.~\ref{fig:whitney_vnmm_dual_equivalence}a), the degrees of freedom associated with the triangular cell $\Omega_e$ are line integrals of circulation $\alpha_k = \oint_{e_k} \vec{E} \cdot d\boldsymbol{\ell}$ along continuous 1D edges of finite physical length $L_k$. As demonstrated in the asymptotic collapse limit (Fig.~\ref{fig:whitney_vnmm_dual_equivalence}b), when the physical edge length shrinks to zero ($L_k \to 0$), the 1D continuous edge degenerates into a point-collocated vector node $(P_k, \vec{t}_k)$, where the circulation DoF $\alpha_k$ naturally scales into a pointwise directional field projection $e_k = \vec{E}(P_k) \cdot \vec{t}_k$ [Volts/meter].
 
-\subsubsection{Formal Proof of the Dual Equivalence Theorem}
+\subsubsection{Formal Proof of the Local Dual Equivalence Theorem}
 \label{subsubsec:formal_proof_dual_whitney}
 Let $T \subset \mathbb{R}^2$ be an arbitrary non-degenerate triangular simplex with vertices $V_1, V_2, V_3$ ordered counter-clockwise and non-zero area $|T| > 0$. Let $e_k = (V_k, V_{k+1})$ be the directed boundary edges of length $L_k = \|V_{k+1} - V_k\| > 0$, with unit tangent vectors $\vec{t}_k = (V_{k+1} - V_k)/L_k$ and midpoints $M_k = \frac{1}{2}(V_k + V_{k+1})$ for $k \in \{1, 2, 3\}$ (with index wrap-around $V_4 \equiv V_1$).
 
-\begin{theorem}[Dual Equivalence of Whitney 1-Forms and VNMM 2D $\mathcal{L}^1$]
+\begin{theorem}[Local Dual Equivalence of Whitney 1-Forms and VNMM 2D $\mathcal{L}^1$]
 Consider the support triad of vector nodes $\{P_k, \vec{t}_k\}_{k=1}^3$ defined at the edge midpoints $P_k = M_k$ with directors $\vec{t}_k$. The VNMM 2D $\mathcal{L}^1$ shape functions $\vec{N}_k(\mathbf{x})$ and the Whitney 1-forms $\vec{w}_k(\mathbf{x}) = \lambda_i(\mathbf{x})\nabla\lambda_j - \lambda_j(\mathbf{x})\nabla\lambda_i$ satisfy:
 \begin{equation}
 \vec{N}_k(\mathbf{x}) \equiv L_k \, \vec{w}_k(\mathbf{x}) \quad \Longleftrightarrow \quad \vec{w}_k(\mathbf{x}) \equiv \frac{1}{L_k} \vec{N}_k(\mathbf{x}), \quad \forall \mathbf{x} \in \mathbb{R}^2, \ \forall k \in \{1, 2, 3\}
@@ -504,7 +504,7 @@ This constructive isomorphism is graphically presented in Fig.~\ref{fig:whitney_
 
 
 \subsubsection{Extension of the Valid Physical Interpolation Domain}
-This dual Whitney equivalence resolves a longstanding misconception regarding meshless vector interpolation domains \cite{goncalves2025tese}. In conventional scalar meshless methods (e.g., Moving Least Squares or Element-Free Galerkin), evaluating field approximations outside the physical convex hull enclosed by the node coordinates $\mathbf{x}_k$ constitutes an unconstrained extrapolation, leading to rapid truncation error growth \cite{lima2017edge}.
+This local dual Whitney equivalence resolves a longstanding misconception regarding meshless vector interpolation domains \cite{goncalves2025tese}. In conventional scalar meshless methods (e.g., Moving Least Squares or Element-Free Galerkin), evaluating field approximations outside the physical convex hull enclosed by the node coordinates $\mathbf{x}_k$ constitutes an unconstrained extrapolation, leading to rapid truncation error growth \cite{lima2017edge}.
 
 However, because the VNMM vector basis reproduces the complete polynomial space of Whitney edge elements over the virtual macro-triangle $\Omega_{x}$ defined by the intersecting dotted lines of action of vector directors $\vec{t}_k$ (Fig.~\ref{fig:whitney_vnmm_dual_equivalence}c), the valid domain for local $H(\mathrm{curl})$ field approximation and constant curl representation is not geographically restricted to the small physical convex hull of $\mathbf{x}_k$ \cite{nedelec1980mixed, monk2003finite}. Instead, as proven by the dual scaling law~\eqref{eq:dual_equivalence_scaling}, it extends throughout the entire interior bounding region of the virtual macro-triangle. 
 
@@ -513,7 +513,7 @@ As long as the support selection algorithm enforces a well-conditioned matrix $\
 \subsubsection{Mathematical Origin of Modal Aliasing and Curl Stagnation}
 \label{subsec:L1_aliasing_analysis}
 
-Despite its solenoidal identity and dual equivalence to Whitney edge elements, the incomplete $\mathcal{L}^1$ basis suffers from a fundamental mathematical limitation when applied to point-collocated meshless approximations on arbitrary point clouds. Specifically, the numerical approximation of the curl operator $(\nabla \times \vec{E}^h)_z$ fails to achieve asymptotic convergence, stagnating at an irreducible $\mathcal{O}(1)$ relative error plateau regardless of spatial grid refinement $h \to 0$ \cite{goncalves2025tese}.
+Despite its solenoidal identity and local dual equivalence to Whitney edge elements on conforming simplices, the incomplete $\mathcal{L}^1$ basis suffers from a fundamental mathematical limitation when applied to point-collocated meshless approximations on arbitrary point clouds. Specifically, the numerical approximation of the curl operator $(\nabla \times \vec{E}^h)_z$ fails to achieve asymptotic convergence, stagnating at an irreducible $\mathcal{O}(1)$ relative error plateau regardless of spatial grid refinement $h \to 0$ \cite{goncalves2025tese}.
 
 The mathematical origin of this derivative stagnation lies in the local Taylor series expansion of the exact electric field $\vec{E}$ centered at the evaluation point $P(x_P, y_P)$ \cite{li2007meshfree, liu2009mesh}:
 \begin{equation}
@@ -1009,7 +1009,7 @@ This section assesses the numerical performance of the proposed Vector Nodal Mes
     \item \textbf{Limitations and Scope of Applicability (Section~\ref{subsec:limitations_scope}):} Focused on establishing honest methodological boundaries, discussing background quadrature dependencies, extreme point-cloud anisotropy, penalty parameter sensitivity, and high-frequency dispersion.
 \end{enumerate}
 
-\subsection{Conforming Dual Equivalence: VNMM $\mathcal{L}^1$ vs. Whitney EFEM}
+\subsection{Conforming Local Dual Equivalence: VNMM $\mathcal{L}^1$ vs. Whitney EFEM}
 \label{subsec:conforming_dual_equivalence}
 
 To establish a rigorous baseline connecting the proposed vector meshless formulation to established finite element theory, this first experiment evaluates the local vector interpolation capacity of the incomplete 3-node basis $\mathcal{L}^1$ against lowest-order Whitney 1-form edge elements (N\'ed\'elec 1st-kind) \cite{nedelec1980mixed, monk2003finite}.
@@ -1034,7 +1034,7 @@ Following the discrete scaling relation proven in Section~\ref{subsubsec:formal_
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=\linewidth]{figura_malha_conforme_vnmm_L1.pdf}
-    \caption{Conforming dual topology representation over the square domain $\Omega = [0, \pi] \times [0, \pi]$, displaying the underlying triangular finite element mesh alongside the dual VNMM $\mathcal{L}^1$ vector nodal cloud. Vector nodes are co-located at edge midpoints $M_k$ with unit directional vectors $\vec{t}_k$ aligned along the triangle edges. This exact midpoint co-location guarantees that support triads $\{P_1$, $P_2$, $P_3\}$ form local triangles matching the EFEM cells, establishing pointwise dual equivalence.}
+    \caption{Conforming dual topology representation over the square domain $\Omega = [0, \pi] \times [0, \pi]$, displaying the underlying triangular finite element mesh alongside the dual VNMM $\mathcal{L}^1$ vector nodal cloud. Vector nodes are co-located at edge midpoints $M_k$ with unit directional vectors $\vec{t}_k$ aligned along the triangle edges. This exact midpoint co-location guarantees that support triads $\{P_1$, $P_2$, $P_3\}$ form local triangles matching the EFEM cells, establishing pointwise local dual equivalence.}
     \label{fig:malha_conforme_vnmm_L1}
 \end{figure}
 
