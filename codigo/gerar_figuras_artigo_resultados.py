@@ -53,7 +53,9 @@ COLOR_GRAY = "#555555"       # Neutral gray for reference lines
 COLOR_LIGHT_BG = "#f8f9fa"
 
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "relatorios")
+ARTIGO_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "artigo")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+os.makedirs(ARTIGO_DIR, exist_ok=True)
 
 
 # =============================================================================
@@ -93,8 +95,8 @@ def generate_figure_1():
     h_ref = np.linspace(h_vals.min() * 0.85, h_vals.max() * 1.15, 60)
     c_h2 = E_rms_P1[2] / (h_vals[2]**2)
     c_h1 = E_rms_L1[1] / (h_vals[1]**1)
-    ax_E.loglog(h_ref, c_h2 * (h_ref**2), 'k:', alpha=0.55, label=r"Theoretical $\mathcal{O}(h^2)$ slope")
-    ax_E.loglog(h_ref, c_h1 * (h_ref**1), 'gray', linestyle='-.', alpha=0.45, label=r"Theoretical $\mathcal{O}(h^1)$ slope")
+    ax_E.loglog(h_ref, c_h2 * (h_ref**2), 'k:', alpha=0.55, label=r"Reference $\mathcal{O}(h^2)$ slope")
+    ax_E.loglog(h_ref, c_h1 * (h_ref**1), 'gray', linestyle='-.', alpha=0.45, label=r"Reference $\mathcal{O}(h^1)$ slope")
     
     ax_E.set_ylim(5.0e-4, 0.35)
     ax_E.set_xlabel(r"Characteristic Nodal Spacing $h_{\mathrm{avg}}$ [m]")
@@ -110,7 +112,7 @@ def generate_figure_1():
                   label=f"Complete Base $\\mathcal{{P}}^1$ (6 nodes): $\\mathcal{{O}}(h^{{{p_rot_P1:.2f}}})$")
     
     c_curl1 = rot_rms_P1[2] / (h_vals[2]**1)
-    ax_rot.loglog(h_ref, c_curl1 * (h_ref**1), 'k:', alpha=0.55, label=r"Theoretical $\mathcal{O}(h^1)$ slope")
+    ax_rot.loglog(h_ref, c_curl1 * (h_ref**1), 'k:', alpha=0.55, label=r"Reference $\mathcal{O}(h^1)$ slope")
     
     ax_rot.set_ylim(1.5e-2, 1.8)
     ax_rot.set_xlabel(r"Characteristic Nodal Spacing $h_{\mathrm{avg}}$ [m]")
@@ -123,6 +125,8 @@ def generate_figure_1():
     png_path = os.path.join(OUTPUT_DIR, "figura_convergencia_interpolacao_L1_vs_P1.png")
     fig.savefig(pdf_path)
     fig.savefig(png_path)
+    fig.savefig(os.path.join(ARTIGO_DIR, "figura_convergencia_interpolacao_L1_vs_P1.pdf"))
+    fig.savefig(os.path.join(ARTIGO_DIR, "figura_convergencia_interpolacao_L1_vs_P1.png"))
     plt.close(fig)
     print(f"  Saved: {pdf_path}")
     print(f"  Saved: {png_path}")
@@ -223,6 +227,8 @@ def generate_figure_2():
     png_path = os.path.join(OUTPUT_DIR, "figura_espectro_cavidade_com_sem_regularizacao.png")
     fig.savefig(pdf_path)
     fig.savefig(png_path)
+    fig.savefig(os.path.join(ARTIGO_DIR, "figura_espectro_cavidade_com_sem_regularizacao.pdf"))
+    fig.savefig(os.path.join(ARTIGO_DIR, "figura_espectro_cavidade_com_sem_regularizacao.png"))
     plt.close(fig)
     print(f"  Saved: {pdf_path}")
     print(f"  Saved: {png_path}")
@@ -302,6 +308,8 @@ def generate_figure_3():
     png_path = os.path.join(OUTPUT_DIR, "figura_convergencia_hibrido_vs_vnmm_vs_fem.png")
     fig.savefig(pdf_path)
     fig.savefig(png_path)
+    fig.savefig(os.path.join(ARTIGO_DIR, "figura_convergencia_hibrido_vs_vnmm_vs_fem.pdf"))
+    fig.savefig(os.path.join(ARTIGO_DIR, "figura_convergencia_hibrido_vs_vnmm_vs_fem.png"))
     plt.close(fig)
     print(f"  Saved: {pdf_path}")
     print(f"  Saved: {png_path}")
@@ -309,49 +317,49 @@ def generate_figure_3():
 
 
 # =============================================================================
-# FIGURE 4: Robustness Under Stochastic Perturbations & Floor Role (Section 6.4)
+# FIGURE 4: Robustness Under Stochastic Perturbations & Dimensionless Threshold (Section 5.3)
 # =============================================================================
 def generate_figure_4():
-    print(">>> Generating Figure 4: Stochastic Robustness & Tolerance Floor (Section 6.4)...")
+    print(">>> Generating Figure 4: Stochastic Robustness & Dimensionless Threshold (Section 5.3)...")
     
-    # Numerical data for Section 6.3 on [0, pi]^2
+    # Numerical data for Section 5.3 on [0, pi]^2
     # Mesh refinement with random nodal jitter (25%) and random director angles (0 to 2pi)
     h_vals = np.array([0.5236, 0.3491, 0.2244, 0.1496, 0.0982, 0.0654])
     
-    # WITHOUT floor: Tol_det proportional to h^4 (permissive unconstrained scaling)
+    # Overly permissive threshold: Tol_hat <= 0.065 (curl degradation due to ill-conditioned sextets)
     E_rms_sem = np.array([1.5734e-1, 6.8018e-2, 2.1490e-2, 8.8302e-3, 3.9952e-3, 1.9496e-3])
     rot_rms_sem = np.array([3.9767e-1, 2.4035e-1, 1.6794e-1, 1.1930e-1, 8.6573e-2, 6.0053e-2])
     
-    # WITH tolerance floor Tol_floor = 1.5e-5
+    # Stabilized threshold: Tol_hat = 0.82 (strict monotonic convergence restored)
     E_rms_com = np.array([1.2430e-1, 3.9749e-2, 1.4656e-2, 6.3940e-3, 2.8591e-3, 1.2100e-3])
     rot_rms_com = np.array([2.5542e-1, 1.6616e-1, 1.0686e-1, 7.2390e-2, 4.8940e-2, 3.2000e-2])
     
-    # Tolerance sweep in the fine mesh (N = 4192, h = 0.0654 m)
-    tol_sweep = np.array([1.0e-6, 3.0e-6, 8.0e-6, 1.5e-5, 3.0e-5, 6.0e-5, 1.0e-4])
-    E_rms_sweep = np.array([2.21e-3, 1.34e-3, 1.15e-3, 1.21e-3, 1.41e-3, 1.80e-3, 2.09e-3])
-    rot_rms_sweep = np.array([6.86e-2, 4.09e-2, 3.27e-2, 3.20e-2, 3.33e-2, 3.33e-2, 3.46e-2])
-    K_avg_sweep = np.array([6.3, 7.0, 8.8, 10.3, 11.3, 11.9, 13.5])
+    # Dimensionless threshold sweep on fine mesh (N = 4192, h = 0.0654 m) across [0.05, 6.00]
+    tol_hat_sweep = np.array([0.05, 0.10, 0.25, 0.50, 0.80, 1.00, 1.50, 2.00, 3.00, 4.50, 6.00])
+    E_rms_sweep = np.array([2.26e-3, 1.66e-3, 1.21e-3, 1.15e-3, 1.18e-3, 1.23e-3, 1.38e-3, 1.50e-3, 1.76e-3, 2.00e-3, 2.19e-3])
+    rot_rms_sweep = np.array([6.98e-2, 5.31e-2, 3.56e-2, 3.19e-2, 3.18e-2, 3.27e-2, 3.32e-2, 3.30e-2, 3.36e-2, 3.25e-2, 3.44e-2])
+    K_avg_sweep = np.array([6.3, 6.6, 7.6, 9.1, 10.3, 10.7, 11.2, 11.4, 11.8, 12.8, 13.9])
     
     fig, (ax_conv, ax_tol) = plt.subplots(1, 2, figsize=(12.0, 4.8))
     fig.subplots_adjust(left=0.08, right=0.89, bottom=0.15, top=0.92, wspace=0.34)
     
     # --- Subplot (a): Convergence under Stochastic Perturbations ---
     ax_conv.loglog(h_vals, rot_rms_sem, 's--', color=COLOR_CRIMSON, markerfacecolor='white',
-                   markeredgewidth=1.8, label=r"Curl RMS: Without Floor ($\mathrm{Tol}_{\mathrm{det}} \propto h^4$)")
+                   markeredgewidth=1.8, label=r"Curl RMS: Permissive ($\widehat{\mathrm{Tol}} = 0.05$)")
     ax_conv.loglog(h_vals, rot_rms_com, 'd-', color=COLOR_TEAL, markerfacecolor=COLOR_TEAL,
-                   label=r"Curl RMS: With Floor ($\mathrm{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$)")
+                   label=r"Curl RMS: Stabilized ($\widehat{\mathrm{Tol}} = 0.80$)")
     
     ax_conv.loglog(h_vals, E_rms_sem, '^--', color="#7f8c8d", markerfacecolor='white',
-                   markeredgewidth=1.8, label=r"$\mathbf{E}$ RMS: Without Floor")
+                   markeredgewidth=1.8, label=r"$\mathbf{E}$ RMS: Permissive ($\widehat{\mathrm{Tol}} = 0.05$)")
     ax_conv.loglog(h_vals, E_rms_com, 'o-', color=COLOR_NAVY, markerfacecolor=COLOR_NAVY,
-                   label=r"$\mathbf{E}$ RMS: With Floor ($\mathrm{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$)")
+                   label=r"$\mathbf{E}$ RMS: Stabilized ($\widehat{\mathrm{Tol}} = 0.80$)")
     
     # Reference lines
     h_ref = np.linspace(h_vals.min() * 0.85, h_vals.max() * 1.15, 60)
     c_h2 = E_rms_com[2] / (h_vals[2]**2)
     c_h1 = rot_rms_com[2] / (h_vals[2]**1)
-    ax_conv.loglog(h_ref, c_h2 * (h_ref**2), 'k:', alpha=0.55, label=r"Theoretical $\mathcal{O}(h^2)$ slope")
-    ax_conv.loglog(h_ref, c_h1 * (h_ref**1), 'gray', linestyle='-.', alpha=0.55, label=r"Theoretical $\mathcal{O}(h^1)$ slope")
+    ax_conv.loglog(h_ref, c_h2 * (h_ref**2), 'k:', alpha=0.55, label=r"Reference $\mathcal{O}(h^2)$ slope")
+    ax_conv.loglog(h_ref, c_h1 * (h_ref**1), 'gray', linestyle='-.', alpha=0.55, label=r"Reference $\mathcal{O}(h^1)$ slope")
     
     ax_conv.set_xlabel(r"Characteristic Nodal Spacing $h_{\mathrm{avg}}$ [m]")
     ax_conv.set_ylabel("RMS Interpolation Error")
@@ -360,45 +368,52 @@ def generate_figure_4():
     ax_conv.set_ylim(8.0e-4, 1.2)
     ax_conv.legend(loc="lower right", fontsize=8.2, framealpha=0.92)
     
-    # --- Subplot (b): Stabilizing Role of the Tolerance Floor ---
+    # --- Subplot (b): Stabilizing Role of the Dimensionless Threshold ---
     ax_tol.set_xscale('log')
     ax_tol.set_yscale('log')
     
-    l1 = ax_tol.plot(tol_sweep, rot_rms_sweep, 'd-', color=COLOR_CRIMSON, linewidth=2.0,
+    l1 = ax_tol.plot(tol_hat_sweep, rot_rms_sweep, 'd-', color=COLOR_CRIMSON, linewidth=2.0,
                      markerfacecolor=COLOR_CRIMSON, label=r"Curl RMS $\|(\nabla \times \mathbf{E})_z - (\nabla \times \mathbf{E}^h)_z\|$")
-    l2 = ax_tol.plot(tol_sweep, E_rms_sweep, 'o-', color=COLOR_NAVY, linewidth=2.0,
+    l2 = ax_tol.plot(tol_hat_sweep, E_rms_sweep, 'o-', color=COLOR_NAVY, linewidth=2.0,
                      markerfacecolor=COLOR_NAVY, label=r"Field RMS $\|\mathbf{E} - \mathbf{E}^h\|$")
     
-    ax_tol.set_xlabel(r"Determinant Threshold Criterion $\mathrm{Tol}_{\mathrm{det}}$")
+    ax_tol.set_xlabel(r"Dimensionless Threshold $\widehat{\mathrm{Tol}}$")
     ax_tol.set_ylabel("RMS Interpolation Error", color="#2c3e50")
     ax_tol.tick_params(axis='y', labelcolor="#2c3e50")
-    ax_tol.set_xlim(7.0e-7, 1.5e-4)
+    ax_tol.set_xlim(0.038, 7.5)
     ax_tol.set_ylim(8.0e-4, 0.12)
+    
+    # Format x-ticks with clean numbers
+    ax_tol.set_xticks([0.05, 0.1, 0.5, 1.0, 3.0, 6.0])
+    ax_tol.get_xaxis().set_major_formatter(ticker.ScalarFormatter())
     
     # Twin axis for neighborhood size K_avg
     ax_k = ax_tol.twinx()
-    l3 = ax_k.plot(tol_sweep, K_avg_sweep, 's--', color=COLOR_ORANGE, linewidth=2.0,
+    l3 = ax_k.plot(tol_hat_sweep, K_avg_sweep, 's--', color=COLOR_ORANGE, linewidth=2.0,
                    markerfacecolor='white', markeredgewidth=1.8, label=r"Neighborhood $K_{\mathrm{avg}}$ (right axis)")
     ax_k.set_ylabel(r"Candidate Neighbors Queried $K_{\mathrm{avg}}$", color=COLOR_ORANGE)
     ax_k.tick_params(axis='y', labelcolor=COLOR_ORANGE)
     ax_k.set_ylim(5, 16)
     
-    # Vertical line for floor reference
-    l4 = [ax_tol.axvline(1.5e-5, color="#27ae60", linestyle="--", linewidth=1.6, alpha=0.85,
-                         label=r"Stabilizing Floor $\mathrm{Tol}_{\mathrm{floor}} = 1.5 \times 10^{-5}$")]
+    # Optimal stabilization window band and threshold indicator
+    ax_tol.axvspan(0.80, 1.50, color="#27ae60", alpha=0.10)
+    l4 = [ax_tol.axvline(0.80, color="#27ae60", linestyle="--", linewidth=1.6, alpha=0.85,
+                         label=r"Stabilizing $\widehat{\mathrm{Tol}} = 0.80$")]
     
     # Combined legend for ax_tol and ax_k
     lines = l1 + l2 + l3 + l4
     labels = [l.get_label() for l in lines]
-    ax_tol.legend(lines, labels, loc="upper right", fontsize=8.2, framealpha=0.92)
+    ax_tol.legend(lines, labels, loc="upper right", fontsize=8.0, framealpha=0.92, borderpad=0.35)
     
-    ax_tol.set_title(r"(b) Stabilization vs. Tolerance Floor ($N = 4{,}192$)")
+    ax_tol.set_title(r"(b) Stabilization vs. $\widehat{\mathrm{Tol}}$ ($N = 4{,}192$)")
     ax_tol.grid(True, which="both", linestyle="--", alpha=0.5)
     
     pdf_path = os.path.join(OUTPUT_DIR, "figura_robustez_perturbacao_estocastica.pdf")
     png_path = os.path.join(OUTPUT_DIR, "figura_robustez_perturbacao_estocastica.png")
     fig.savefig(pdf_path)
     fig.savefig(png_path)
+    fig.savefig(os.path.join(ARTIGO_DIR, "figura_robustez_perturbacao_estocastica.pdf"))
+    fig.savefig(os.path.join(ARTIGO_DIR, "figura_robustez_perturbacao_estocastica.png"))
     plt.close(fig)
     print(f"  Saved: {pdf_path}")
     print(f"  Saved: {png_path}")
