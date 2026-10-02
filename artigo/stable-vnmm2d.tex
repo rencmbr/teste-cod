@@ -144,7 +144,7 @@
 
 %% Abstract
 \begin{abstract}
-The Vector Nodal Meshless Method (VNMM) provides a mesh-connectivity-free framework for vector-field approximation on unstructured point clouds. However, the conventional formulation based on N\'ed\'elec's incomplete solenoidal polynomial space ($\mathcal{L}^1$) exhibits a persistent $\mathcal{O}(1)$ error plateau in curl approximation when applied to arbitrary node distributions. This work addresses this limitation through two methodological developments. First, the incomplete $\mathcal{L}^1$ basis is replaced by the complete linear vector space $\mathcal{P}_1 \times \mathcal{P}_1$, capturing all components of the local first-order field Jacobian, removing the derivative aliasing mechanism associated with the incomplete $\mathcal{L}^1$ basis, and restoring first-order ($\mathcal{O}(h)$) convergence of the curl approximation. Second, an automated support-selection strategy combines $k$-d tree neighborhood queries with scale-aware determinant qualification and an absolute tolerance floor to reject degenerate local stencils and improve stencil conditioning without requiring mesh connectivity. The formulation is validated through a constructive local equivalence with lowest-order Whitney edge elements under conforming midpoint/tangent placement, as well as vector-field and curl interpolation benchmarks on irregular point clouds with perturbed node positions and director orientations. For resonant-cavity eigenvalue problems, a div-curl regularized Ritz-Galerkin formulation suppresses discrete gradient-mode contamination and provides accurate modal predictions, with a mean cutoff-wavenumber error of approximately 1\% in the tested configuration. The results demonstrate that complete linear vector polynomial approximation combined with algebraic support qualification provides a robust mesh-connectivity-free VNMM framework for two-dimensional electromagnetic analysis.
+The Vector Nodal Meshless Method (VNMM) provides a mesh-connectivity-free framework for vector-field approximation on unstructured point clouds. However, the conventional formulation based on N\'ed\'elec's incomplete solenoidal polynomial space ($\mathcal{L}^1$) exhibits a persistent $\mathcal{O}(1)$ error plateau in curl approximation when applied to arbitrary node distributions. This work resolves this limitation through a two-level framework addressing both local polynomial consistency and global variational stability. Locally, the incomplete $\mathcal{L}^1$ basis is replaced by the complete linear vector space $\mathcal{P}_1 \times \mathcal{P}_1$, capturing all components of the first-order field Jacobian, removing derivative aliasing, and restoring first-order ($\mathcal{O}(h)$) curl convergence. Degenerate local stencils are rejected through scale-aware determinant qualification on a dimensionless placement matrix $\widehat{\mathbf{A}}$ combined with $k$-d tree searches. Globally, we demonstrate that while VNMM exhibits an exact constructive equivalence to lowest-order Whitney edge elements on conforming simplices, dynamic support selection on unconstrained point clouds produces a globally non-conforming approximation ($V_h \not\subset H(\mathrm{curl})$). This non-conformity breaks the discrete de Rham sequence, causing discrete gradient nullspace leakage and spurious modes in eigenvalue problems. We resolve this by incorporating a div-curl regularized Ritz-Galerkin formulation that shifts spurious modes away from the operational spectrum, delivering clean modal predictions with a mean cutoff-wavenumber error of approximately 1\% on resonant cavity benchmarks. The findings establish that pairing complete local vector polynomials with variational div-curl regularization provides a robust, non-conforming meshless framework for electromagnetic analysis.
 \end{abstract}
 
 %%Graphical abstract
@@ -156,9 +156,9 @@ The Vector Nodal Meshless Method (VNMM) provides a mesh-connectivity-free framew
 \begin{highlights}
 \item Complete $\mathcal{P}^1$ basis overcomes curl stagnation of $\mathcal{L}^1$ VNMM.
 \item Dimensionless matrix $\widehat{\mathbf{A}}$ prevents support dilation as $h \to 0$.
-\item Local constructive equivalence to Whitney 1-forms proved on conforming simplices.
-\item Div-curl Ritz-Galerkin formulation suppresses spurious cavity resonant modes.
-\item Intra-cell support jumps and quadrature sensitivity analyzed on point clouds.
+\item Local equivalence to Whitney 1-forms proved on conforming simplices.
+\item Dynamic meshless supports induce global non-conformity in $H(\mathrm{curl})$.
+\item Div-curl regularized weak form suppresses gradient leakage and spurious modes.
 \end{highlights}
 
 %% Keywords
@@ -296,12 +296,19 @@ When attempting to liberate the VNMM from spatial meshes by performing automated
 
 While conforming edge elements enforce circulation cancellation along cell boundaries via Stokes' theorem \cite{nedelec1980mixed, monk2003finite}, point-collocated meshless schemes evaluate fields through pointwise projections without closed-contour integrals \cite{goncalves2025tese}. In the incomplete 3-node solenoidal space $\mathcal{L}^1$, the omission of dilatational gradient components ($\partial E_x/\partial x$, $\partial E_y/\partial y$) prevents local shape functions from capturing the complete first-order field variation. Under unstructured collocation, these unrepresented modes contaminate the rotational degree of freedom through the inverted placement matrix, producing a persistent $\mathcal{O}(1)$ modal aliasing noise floor under refinement. The mathematical origin and asymptotic scaling of this aliasing mechanism are analyzed in Section~\ref{subsec:L1_aliasing_analysis}.
 
+Furthermore, liberating the approximation from background meshes reveals a fundamental distinction in meshless vector electromagnetics:
+\begin{equation}
+\boxed{\text{local } H(\mathbf{curl}) \text{ regularity} \neq \text{global } H(\mathbf{curl}) \text{ conformity}.}
+\label{eq:local_reg_vs_global_conf}
+\end{equation}
+Although each locally assembled vector shape function possesses smooth $H(\mathbf{curl})$ regularity within its local support stencil, active stencils are queried dynamically across evaluation points. Consequently, tangential traces across adjacent support boundaries do not cancel exactly on arbitrary point clouds, rendering the global approximation space non-conforming ($V_h \not\subset H(\mathbf{curl}; \Omega)$). In electromagnetic eigenvalue problems, this loss of global conformity breaks the exact discrete de Rham complex sequence ($\operatorname{Im}(\nabla) \not\subset \ker(\nabla \times)$), allowing irrotational gradient modes to leak into the physical spectrum (gradient leakage) and generate non-physical spurious modes. Overcoming both challenges therefore requires an integrated two-level methodology: completing the local polynomial space ($\mathcal{L}^1 \to \mathcal{P}^1$) to resolve the local Jacobian and eliminate derivative aliasing, coupled with a div-curl regularized Ritz-Galerkin weak formulation ($\mathbf{K}_{\mathrm{div}}$) to control global gradient leakage.
+
 % ---------------------------------------------------------
 % SUBSECTION 1.3: SCOPE AND MAIN CONTRIBUTIONS
 % ---------------------------------------------------------
 \subsection{Scope and Main Contributions of the Paper}
 \label{subsec:scope_contributions}
-This paper presents a stabilized Vector Nodal Meshless Method (VNMM 2D) designed for stable vector field approximations on unconstrained point clouds without mesh connectivity. The core methodological contributions of this work are threefold:
+This paper presents a stabilized Vector Nodal Meshless Method (VNMM 2D) designed for stable vector field approximations on unconstrained point clouds without mesh connectivity. The core methodological contributions of this work are fourfold:
 
 \begin{enumerate}
     \item \textbf{Elimination of Modal Aliasing via Complete $\mathcal{P}^1$ Vector Basis:} 
@@ -310,8 +317,11 @@ This paper presents a stabilized Vector Nodal Meshless Method (VNMM 2D) designed
     \item \textbf{Scale-Invariant Support Selection via Dimensionless Placement Matrix $\widehat{\mathbf{A}}$:} 
     To enable stable, mesh-free operation on unstructured node distributions without unphysical support dilation as $h \to 0$, we establish a geometric singularity classification in $\mathbb{R}^{6\times6}$ (Sections~\ref{subsec:singularities_L1} and \ref{subsec:singularities_P1}) and eliminate the quartic spatial scaling dependence $\det(\mathbf{A}) \sim \mathcal{O}(h^4)$ by formulating the support selection criterion in terms of the scale-invariant, dimensionless placement matrix $\widehat{\mathbf{A}}$ ($|\det(\widehat{\mathbf{A}})| \ge \widehat{\mathrm{Tol}} > 0$). By normalizing local coordinates by the local nodal spacing $h_{\mathrm{local}}$, this formulation decouples algebraic qualification from physical mesh dimensions, unifies regular and irregular grids under a single criterion, bounds local matrix conditioning ($\kappa_2(\widehat{\mathbf{A}}) \sim \mathcal{O}(1)$), and prevents unphysical support dilation as $h \to 0$ (Section~\ref{sec:conditioning}).
 
-    \item \textbf{Rigorous Local Dual Equivalence Proof:} 
-    We establish the Local Dual Equivalence Theorem (Section~\ref{subsubsec:formal_proof_dual_whitney}), formally proving the local constructive equivalence under conforming midpoint/tangent placement between the local VNMM $\mathcal{L}^1$ shape functions and lowest-order Whitney 1-forms ($\vec{N}_k = L_k \vec{w}_k$), rigorously bridging nodal meshless formulations and Edge FEM on conforming simplices.
+    \item \textbf{Rigorous Local Constructive Equivalence Proof:} 
+    We establish the Local Dual Equivalence Theorem (Section~\ref{subsubsec:formal_proof_dual_whitney}), formally proving the local constructive equivalence under conforming midpoint/tangent placement between the local VNMM $\mathcal{L}^1$ shape functions and lowest-order Whitney 1-forms ($\vec{N}_k = L_k \vec{w}_k$). This rigorously delineates the exact boundary where mesh-conforming topology ensures global $H(\mathbf{curl})$ conformity versus arbitrary point clouds where dynamic stencils induce global non-conformity.
+
+    \item \textbf{Variational Div-Curl Regularization for Non-Conforming Meshless Discretizations:} 
+    To address the gradient leakage stemming from global non-conformity ($V_h \not\subset H(\mathbf{curl}; \Omega)$) on arbitrary point clouds, we incorporate a div-curl regularized Ritz-Galerkin weak formulation ($\mathbf{K} = \mathbf{K}_{\mathrm{curl}} + s_{\mathrm{div}} \mathbf{K}_{\mathrm{div}}$, Section~\ref{sec:variational_formulation}), providing reliable spectral stabilization and spurious-mode suppression without introducing auxiliary Lagrange multipliers or saddle-point indefiniteness.
 \end{enumerate}
 
 To rigorously assess these contributions and delineate the operational performance of the stabilized VNMM, the numerical campaign in Section~\ref{sec:numerical_results} is structured into three complementary stages:
@@ -536,15 +546,14 @@ Because triangle $T$ is non-degenerate, the local moment placement matrix $\math
 By the scaling law~\eqref{eq:dual_equivalence_scaling}, $(\nabla \times \vec{N}_k)_z = L_k (\nabla \times \vec{w}_k)_z = L_k / |T|$.
 \end{proof}
 
-This local constructive equivalence under conforming midpoint/tangent placement is graphically presented in Fig.~\ref{fig:whitney_vnmm_dual_equivalence}d and~\ref{fig:whitney_vnmm_dual_equivalence}e and is verified numerically in Section~\ref{subsec:conforming_dual_equivalence}.
+As graphically illustrated in Fig.~\ref{fig:whitney_vnmm_dual_equivalence}d and~\ref{fig:whitney_vnmm_dual_equivalence}e (and verified numerically in Section~\ref{subsec:conforming_dual_equivalence}), the normalized VNMM $\mathcal{L}^1$ shape functions $\frac{1}{L_k}\vec{N}_k$ and canonical Whitney 1-forms $\vec{w}_k$ match identically across the simplex $T$ down to floating-point machine precision ($\approx 10^{-16}$).
 
-
-\subsubsection{Extension of the Valid Physical Interpolation Domain}
-This local dual Whitney equivalence resolves a longstanding misconception regarding meshless vector interpolation domains \cite{goncalves2025tese}. In conventional scalar meshless methods (e.g., Moving Least Squares or Element-Free Galerkin), evaluating field approximations outside the physical convex hull enclosed by the node coordinates $\mathbf{x}_k$ constitutes an unconstrained extrapolation, leading to rapid truncation error growth \cite{lima2017edge}.
-
-However, because the VNMM vector basis reproduces the complete polynomial space of Whitney edge elements over the virtual macro-triangle $\Omega_{x}$ defined by the intersecting dotted lines of action of vector directors $\vec{t}_k$ (Fig.~\ref{fig:whitney_vnmm_dual_equivalence}c), the valid domain for local $H(\mathrm{curl})$ field approximation and constant curl representation is not geographically restricted to the small physical convex hull of $\mathbf{x}_k$ \cite{nedelec1980mixed, monk2003finite}. Instead, as proven by the dual scaling law~\eqref{eq:dual_equivalence_scaling}, it extends throughout the entire interior bounding region of the virtual macro-triangle. 
-
-Under the regular-support assumptions considered here, which require that the local placement matrix $\mathbf{A}$ remains well-conditioned and that intersection vertices remain bounded and non-degenerate, field evaluations at any point $P \in \Omega_{x}$ preserve local $H(\mathrm{curl})$ regularity. In this setting, the complete $\mathcal{P}^1$ vector basis provides the polynomial reproduction required for first-order derivative consistency, while the corresponding asymptotic convergence rates are subsequently verified numerically in Section~\ref{sec:numerical_results}.
+\subsubsection{Local $H(\mathrm{curl})$ Regularity versus Global $H(\mathrm{curl})$ Conformity}
+Beyond establishing the mathematical connection to edge finite elements, this constructive identity clarifies a fundamental structural distinction in vector meshless approximations:
+\begin{enumerate}
+    \item \textbf{Local $H(\mathrm{curl})$ Regularity on Virtual Simplices:} In conventional scalar meshless methods (e.g., Moving Least Squares or Element-Free Galerkin), evaluating field approximations outside the physical convex hull enclosed by the node coordinates $\mathbf{x}_k$ constitutes an unconstrained extrapolation, leading to rapid truncation error growth \cite{lima2017edge}. In contrast, because the VNMM vector basis reproduces the complete polynomial space of Whitney edge elements over the virtual macro-triangle $\Omega_{x}$ defined by the intersecting lines of action of vector directors $\vec{t}_k$ (Fig.~\ref{fig:whitney_vnmm_dual_equivalence}c), the valid domain for local $H(\mathrm{curl})$ field approximation is not geographically restricted to the small physical convex hull of $\mathbf{x}_k$ \cite{nedelec1980mixed, monk2003finite}. Under regular-support assumptions (well-conditioned local placement matrix $\mathbf{A}$ and non-degenerate intersection vertices), any field evaluation at $P \in \Omega_{x}$ preserves local $H(\mathrm{curl})$ regularity.
+    \item \textbf{Loss of Global $H(\mathrm{curl})$ Conformity on Unconstrained Point Clouds:} When nodes and directors form a conforming simplicial mesh (Section~\ref{subsubsec:formal_proof_dual_whitney}), tangential traces across adjacent element facets match identically, yielding global conformity $V_h \subset H(\mathrm{curl}; \Omega)$. On arbitrary, unconstrained point clouds, however, support stencils are selected dynamically as the evaluation point $P$ moves across the domain. Because adjacent stencils differ in node composition and orientation, tangential traces do not cancel continuously across internal support boundaries. Consequently, the global approximation space is non-conforming ($V_h \not\subset H(\mathrm{curl}; \Omega)$). As developed in Section~\ref{sec:variational_formulation}, this distinction is essential: local polynomial completeness (via $\mathcal{P}^1$) restores local Jacobian and curl consistency, but spectral stability in eigenvalue problems requires a div-curl regularized weak form to suppress gradient leakage arising from global non-conformity.
+\end{enumerate}
 
 \subsubsection{Mathematical Origin of Modal Aliasing and Curl Stagnation}
 \label{subsec:L1_aliasing_analysis}
@@ -1056,9 +1065,38 @@ Let the Hilbert space of square-integrable vector fields with square-integrable 
 \mathcal{S} \triangleq \left\{ \vec{E} \in H(\mathrm{curl}; \Omega) \;\middle|\; \hat{n} \times \vec{E} = \mathbf{0} \text{ on } \partial\Omega \right\}.
 \label{eq:hilbert_space_S}
 \end{equation}
+
+\subsubsection{Theoretical Origin: From Global Non-Conformity to Gradient Leakage}
 In standard Edge Finite Element Formulations (EFEM), the discrete space is globally $H(\mathrm{curl})$-conforming ($V_h \subset \mathcal{S}$) because shared tangential degrees of freedom across conforming element facets guarantee exact tangential trace continuity ($\hat{n} \times [\vec{E}^h] = \mathbf{0}$) \cite{monk2003finite, bossavit1990spurious}. Under this global conformity, the discrete de Rham complex property $\operatorname{Im}(\nabla) \subset \ker(\nabla \times)$ holds exactly: irrotational gradient fields ($\vec{E} = \nabla \phi$) yield an identically zero curl ($\nabla \times (\nabla \phi) \equiv \mathbf{0}$) and map directly into the zero eigenvalue subspace ($\lambda = 0$), preventing spectrum contamination without auxiliary constraints \cite{monk2003finite, boffi1999computational}.
 
-In contrast, on arbitrary point clouds, the assembled meshless VNMM vector approximation is globally non-conforming ($V_h \not\subset \mathcal{S}$). Although each local vector shape function $\vec{N}_i(\mathbf{x})$ possesses local $H(\mathrm{curl})$ regularity within its local support stencil, the active support changes across the domain, producing minor tangential trace discontinuities across support boundaries. Consequently, the discrete de Rham complex does not hold exactly at background quadrature points, and discrete gradient states produce non-zero numerical curl residues ($\nabla \times (\nabla \phi) \neq \mathbf{0}$). This discrete gradient nullspace leakage causes spurious non-physical modes to infiltrate the low-frequency spectrum. To suppress these spurious modes without introducing saddle-point system indefiniteness or auxiliary Lagrange multipliers, we adopt a \textbf{Ritz-Galerkin weak formulation with div-curl penalty regularization} \cite{monk2003finite, bossavit1998computational}:
+In contrast, on unconstrained point clouds, the assembled meshless VNMM vector approximation is globally non-conforming:
+\begin{equation}
+V_h \not\subset \mathcal{S} \subset H(\mathrm{curl}; \Omega).
+\label{eq:nonconforming_space}
+\end{equation}
+Although each local vector shape function $\vec{N}_i(\mathbf{x})$ possesses local $H(\mathrm{curl})$ regularity within its local support stencil (Section~\ref{subsec:complete_P1_basis}), active support stencils are selected dynamically across the domain via $k$-d tree spatial queries. Consequently:
+\begin{enumerate}
+    \item \textbf{Breakdown of the Discrete de Rham Sequence:} Because tangential traces suffer minor non-polynomial jumps across shifting support boundaries, the discrete de Rham sequence fails to close exactly ($\operatorname{Im}(\nabla_h) \not\subset \ker(\nabla_h \times)$).
+    \item \textbf{Discrete Gradient Nullspace Leakage:} Discrete gradient fields $\vec{E}^h = \nabla \phi$ produce non-zero numerical curl residues ($\nabla \times (\nabla \phi) \neq \mathbf{0}$). This leaks the infinite-dimensional static gradient nullspace into the non-zero discrete spectrum, causing non-physical, highly oscillatory spurious modes to infiltrate the physical resonance band.
+    \item \textbf{The Methodological Chain:} This establishes the cohesive architectural chain of the proposed framework:
+    \begin{equation}
+    \boxed{
+    \begin{aligned}
+    \mathcal{L}^1 \text{ (derivative defect)} &\longrightarrow \mathcal{P}^1 \text{ (local completeness)} \\
+    &\;\Downarrow \\
+    \text{dynamic supports} &\longrightarrow V_h \not\subset H(\mathrm{curl}) \text{ (non-conformity)} \\
+    &\;\Downarrow \\
+    \text{de Rham breakdown} &\longrightarrow \text{gradient leakage (spurious modes)} \\
+    &\;\Downarrow \\
+    \mathbf{K}_{\mathrm{div}} \text{ regularization} &\longrightarrow \text{spectral stabilization}
+    \end{aligned}
+    }
+    \label{eq:conceptual_chain}
+    \end{equation}
+\end{enumerate}
+
+\subsubsection{Div-Curl Regularized Weak Formulation}
+To suppress these spurious modes without introducing saddle-point system indefiniteness or auxiliary Lagrange multipliers, we adopt a \textbf{Ritz-Galerkin weak formulation with div-curl penalty regularization} \cite{monk2003finite, bossavit1998computational}:
 \begin{multline}
 \int_{\Omega} \frac{1}{\mu_r} (\nabla \times \vec{W})_z (\nabla \times \vec{E})_z \, d\Omega + s_{\mathrm{div}} \int_{\Omega} (\nabla \cdot \vec{W}) (\nabla \cdot \vec{E}) \, d\Omega \\
 = \lambda \int_{\Omega} \epsilon_r \vec{W} \cdot \vec{E} \, d\Omega, \quad \forall \vec{W} \in \mathcal{S}
@@ -1673,6 +1711,9 @@ The primary methodological contributions and validation findings of this researc
 
     \item \textbf{Scale-Invariant Support Selection via Dimensionless Placement Matrix $\widehat{\mathbf{A}}$:} 
     By replacing pre-defined geometric subdivisions with an automated selection algorithm coupling $k$-d tree spatial queries with a determinant-based empirical support qualification criterion based on the dimensionless matrix $\widehat{\mathbf{A}}$ ($|\det(\widehat{\mathbf{A}})| \ge \widehat{\mathrm{Tol}} > 0$), the approach identifies admissible support sextets across irregular node distributions. Normalizing local coordinates by the local spacing $h_{\mathrm{local}}$ eliminates the quartic $\mathcal{O}(h^4)$ spatial scaling dependence of the placement determinant, unifies support qualification between regular and irregular grids, empirically bounds local matrix conditioning ($\kappa_2(\widehat{\mathbf{A}}) \le 5.9$, unscaled $\kappa_2(\mathbf{A}) \le 80$ under bounded search radii), and prevents unphysical support dilation as $h \to 0$ while preserving monotonic convergence under $25\%$ stochastic spatial jitter and random director orientations in the evaluated realization.
+
+    \item \textbf{Variational Stabilization of Global Non-Conformity via Div-Curl Regularization:} 
+    By formally establishing that dynamic support selection on unconstrained point clouds produces a globally non-conforming approximation space ($V_h \not\subset H(\mathrm{curl}; \Omega)$) that breaks the discrete de Rham complex, we formulate the div-curl regularized Ritz-Galerkin weak form ($\mathbf{K} = \mathbf{K}_{\mathrm{curl}} + s_{\mathrm{div}} \mathbf{K}_{\mathrm{div}}$) as the necessary variational mechanism to suppress gradient nullspace leakage, eliminating spurious resonant modes without requiring volumetric mesh connectivity or auxiliary Lagrange multipliers.
 \end{enumerate}
 
 \textbf{Spectral Validation and Benchmark Findings:}
@@ -1709,6 +1750,9 @@ Building upon the 2D vector meshless formulation developed and validated in this
 
     \item \textbf{Curved Boundaries and Complex Material Interfaces:} 
     Extending the computational validation to circular resonators, cylindrical waveguiding structures, and non-planar dielectric interfaces. For material interfaces, future research should develop subdomain-partitioned support stencils (e.g., leveraging dedicated $k$-d tree data structures for distinct material subdomains \cite{parreira2006efficient}) and interface-conforming quadrature schemes to preserve sharp constitutive parameter jumps ($\epsilon_{r1} \neq \epsilon_{r2}$) and evaluate the weak variational enforcement of normal flux continuity ($D_{n1} = D_{n2}$), while systematically benchmarking how pointwise unit tangent director assignment ($\vec{t}_k = \hat{\tau}(\mathbf{x}_k)$) maintains geometric fidelity on curved boundaries without polygonization.
+
+    \item \textbf{Weak Tangential Trace Enforcement and Discontinuous Galerkin Formulations:} 
+    Because the assembled meshless space on arbitrary clouds is inherently non-conforming ($V_h \not\subset H(\mathrm{curl}; \Omega)$), an intriguing theoretical avenue is to investigate interior penalty Discontinuous Galerkin (IP-DG) or hybridized trace frameworks. By penalizing tangential trace jumps $[\hat{n} \times \vec{E}^h]$ explicitly across internal support boundaries or background cell interfaces, such formulations could weakly enforce discrete de Rham complex preservation and provide an alternative to volumetric div-curl penalty regularization.
 \end{enumerate}
 
 
